@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OFIMANTE - Bolsa de Empleo en Ciudad Mante</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Enlace al archivo CSS externo -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="nav-container">
+            <div class="logo">
+                <h1>OFIMANTE</h1>
+                <span></span>
+            </div>
+            <nav>
+                <button id="btn-home" class="active" onclick="switchView('home')">Buscar Empleo</button>
+                <button id="btn-post" onclick="switchView('post')">Publicar Vacante</button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- VISTA 1: BUSCAR EMPLEO -->
+        <section id="view-home" class="view-section active">
+            <div class="hero">
+                <h2>Conectando el talento de Ciudad Mante</h2>
+                <p>Encuentra o publica ofertas de trabajo de forma rápida, sencilla y segura.</p>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Puesto, habilidad o palabra clave..." oninput="filterJobs()">
+                    <select id="locationSelect" onchange="filterJobs()">
+                        <option value="">Todas las ubicaciones</option>
+                        <option value="Centro">Zona Centro</option>
+                        <option value="Norte">Zona Norte</option>
+                        <option value="Industrial">Parque Industrial</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Contenedor donde JavaScript inyectará las tarjetas de empleo -->
+            <div id="jobsGrid" class="jobs-grid">
+                <!-- Las vacantes se cargan dinámicamente aquí -->
+            </div>
+        </section>
+
+        <!-- VISTA 2: PUBLICAR VACANTE -->
+        <section id="view-post" class="view-section">
+            <div class="form-container">
+                <h3>Registrar Nueva Vacante de Empleo</h3>
+                <form id="jobForm" onsubmit="handlePostJob(event)">
+                    <div class="form-group">
+                        <label for="puesto">Puesto ofrecido:</label>
+                        <input type="text" id="puesto" required placeholder="Ej. Auxiliar Administrativo, Programador Jr...">
+                    </div>
+                    <div class="form-group">
+                        <label for="empresa">Empresa o Empleador:</label>
+                        <input type="text" id="empresa" required placeholder="Ej. Comercial Mante / Negocio Local">
+                    </div>
+                    <div class="form-group">
+                        <label for="ubicacion">Ubicación en Ciudad Mante:</label>
+                        <input type="text" id="ubicacion" required placeholder="Ej. Zona Centro, Ciudad Mante">
+                    </div>
+                    <div class="form-group">
+                        <label for="requisitos">Requisitos y Habilidades:</label>
+                        <textarea id="requisitos" required placeholder="Experiencia mínima, manejo de PC, disponibilidad de horario..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="contacto">Datos de contacto (Teléfono / Correo):</label>
+                        <input type="text" id="contacto" required placeholder="Ej. Tel: 831-000-0000 o correo@empresa.com">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Publicar Vacante</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>OFIMANTE &copy; 2026 — Desarrollado para Programación Avanzada | Unidad Académica Multidisciplinaria Mante (UAT)</p>
+    </footer>
+
+    <!-- Enlace al archivo JavaScript externo -->
+    <script src="OFIMANTE.js"></script>
+</body>
+</html>
