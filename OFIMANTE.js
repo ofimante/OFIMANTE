@@ -234,4 +234,8 @@ function switchView(viewName) {
 window.onload = function() {
     renderJobs(jobs);
     renderManageTable();
+<<<<<<< HEAD
 }
+=======
+};
+>>>>>>> 20c6def2e42b7507fa258c6c4eb90721129ad6fd
