@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OFIMANTE - Plataforma de Empleo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header con Men煤 de Navegaci贸n -->
+    <header>
+        <div class="nav-container">
+            <div class="logo">
+                <h1>OFIMANTE</h1>
+                <span>UAT Mante</span>
+            </div>
+            <nav>
+                <button id="btn-home" class="active" onclick="switchView('home')">1. Buscar Empleo</button>
+                <button id="btn-post" onclick="switchView('post')">2. Publicar Vacante</button>
+                <button id="btn-manage" onclick="switchView('manage')">3. Panel y Gesti贸n</button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- PANTALLA 1: BUSCADOR Y LISTADO DE EMPLEOS -->
+        <section id="view-home" class="view-section active">
+            <div class="hero">
+                <h2>Bolsa de Empleo en Ciudad Mante</h2>
+                <p>Encuentra oportunidades laborales adaptadas a tus habilidades y experiencia.</p>
+                
+                <!-- Barra de B煤squeda y Filtros (Componentes: Campos de texto, ComboBox) -->
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Buscar por puesto o palabra clave..." oninput="filterJobs()">
+                    <select id="locationSelect" onchange="filterJobs()">
+                        <option value="">Todas las ubicaciones</option>
+                        <option value="Centro">Zona Centro</option>
+                        <option value="Norte">Zona Norte</option>
+                        <option value="Industrial">Parque Industrial</option>
+                    </select>
+                    <button class="btn-secondary" onclick="clearFilters()">Limpiar Filtros</button>
+                </div>
+            </div>
+
+            <div id="jobsGrid" class="jobs-grid">
+                <!-- Las tarjetas de empleo se cargan din谩micamente -->
+            </div>
+        </section>
+
+        <!-- PANTALLA 2: REGISTRO Y PUBLICACI脫N DE VACANTES -->
+        <section id="view-post" class="view-section">
+            <div class="form-container">
+                <h3>Registrar Nueva Vacante</h3>
+                <p class="form-subtitle">Completa la informaci贸n obligatoria para publicar la oferta.</p>
+                
+                <!-- Mensaje de error / validaci贸n -->
+                <div id="errorAlert" class="alert-error" style="display: none;"></div>
+
+                <form id="jobForm" onsubmit="handlePostJob(event)">
+                    <div class="form-group">
+                        <label for="puesto">Puesto ofrecido: *</label>
+                        <input type="text" id="puesto" placeholder="Ej. Auxiliar Administrativo">
+                    </div>
+                    <div class="form-group">
+                        <label for="empresa">Empresa o Empleador: *</label>
+                        <input type="text" id="empresa" placeholder="Ej. Negocio Local Mante">
+                    </div>
+                    <div class="form-group">
+                        <label for="ubicacion">Ubicaci贸n (ComboBox): *</label>
+                        <select id="ubicacion">
+                            <option value="">Seleccione una zona</option>
+                            <option value="Zona Centro">Zona Centro</option>
+                            <option value="Zona Norte">Zona Norte</option>
+                            <option value="Parque Industrial">Parque Industrial</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Componente CheckBox para Modalidad -->
+                    <div class="form-group checkbox-group">
+                        <label>Modalidad de trabajo:</label>
+                        <div>
+                            <label><input type="checkbox" id="modalidadPresencial" value="Presencial" checked> Presencial</label>
+                            <label><input type="checkbox" id="modalidadTiempoCompleto" value="Tiempo Completo"> Tiempo Completo</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="requisitos">Requisitos y Habilidades: *</label>
+                        <textarea id="requisitos" placeholder="Escribe los requisitos..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="contacto">Datos de contacto (Tel茅fono / Correo): *</label>
+                        <input type="text" id="contacto" placeholder="Ej. 831 123 4567">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Guardar Vacante</button>
+                        <button type="button" class="btn-secondary" onclick="resetForm()">Limpiar Formulario</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- PANTALLA 3: PANEL Y GESTI脫N (Tabla para Editar y Eliminar) -->
+        <section id="view-manage" class="view-section">
+            <div class="table-container">
+                <h3>Panel de Administraci贸n de Vacantes</h3>
+                <p>Gestiona, edita o elimina las ofertas publicadas en el sistema.</p>
+                
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Puesto</th>
+                                <th>Empresa</th>
+                                <th>Ubicaci贸n</th>
+                                <th>Contacto</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manageTableBody">
+                            <!-- Datos inyectados por JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal de Edici贸n (Oculto por defecto) -->
+    <div id="editModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Editar Vacante</h3>
+            <input type="hidden" id="editId">
+            <div class="form-group">
+                <label>Puesto:</label>
+                <input type="text" id="editPuesto">
+            </div>
+            <div class="form-group">
+                <label>Empresa:</label>
+                <input type="text" id="editEmpresa">
+            </div>
+            <div class="form-group">
+                <label>Contacto:</label>
+                <input type="text" id="editContacto">
+            </div>
+            <div class="form-actions">
+                <button class="btn-primary" onclick="saveEditedJob()">Actualizar / Guardar</button>
+                <button class="btn-secondary" onclick="closeEditModal()">Regresar / Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>OFIMANTE &copy; 2026 鈥� UAT Unidad Acad茅mica Multidisciplinaria Mante</p>
+    </footer>
+
+    <script src="OFIMANTE.js"></script>
+</body>
+</html>
