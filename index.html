@@ -1,24 +1,28 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OFIMANTE - Plataforma de Empleo & Agenda Virtual | Cd. Mante, Tam.</title>
-    <!-- Tipografía Inter y Outfit para estilo médico-tecnológico -->
+    <title>OFIMANTE - Empleo y Conexión Laboral | Ciudad Mante, Tam.</title>
+    <!-- Tipografías Outfit e Inter para estilo médico-tecnológico y profesional -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <!-- ==================================================================== -->
-    <!-- BARRA SUPERIOR Y NAVEGACIÓN PRINCIPAL -->
+    <!-- BARRA SUPERIOR DE NAVEGACIÓN (HEADER) -->
     <!-- ==================================================================== -->
     <header class="navbar">
         <div class="nav-container">
             <!-- Logotipo Oficial OFIMANTE -->
-            <div class="brand" onclick="switchView('landing')">
+            <div class="brand" onclick="goToScreen('screen-1')">
                 <img src="logo.png" alt="Logotipo OFIMANTE" class="brand-logo" id="brandLogo">
                 <div class="brand-text">
                     <span class="brand-title">OFIMANTE</span>
@@ -26,1140 +30,785 @@
                 </div>
             </div>
 
-            <!-- Selector Rápido de Rol Activo -->
-            <div class="role-selector-pill">
-                <span class="role-label">Perfil actual:</span>
-                <div class="role-buttons">
-                    <button id="btnRoleCandidate" class="role-btn active" onclick="setUserRole('candidato')">
-                        🎓 Candidato
-                    </button>
-                    <button id="btnRoleCompany" class="role-btn" onclick="setUserRole('empresa')">
-                        🏢 Empresa
-                    </button>
-                    <button id="btnRoleAdmin" class="role-btn" onclick="setUserRole('admin')">
-                        🛡️ Administrador
-                    </button>
-                </div>
-            </div>
-
-            <!-- Menú de Navegación -->
+            <!-- Navegación Directa entre las 5 Pantallas -->
             <nav class="nav-links">
-                <button id="nav-landing" class="nav-btn active" onclick="switchView('landing')">Inicio</button>
-                <button id="nav-jobs" class="nav-btn" onclick="switchView('jobs')">Bolsa de Empleo</button>
-                <button id="nav-agenda" class="nav-btn" onclick="switchView('agenda')">📅 Agenda Virtual</button>
-                <button id="nav-candidate" class="nav-btn" onclick="switchView('candidate')">Mi Expediente</button>
-                <button id="nav-company" class="nav-btn" onclick="switchView('company')">Panel Empresa</button>
-                <button id="nav-admin" class="nav-btn" onclick="switchView('admin')">Admin</button>
+                <button id="nav-btn-1" class="nav-btn active" onclick="goToScreen('screen-1')">1. Inicio</button>
+                <button id="nav-btn-2" class="nav-btn" onclick="goToScreen('screen-2')">2. Registro / Login</button>
+                <button id="nav-btn-3" class="nav-btn" onclick="goToScreen('screen-3')">3. Candidato</button>
+                <button id="nav-btn-4" class="nav-btn" onclick="goToScreen('screen-4')">4. Empresa</button>
+                <button id="nav-btn-5" class="nav-btn" onclick="goToScreen('screen-5')">5. Administrador</button>
             </nav>
 
-            <!-- Acceso de Usuario & Botón Google -->
+            <!-- Acceso Rápido y Usuario Activo -->
             <div class="user-auth-area">
-                <div id="loggedUserWidget" class="user-badge" style="display: none;">
-                    <img id="userAvatarImg" src="logo.png" alt="Avatar" class="user-avatar-mini">
+                <div id="userProfileBadge" class="user-badge" style="display: none;">
+                    <img id="headerUserAvatar" src="logo.png" alt="Avatar" class="user-avatar-mini">
                     <div class="user-meta">
-                        <span id="userNameDisplay" class="user-name">Usuario</span>
-                        <span id="userRoleDisplay" class="user-role-badge">Candidato</span>
+                        <span id="headerUserName" class="user-name">Usuario</span>
+                        <span id="headerUserRole" class="user-role-badge">Candidato</span>
                     </div>
-                    <button class="btn-logout" onclick="logoutUser()" title="Cerrar Sesión">✕</button>
+                    <button class="btn-logout" onclick="logoutSession()" title="Cerrar Sesión">✕</button>
                 </div>
 
-                <button id="btnOpenAuth" class="btn-google-nav" onclick="openAuthModal()">
+                <button id="btnHeaderLogin" class="btn-google-nav" onclick="goToScreen('screen-2')">
                     <svg class="google-icon-svg" viewBox="0 0 24 24" width="18" height="18">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        <path fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                        <path fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                     </svg>
-                    <span>Entrar con Google</span>
+                    <span>Acceder</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Indicador de conexión / sincronización con backend -->
-    <div id="syncStatusBar" class="sync-banner">
+    <!-- Barra de Estado del Backend (PHP / LocalStorage) -->
+    <div id="backendStatusBar" class="sync-banner">
         <span class="pulse-indicator"></span>
-        <span id="syncStatusText">Conectado al Servidor Local OFIMANTE (Persistencia activa)</span>
+        <span id="backendStatusMsg">Conectado con Backend PHP y Base de Datos (Modo Activo)</span>
     </div>
 
     <!-- ==================================================================== -->
-    <!-- CONTENEDOR PRINCIPAL DE VISTAS (SPA) -->
+    <!-- CONTENEDOR PRINCIPAL: LAS 5 PANTALLAS OFICIALES -->
     <!-- ==================================================================== -->
     <main class="main-content">
 
         <!-- ---------------------------------------------------------------- -->
-        <!-- VISTA 1: PANTALLA INICIAL (LANDING & BIENVENIDA) -->
+        <!-- PANTALLA 1: PANTALLA INICIAL (HOME & PRESENTACIÓN) -->
         <!-- ---------------------------------------------------------------- -->
-        <section id="view-landing" class="app-view active">
-            <!-- Hero Principal Estilo Médico-Tecnológico -->
+        <section id="screen-1" class="screen-view active">
+            <!-- Hero Principal -->
             <div class="hero-section">
                 <div class="hero-content">
                     <div class="hero-badge">
                         <span class="beacon-pulse"></span>
-                        Bolsa de Empleo y Agenda Virtual Universitaria
+                        Bolsa de Trabajo y Vinculación en Ciudad Mante
                     </div>
-                    <h1 class="hero-title">Impulsando el Talento de <span class="gradient-text">Ciudad Mante</span></h1>
+                    <h1 class="hero-title">Conectamos el Talento de <span class="gradient-text">Ciudad Mante</span></h1>
                     <p class="hero-description">
-                        <strong>OFIMANTE</strong> es la plataforma interactiva diseñada para conectar a estudiantes de nivel superior, 
-                        profesionales egresados y empresas líderes de <strong>Ciudad Mante, Tamaulipas</strong>. Organiza tus postulaciones, 
-                        agenda entrevistas laborales y programa tus citas académicas con tecnología clínica y moderna.
+                        <strong>OFIMANTE</strong> es la plataforma web creada para conectar a personas sin empleo o en
+                        búsqueda de oportunidades
+                        con empresas, comercios y locales de <strong>Ciudad Mante, Tamaulipas</strong>.
+                        Un espacio confiable, con verificación administrativa de perfiles y publicación formal de
+                        vacantes.
                     </p>
-                    
+
                     <div class="hero-action-buttons">
-                        <button class="btn-action-primary" onclick="switchView('jobs')">
-                            🔍 Explorar Vacantes Locales
+                        <button class="btn-primary-huge" onclick="goToScreen('screen-2')">
+                            🚀 Iniciar Sesión o Registrarse
                         </button>
-                        <button class="btn-action-teal" onclick="switchView('agenda')">
-                            📅 Agenda Virtual de Citas
-                        </button>
-                        <button class="btn-action-google" onclick="openAuthModal()">
-                            <svg class="google-icon-svg" viewBox="0 0 24 24" width="20" height="20">
-                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                            </svg>
-                            Iniciar Sesión / Registrarse
+                        <button class="btn-action-teal" onclick="quickGuestExplore()">
+                            🔍 Ver Empleos Disponibles
                         </button>
                     </div>
 
-                    <!-- Métricas Rápidas -->
                     <div class="hero-stats">
                         <div class="stat-box">
-                            <span class="stat-number" id="landingStatJobs">4+</span>
+                            <span class="stat-number" id="homeJobsCount">3+</span>
                             <span class="stat-caption">Vacantes Activas</span>
                         </div>
                         <div class="stat-box">
-                            <span class="stat-number" id="landingStatCandidates">100%</span>
-                            <span class="stat-caption">Enfocado a El Mante</span>
+                            <span class="stat-number" id="homeCompaniesCount">2+</span>
+                            <span class="stat-caption">Empresas Registradas</span>
                         </div>
                         <div class="stat-box">
-                            <span class="stat-number" id="landingStatAgenda">24/7</span>
-                            <span class="stat-caption">Agenda Interactiva</span>
+                            <span class="stat-number">100%</span>
+                            <span class="stat-caption">Verificado por Admin</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tarjeta con Logo e Identidad Visual Médica/Creativa -->
                 <div class="hero-brand-card">
                     <div class="logo-circle-container">
-                        <img src="logo.png" alt="OFIMANTE Logo Oficial" class="hero-logo-img">
+                        <img src="logo.png" alt="OFIMANTE" class="hero-logo-img">
                     </div>
-                    <div class="hero-badge-tag">Oficial • UAT Mante • IT Mante • Región Cañera</div>
+                    <div class="hero-badge-tag">Plataforma Oficial de Empleo Mante</div>
                     <p class="hero-card-quote">
-                        "Tecnología limpia, ágil y precisa para la inserción laboral y el desarrollo profesional de nuestros estudiantes de nivel superior."
+                        "Uniendo esfuerzos para que cada persona en Ciudad Mante encuentre el empleo ideal y cada
+                        negocio local crezca con el mejor personal."
                     </p>
                 </div>
             </div>
 
-            <!-- SECCIÓN CON IMÁGENES REPRESENTATIVAS DE CIUDAD MANTE, TAMAULIPAS -->
-            <section class="mante-gallery-section">
+            <!-- GALERÍA DE CIUDAD MANTE, TAMAULIPAS -->
+            <div class="mante-gallery-section">
                 <div class="section-header-center">
-                    <span class="pill-title">Nuestra Identidad Regional</span>
-                    <h2 class="section-title">Orgullo de Ciudad Mante, Tamaulipas</h2>
-                    <p class="section-subtitle">
-                        Conectando oportunidades en el corazón de la región cañera y las faldas del majestuoso Bernal.
-                    </p>
+                    <span class="pill-title">Identidad Mantense</span>
+                    <h2 class="section-title">Oportunidades en Nuestra Ciudad</h2>
+                    <p class="section-subtitle">Conoce los lugares emblemáticos que representan el corazón de nuestra
+                        comunidad.</p>
                 </div>
 
                 <div class="city-cards-grid">
-                    <!-- Tarjeta 1: Cerro del Bernal -->
                     <article class="city-card">
                         <div class="city-img-wrapper">
-                            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80" 
-                                 alt="Cerro del Bernal de Horcasitas" 
-                                 class="city-img">
-                            <span class="city-tag">Monumento Natural</span>
+                            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80"
+                                alt="Cerro del Bernal" class="city-img">
+                            <span class="city-tag">El Bernal</span>
                         </div>
                         <div class="city-content">
-                            <h3>El Cerro del Bernal</h3>
-                            <p>El guardián volcánico y símbolo por excelencia de El Mante y el sur de Tamaulipas, inspirando la grandeza de nuestros profesionistas.</p>
+                            <h3>Cerro del Bernal de Horcasitas</h3>
+                            <p>Monumento natural icónico y protector de nuestra región, símbolo de fortaleza laboral y
+                                orgullo mantense.</p>
                         </div>
                     </article>
 
-                    <!-- Tarjeta 2: El Nacimiento del Río Mante -->
                     <article class="city-card">
                         <div class="city-img-wrapper">
-                            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80" 
-                                 alt="El Nacimiento del Río Mante" 
-                                 class="city-img">
-                            <span class="city-tag">Manantial Turquesa</span>
+                            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80"
+                                alt="El Nacimiento" class="city-img">
+                            <span class="city-tag">El Nacimiento</span>
                         </div>
                         <div class="city-content">
                             <h3>El Nacimiento del Río Mante</h3>
-                            <p>Aguas cristalinas y manantial subterráneo de la Sierra de Cucharas, orgullo ecoturístico y vital para el desarrollo local.</p>
+                            <p>Aguas cristalinas turquesas y atractivo turístico que impulsa la economía, hotelería y
+                                comercio local.</p>
                         </div>
                     </article>
 
-                    <!-- Tarjeta 3: Cañón de la Servilleta -->
                     <article class="city-card">
                         <div class="city-img-wrapper">
-                            <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&auto=format&fit=crop&q=80" 
-                                 alt="Cañón de la Servilleta" 
-                                 class="city-img">
-                            <span class="city-tag">Río Boquillas</span>
+                            <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&auto=format&fit=crop&q=80"
+                                alt="Cañón de la Servilleta" class="city-img">
+                            <span class="city-tag">La Servilleta</span>
                         </div>
                         <div class="city-content">
                             <h3>Cañón de la Servilleta</h3>
-                            <p>Un prodigio geológico rodeado de cañones y vegetación exuberante, muestra del potencial natural y turístico de nuestra tierra.</p>
+                            <p>Majestuoso cañón natural atravesado por el Río Boquillas, riqueza ecológica de El Mante.
+                            </p>
                         </div>
                     </article>
 
-                    <!-- Tarjeta 4: Plaza Principal y Centro Cívico -->
                     <article class="city-card">
                         <div class="city-img-wrapper">
-                            <img src="https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?w=800&auto=format&fit=crop&q=80" 
-                                 alt="Plaza Principal de Ciudad Mante" 
-                                 class="city-img">
-                            <span class="city-tag">Centro Histórico</span>
+                            <img src="https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?w=800&auto=format&fit=crop&q=80"
+                                alt="Plaza Principal" class="city-img">
+                            <span class="city-tag">Zona Centro</span>
                         </div>
                         <div class="city-content">
-                            <h3>Plaza Principal & Vida Mantense</h3>
-                            <p>Punto de reunión comunitaria, comercio local, servicios de salud e instituciones universitarias de prestigio.</p>
+                            <h3>Plaza Principal & Comercios</h3>
+                            <p>Centro neurálgico del comercio, despachos profesionales y servicios en Ciudad Mante.</p>
                         </div>
                     </article>
                 </div>
-            </section>
-
-            <!-- ¿CÓMO FUNCIONA PARA CADA ROL? -->
-            <section class="roles-guide-section">
-                <div class="section-header-center">
-                    <span class="pill-title">Ecosistema Colaborativo</span>
-                    <h2 class="section-title">Una Herramienta Hecha a la Medida de Cada Rol</h2>
-                    <p class="section-subtitle">Selecciona tu perfil en cualquier momento con un solo clic.</p>
-                </div>
-
-                <div class="roles-grid">
-                    <div class="role-feature-card">
-                        <div class="role-card-icon">🎓</div>
-                        <h3>Para Candidatos & Estudiantes</h3>
-                        <ul class="role-features-list">
-                            <li>✓ Expediente profesional completo (7 secciones oficiales).</li>
-                            <li>✓ Búsqueda de vacantes por requisitos y zonas de El Mante.</li>
-                            <li>✓ Postulación con 1 clic y seguimiento en tiempo real.</li>
-                            <li>✓ Agenda virtual para entrevistas y entregas de solicitud.</li>
-                        </ul>
-                        <button class="btn-card-role" onclick="setUserRole('candidato'); switchView('candidate');">
-                            Completar Mi Expediente
-                        </button>
-                    </div>
-
-                    <div class="role-feature-card featured-role">
-                        <div class="role-card-icon">🏢</div>
-                        <h3>Para Empresas de El Mante</h3>
-                        <ul class="role-features-list">
-                            <li>✓ Registro empresarial formal (fiscal, contacto y operativo).</li>
-                            <li>✓ Publicación de vacantes con filtros salariales y de zona.</li>
-                            <li>✓ Revisión exhaustiva de CVs de candidatos postulados.</li>
-                            <li>✓ Agendamiento directo de entrevistas presenciales o por Meet.</li>
-                        </ul>
-                        <button class="btn-card-role btn-role-primary" onclick="setUserRole('empresa'); switchView('company');">
-                            Gestionar Empresa & Vacantes
-                        </button>
-                    </div>
-
-                    <div class="role-feature-card">
-                        <div class="role-card-icon">🛡️</div>
-                        <h3>Para el Administrador</h3>
-                        <ul class="role-features-list">
-                            <li>✓ Aprobación, rechazo y edición de solicitudes de vacantes.</li>
-                            <li>✓ Moderación y bloqueo/baneo de usuarios o empresas.</li>
-                            <li>✓ Eliminación de vacantes e infracciones del sistema.</li>
-                            <li>✓ Métricas de colocación laboral en tiempo real.</li>
-                        </ul>
-                        <button class="btn-card-role" onclick="setUserRole('admin'); switchView('admin');">
-                            Panel de Control Admin
-                        </button>
-                    </div>
-                </div>
-            </section>
-        </section>
-
-        <!-- ---------------------------------------------------------------- -->
-        <!-- VISTA 2: BOLSA DE EMPLEOS (BUSCADOR, FILTROS Y VACANTES) -->
-        <!-- ---------------------------------------------------------------- -->
-        <section id="view-jobs" class="app-view">
-            <div class="view-header">
-                <div>
-                    <h2>💼 Bolsa de Empleo en Ciudad Mante</h2>
-                    <p class="view-subtitle">Encuentra y postúlate a oportunidades laborales verificadas en la región.</p>
-                </div>
-                <button class="btn-primary-large" onclick="handleNewJobPrompt()">
-                    ➕ Publicar Nueva Vacante
-                </button>
-            </div>
-
-            <!-- Barra de Búsqueda Avanzada y Filtros Rápidos -->
-            <div class="search-filter-panel">
-                <div class="search-input-wrapper">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="searchInput" placeholder="Buscar por puesto, conocimientos, carrera o empresa..." oninput="applyJobFilters()">
-                </div>
-
-                <div class="filter-controls">
-                    <select id="filterZone" onchange="applyJobFilters()" class="filter-select">
-                        <option value="">📍 Todas las zonas de El Mante</option>
-                        <option value="Zona Centro">Zona Centro</option>
-                        <option value="Zona Norte">Zona Norte</option>
-                        <option value="Zona Sur">Zona Sur</option>
-                        <option value="Zona Industrial">Zona Industrial / Libramiento</option>
-                        <option value="Zona Cañera">Zona Cañera e Ingenio</option>
-                    </select>
-
-                    <select id="filterGiro" onchange="applyJobFilters()" class="filter-select">
-                        <option value="">🏢 Todos los Giros</option>
-                        <option value="Tecnología y Software">Tecnología y Software</option>
-                        <option value="Salud y Servicios Médicos">Salud y Medicina</option>
-                        <option value="Agroindustria y Manufactura">Agroindustria</option>
-                        <option value="Comercio y Administración">Comercio y Administración</option>
-                        <option value="Publicidad y Mercadotecnia">Publicidad y Diseño</option>
-                    </select>
-
-                    <select id="filterSalary" onchange="applyJobFilters()" class="filter-select">
-                        <option value="0">💵 Cualquier Salario</option>
-                        <option value="8000">Más de $8,000 / mes</option>
-                        <option value="12000">Más de $12,000 / mes</option>
-                        <option value="15000">Más de $15,000 / mes</option>
-                    </select>
-
-                    <button class="btn-clean-filters" onclick="resetJobFilters()">
-                        Limpiar Filtros
-                    </button>
-                </div>
-            </div>
-
-            <!-- Contador de resultados -->
-            <div class="results-counter-bar">
-                <span id="jobResultsCount">Mostrando vacantes disponibles</span>
-                <span class="location-badge">📍 Ciudad Mante, Tam.</span>
-            </div>
-
-            <!-- Contenedor Grid de Tarjetas de Empleo -->
-            <div id="jobsGrid" class="jobs-responsive-grid">
-                <!-- Se cargan dinámicamente con JavaScript -->
             </div>
         </section>
 
         <!-- ---------------------------------------------------------------- -->
-        <!-- VISTA 3: EXPEDIENTE Y REGISTRO DEL CANDIDATO (7 SECCIONES) -->
+        <!-- PANTALLA 2: SEGUNDA PANTALLA (REGISTRO & INICIO DE SESIÓN) -->
         <!-- ---------------------------------------------------------------- -->
-        <section id="view-candidate" class="app-view">
-            <div class="view-header">
-                <div>
-                    <h2>🎓 Expediente Profesional del Candidato</h2>
-                    <p class="view-subtitle">Registra y mantén actualizado tu perfil curricular en las 7 secciones obligatorias.</p>
-                </div>
-                <div class="header-actions">
-                    <button class="btn-secondary-large" onclick="loadSampleCandidateData()">
-                        🪄 Llenar con Datos de Ejemplo
-                    </button>
-                    <button class="btn-primary-large" onclick="saveCandidateProfile()">
-                        💾 Guardar Expediente
-                    </button>
+        <section id="screen-2" class="screen-view">
+            <div class="auth-page-container">
+                <div class="auth-card-main">
+                    <div class="auth-card-header text-center">
+                        <img src="logo.png" alt="OFIMANTE" class="auth-brand-logo">
+                        <h2>Acceso a OFIMANTE</h2>
+                        <p class="auth-sub">Regístrate o inicia sesión seleccionando tu rol correspondiente</p>
+                    </div>
+
+                    <!-- SELECTOR DE TIPO DE USUARIO / ROL OBLIGATORIO -->
+                    <div class="role-selection-box">
+                        <label class="block-label">Selecciona cómo deseas ingresar: *</label>
+                        <div class="role-selector-cards">
+                            <div class="role-opt-card active" id="roleOptCandidate"
+                                onclick="selectAuthRole('candidato')">
+                                <span class="role-opt-icon">🎓</span>
+                                <strong>Candidato</strong>
+                                <small>Busco empleo</small>
+                            </div>
+                            <div class="role-opt-card" id="roleOptCompany" onclick="selectAuthRole('empresa')">
+                                <span class="role-opt-icon">🏢</span>
+                                <strong>Empresa / Local</strong>
+                                <small>Ofrezco empleo</small>
+                            </div>
+                            <div class="role-opt-card" id="roleOptAdmin" onclick="selectAuthRole('admin')">
+                                <span class="role-opt-icon">🛡️</span>
+                                <strong>Administrador</strong>
+                                <small>Control de la página</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BOTÓN OFICIAL DE INICIO DE SESIÓN CON GOOGLE -->
+                    <div class="google-login-section">
+                        <button class="btn-google-official" onclick="loginWithGoogle()">
+                            <svg class="google-icon-svg" viewBox="0 0 24 24" width="22" height="22">
+                                <path fill="#4285F4"
+                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                <path fill="#34A853"
+                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                <path fill="#FBBC05"
+                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                                <path fill="#EA4335"
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                            </svg>
+                            <span>Continuar con mi cuenta de Google</span>
+                        </button>
+                    </div>
+
+                    <div class="auth-divider">
+                        <span>O ingresa con tus credenciales</span>
+                    </div>
+
+                    <!-- Pestañas de Formulario: Iniciar Sesión / Registrarse -->
+                    <div class="auth-tabs">
+                        <button id="tabBtnLogin" class="auth-tab-btn active" onclick="switchAuthTab('login')">Iniciar
+                            Sesión</button>
+                        <button id="tabBtnRegister" class="auth-tab-btn" onclick="switchAuthTab('register')">Crear
+                            Cuenta Nueva</button>
+                    </div>
+
+                    <!-- FORMULARIO 1: INICIO DE SESIÓN -->
+                    <form id="formLogin" onsubmit="handleFormLogin(event)">
+                        <div class="form-field">
+                            <label for="loginEmail">Correo Electrónico: *</label>
+                            <input type="email" id="loginEmail" placeholder="usuario@correo.com" required>
+                        </div>
+                        <div class="form-field mt-3">
+                            <label for="loginPassword">Contraseña: *</label>
+                            <input type="password" id="loginPassword" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn-primary-large full-width mt-4">
+                            Entrar a Mi Panel
+                        </button>
+                    </form>
+
+                    <!-- FORMULARIO 2: REGISTRO -->
+                    <form id="formRegister" onsubmit="handleFormRegister(event)" style="display: none;">
+                        <div class="form-field">
+                            <label for="regNombre">Nombre Completo o Nombre Comercial: *</label>
+                            <input type="text" id="regNombre" placeholder="Ej. Carlos Garza o Papelería Mante" required>
+                        </div>
+                        <div class="form-field mt-3">
+                            <label for="regEmail">Correo Electrónico: *</label>
+                            <input type="email" id="regEmail" placeholder="correo@ejemplo.com" required>
+                        </div>
+                        <div class="form-field mt-3">
+                            <label for="regPassword">Contraseña de acceso: *</label>
+                            <input type="password" id="regPassword" placeholder="Crea tu contraseña" required>
+                        </div>
+                        <button type="submit" class="btn-primary-large full-width mt-4">
+                            Registrarme y Continuar
+                        </button>
+                    </form>
+
+                    <!-- Acceso rápido demostrativo para evaluación didáctica -->
+                    <div class="demo-quick-box mt-4">
+                        <span class="demo-title">Accesos Rápidos de Demostración:</span>
+                        <div class="demo-pills">
+                            <button type="button" class="demo-btn" onclick="quickLoginAs('candidato')">🎓 Entrar como
+                                Candidato</button>
+                            <button type="button" class="demo-btn" onclick="quickLoginAs('empresa')">🏢 Entrar como
+                                Empresa</button>
+                            <button type="button" class="demo-btn admin" onclick="quickLoginAs('admin')">🛡️ Entrar como
+                                Administrador</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <form id="candidateForm" class="expediente-form" onsubmit="event.preventDefault(); saveCandidateProfile();">
-                
-                <!-- SECCIÓN 1: ENCABEZADO Y OBJETIVOS -->
-                <div class="form-card-section">
-                    <div class="section-badge-header">
-                        <span class="badge-number">1</span>
-                        <div>
-                            <h3>Encabezado y Objetivos Laborales</h3>
-                            <p class="section-desc">Puesto al que aspiras, expectativa salarial y fecha de postulación.</p>
-                        </div>
-                    </div>
-                    <div class="form-grid-3">
-                        <div class="form-field">
-                            <label for="c_puestoSolicitado">Puesto solicitado: *</label>
-                            <input type="text" id="c_puestoSolicitado" placeholder="Ej. Desarrollador Web Jr., Asistente Médico" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_sueldoDeseado">Sueldo mensual deseado: *</label>
-                            <input type="text" id="c_sueldoDeseado" placeholder="Ej. $14,000 mensuales" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_fechaEntrega">Fecha de entrega / Solicitud: *</label>
-                            <input type="date" id="c_fechaEntrega" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECCIÓN 2: DATOS PERSONALES Y DE CONTACTO -->
-                <div class="form-card-section">
-                    <div class="section-badge-header">
-                        <span class="badge-number">2</span>
-                        <div>
-                            <h3>Datos Personales y de Contacto</h3>
-                            <p class="section-desc">Información fidedigna idéntica a tu identificación oficial.</p>
-                        </div>
-                    </div>
-                    <div class="form-grid-3">
-                        <div class="form-field full-width">
-                            <label for="c_nombreCompleto">Nombre completo (idéntico al INE): *</label>
-                            <input type="text" id="c_nombreCompleto" placeholder="Ej. Carlos Eduardo Garza Morales" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_edad">Edad: *</label>
-                            <input type="number" id="c_edad" min="17" max="80" placeholder="Ej. 23" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_fechaNacimiento">Fecha de nacimiento: *</label>
-                            <input type="date" id="c_fechaNacimiento" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_correo">Correo electrónico profesional: *</label>
-                            <input type="email" id="c_correo" placeholder="correo@ejemplo.com" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_telefonoCelular">Teléfono celular personal: *</label>
-                            <input type="tel" id="c_telefonoCelular" placeholder="831-145-8921" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_telefonoRecados">Teléfono de recados: *</label>
-                            <input type="tel" id="c_telefonoRecados" placeholder="831-232-0987" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_fotoUrl">URL de Fotografía (tipo pasaporte o credencial):</label>
-                            <input type="url" id="c_fotoUrl" placeholder="https://... o usa la foto predeterminada">
-                        </div>
-                        <div class="form-field full-width">
-                            <label for="c_direccion">Dirección completa (Calle, núm, colonia, CP, municipio y estado): *</label>
-                            <input type="text" id="c_direccion" placeholder="Ej. Calle Juárez #402 Ote, Col. Centro, CP 89800, El Mante, Tamaulipas" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECCIÓN 3: DOCUMENTACIÓN OFICIAL -->
-                <div class="form-card-section">
-                    <div class="section-badge-header">
-                        <span class="badge-number">3</span>
-                        <div>
-                            <h3>Documentación Oficial</h3>
-                            <p class="section-desc">Claves y registros requeridos para contratación formal.</p>
-                        </div>
-                    </div>
-                    <div class="form-grid-2">
-                        <div class="form-field">
-                            <label for="c_curp">CURP (18 caracteres): *</label>
-                            <input type="text" id="c_curp" maxlength="18" placeholder="GAMC030518HTSMRL04" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_rfc">RFC (con homoclave): *</label>
-                            <input type="text" id="c_rfc" maxlength="13" placeholder="GAMC0305189T1" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_nss">NSS (Número de Seguridad Social IMSS): *</label>
-                            <input type="text" id="c_nss" maxlength="11" placeholder="45090312458" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_ineFolio">Identificación Oficial (Folio INE / Pasaporte): *</label>
-                            <input type="text" id="c_ineFolio" placeholder="0345092147812" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECCIÓN 4: ESCOLARIDAD -->
-                <div class="form-card-section">
-                    <div class="section-badge-header">
-                        <span class="badge-number">4</span>
-                        <div>
-                            <h3>Escolaridad y Formación Académica</h3>
-                            <p class="section-desc">Estudios de nivel superior o técnico alcanzados.</p>
-                        </div>
-                    </div>
-                    <div class="form-grid-2">
-                        <div class="form-field">
-                            <label for="c_nivelEstudios">Nivel máximo de estudios alcanzado: *</label>
-                            <select id="c_nivelEstudios" required>
-                                <option value="Ingeniería / Licenciatura (Graduado)">Ingeniería / Licenciatura (Graduado)</option>
-                                <option value="Estudiante de Nivel Superior (Últimos semestres)">Estudiante de Nivel Superior (Últimos semestres)</option>
-                                <option value="Técnico Superior Universitario (TSU)">Técnico Superior Universitario (TSU)</option>
-                                <option value="Posgrado / Maestría">Posgrado / Maestría</option>
-                            </select>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_tieneTitulo">Estatus de titulación: *</label>
-                            <select id="c_tieneTitulo" required>
-                                <option value="Título y Cédula Profesional">Título y Cédula Profesional</option>
-                                <option value="Carta de Pasante / Título en trámite">Carta de Pasante / Título en trámite</option>
-                                <option value="Certificado Total de Estudios">Certificado Total de Estudios</option>
-                                <option value="Constancia de Estudios Activa">Constancia de Estudios Activa</option>
-                            </select>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_institucion">Nombre de la institución educativa: *</label>
-                            <input type="text" id="c_institucion" placeholder="Ej. Universidad Autónoma de Tamaulipas (UAM Mante)" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_periodos">Períodos cursados (Fecha inicio - término): *</label>
-                            <input type="text" id="c_periodos" placeholder="Ej. Agosto 2021 - Diciembre 2025" required>
-                        </div>
-                        <div class="form-field full-width">
-                            <label for="c_institucionDireccion">Dirección de la institución educativa: *</label>
-                            <input type="text" id="c_institucionDireccion" placeholder="Ej. Blvd. Enrique Cárdenas González S/N, Cd. Mante, Tam." required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECCIÓN 5: EXPERIENCIA LABORAL -->
-                <div class="form-card-section">
-                    <div class="section-badge-header">
-                        <span class="badge-number">5</span>
-                        <div>
-                            <h3>Experiencia Laboral (Orden cronológico inverso)</h3>
-                            <p class="section-desc">Empleos, proyectos profesionales o prácticas profesionales realizadas.</p>
-                        </div>
-                    </div>
-                    <div class="form-grid-2">
-                        <div class="form-field">
-                            <label for="c_empresaAnterior">Nombre de la empresa o negocio:</label>
-                            <input type="text" id="c_empresaAnterior" placeholder="Ej. Cyber & Papelería El Cañero">
-                        </div>
-                        <div class="form-field">
-                            <label for="c_puestoAnterior">Puesto desempeñado:</label>
-                            <input type="text" id="c_puestoAnterior" placeholder="Ej. Encargado de Soporte y Atención Técnica">
-                        </div>
-                        <div class="form-field">
-                            <label for="c_periodoLaborado">Tiempo o periodo laborado (mes/año entrada y salida):</label>
-                            <input type="text" id="c_periodoLaborado" placeholder="Ej. Enero 2024 - Diciembre 2024 (1 año)">
-                        </div>
-                        <div class="form-field">
-                            <label for="c_contactoJefe">Datos de contacto de jefes anteriores (si autoriza):</label>
-                            <input type="text" id="c_contactoJefe" placeholder="Ej. Ing. Roberto M. - Tel: 831-110-5544">
-                        </div>
-                        <div class="form-field full-width">
-                            <label for="c_funcionesLogros">Principales funciones y logros realizados: *</label>
-                            <textarea id="c_funcionesLogros" rows="3" placeholder="Mantenimiento preventivo, desarrollo de soluciones informáticas, atención al cliente..." required></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECCIÓN 6: CONOCIMIENTOS Y HABILIDADES -->
-                <div class="form-card-section">
-                    <div class="section-badge-header">
-                        <span class="badge-number">6</span>
-                        <div>
-                            <h3>Conocimientos y Habilidades</h3>
-                            <p class="section-desc">Idiomas dominados y competencias tecnológicas o de oficina.</p>
-                        </div>
-                    </div>
-                    <div class="form-grid-2">
-                        <div class="form-field">
-                            <label for="c_idiomas">Idiomas que dominas y nivel: *</label>
-                            <input type="text" id="c_idiomas" placeholder="Ej. Español (Nativo), Inglés (Intermedio Técnico B2)" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="c_softwareHerramientas">Software, herramientas tecnológicas o equipo de oficina: *</label>
-                            <input type="text" id="c_softwareHerramientas" placeholder="Ej. HTML, CSS, JavaScript, Node.js, Office 365, Mantenimiento PC" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECCIÓN 7: REFERENCIAS PERSONALES -->
-                <div class="form-card-section">
-                    <div class="section-badge-header">
-                        <span class="badge-number">7</span>
-                        <div>
-                            <h3>Referencias Personales (No familiares)</h3>
-                            <p class="section-desc">Amigos, catedráticos o excompañeros de trabajo con relación verificable.</p>
-                        </div>
-                    </div>
-                    <div class="form-field full-width">
-                        <label for="c_referencias">Nombres, teléfonos y relación: *</label>
-                        <textarea id="c_referencias" rows="3" placeholder="Ej. Lic. Miguel Ángel Torres (Ex-Catedrático UAMM) - Tel: 831-234-9988 | Ing. Patricia Méndez (Compañera) - Tel: 831-180-2211" required></textarea>
-                    </div>
-                </div>
-
-                <!-- BOTONES DE ACCIÓN GRANDES -->
-                <div class="form-big-actions">
-                    <button type="submit" class="btn-primary-huge">
-                        ✅ Guardar y Actualizar Mi Expediente
-                    </button>
-                    <button type="button" class="btn-secondary-huge" onclick="previewFullCV()">
-                        👁️ Ver Mi CV en Formato Oficial
-                    </button>
-                </div>
-            </form>
         </section>
 
         <!-- ---------------------------------------------------------------- -->
-        <!-- VISTA 4: PANEL DE LA EMPRESA (REGISTRO 3 SECCIONES & VACANTES) -->
+        <!-- PANTALLA 3: TERCERA PANTALLA (CANDIDATO & CV & EMPLEOS) -->
         <!-- ---------------------------------------------------------------- -->
-        <section id="view-company" class="app-view">
+        <section id="screen-3" class="screen-view">
             <div class="view-header">
                 <div>
-                    <h2>🏢 Panel Corporativo y Registro de Empresa</h2>
-                    <p class="view-subtitle">Registra tu empresa en Ciudad Mante, publica vacantes y evalúa candidatos.</p>
+                    <h2>🎓 Panel del Candidato</h2>
+                    <p class="view-subtitle">Registra tu Currículum Vitae y postúlate a los empleos disponibles en
+                        Ciudad Mante.</p>
                 </div>
-                <div class="header-actions">
-                    <button class="btn-secondary-large" onclick="loadSampleCompanyData()">
-                        🪄 Cargar Datos de Demostración
-                    </button>
-                    <button class="btn-primary-large" onclick="saveCompanyProfile()">
-                        💾 Guardar Perfil de Empresa
-                    </button>
+                <div class="header-status-badge">
+                    <span id="candidateStatusBadge" class="status-pill warning">⏳ En espera de validación</span>
                 </div>
             </div>
 
-            <!-- REGISTRO OFICIAL DE LA EMPRESA (3 SECCIONES OBLIGATORIAS) -->
-            <form id="companyForm" class="expediente-form" onsubmit="event.preventDefault(); saveCompanyProfile();">
-                
-                <!-- 1. IDENTIFICACIÓN LEGAL Y FISCAL -->
-                <div class="form-card-section">
-                    <div class="section-badge-header">
-                        <span class="badge-number">1</span>
-                        <div>
-                            <h3>Datos de Identificación Legal y Fiscal</h3>
-                            <p class="section-desc">Constitución legal de la empresa, RFC y representación.</p>
-                        </div>
-                    </div>
-                    <div class="form-grid-2">
-                        <div class="form-field">
-                            <label for="e_razonSocial">Razón social oficial: *</label>
-                            <input type="text" id="e_razonSocial" placeholder="Ej. Soluciones Digitales del Mante S.A. de C.V." required>
-                        </div>
-                        <div class="form-field">
-                            <label for="e_nombreComercial">Nombre comercial / Marca pública: *</label>
-                            <input type="text" id="e_nombreComercial" placeholder="Ej. Soluciones Digitales del Mante" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="e_rfc">Número de Identificación Fiscal (RFC): *</label>
-                            <input type="text" id="e_rfc" maxlength="13" placeholder="SDM190412AB1" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="e_actividadGiro">Actividad económica o giro principal: *</label>
-                            <select id="e_actividadGiro" required>
-                                <option value="Servicios de Tecnologías de Información y Software">Tecnología de Información y Software</option>
-                                <option value="Salud, Especialidades Médicas y Hospitalización">Salud, Especialidades Médicas y Hospitalización</option>
-                                <option value="Agroindustria, Azúcar y Transformación">Agroindustria y Procesamiento Cañero</option>
-                                <option value="Comercio al por Menor y Distribución">Comercio al por Menor y Distribución</option>
-                                <option value="Educación y Formación Superior">Educación y Formación Superior</option>
-                                <option value="Servicios Administrativos y Contables">Servicios Administrativos y Contables</option>
-                            </select>
-                        </div>
-                        <div class="form-field full-width">
-                            <label for="e_representanteLegal">Datos del Representante Legal (Nombre completo y documento): *</label>
-                            <input type="text" id="e_representanteLegal" placeholder="Ej. Lic. Andrea Guadalupe Ruiz Peña (INE: 08941257912)" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. CONTACTO Y LOCALIZACIÓN -->
-                <div class="form-card-section">
-                    <div class="section-badge-header">
-                        <span class="badge-number">2</span>
-                        <div>
-                            <h3>Datos de Contacto y Localización</h3>
-                            <p class="section-desc">Domicilio en Ciudad Mante, sucursales y canales de atención.</p>
-                        </div>
-                    </div>
-                    <div class="form-grid-2">
-                        <div class="form-field full-width">
-                            <label for="e_direccionFiscal">Dirección fiscal y comercial en El Mante / Región: *</label>
-                            <input type="text" id="e_direccionFiscal" placeholder="Ej. Av. Manuel Cavazos Lerma #205, Col. Moderna, Cd. Mante, Tamaulipas" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="e_telefonos">Teléfonos de contacto (Atención a clientes y RH): *</label>
-                            <input type="text" id="e_telefonos" placeholder="831-232-5500 / 831-102-3456" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="e_correos">Correos electrónicos corporativos: *</label>
-                            <input type="text" id="e_correos" placeholder="contacto@empresa.com.mx, rh@empresa.com.mx" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="e_sitioWeb">Sitio web oficial:</label>
-                            <input type="url" id="e_sitioWeb" placeholder="https://solucionesmante.com.mx">
-                        </div>
-                        <div class="form-field">
-                            <label for="e_redesSociales">Redes sociales oficiales:</label>
-                            <input type="text" id="e_redesSociales" placeholder="Facebook: @SolucionesMante | LinkedIn: /company/solucionesmante">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. DATOS OPERACIONALES Y FIRMOGRÁFICOS -->
-                <div class="form-card-section">
-                    <div class="section-badge-header">
-                        <span class="badge-number">3</span>
-                        <div>
-                            <h3>Datos Operacionales y Firmográficos</h3>
-                            <p class="section-desc">Estructura corporativa, infraestructura tecnológica y bancaria.</p>
-                        </div>
-                    </div>
-                    <div class="form-grid-1">
-                        <div class="form-field">
-                            <label for="e_tamanoEstructura">Tamaño y estructura organizacional: *</label>
-                            <input type="text" id="e_tamanoEstructura" placeholder="Ej. Mediana (18 empleados: 10 desarrollo, 4 soporte, 4 administración)" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="e_datosBancarios">Datos financieros y bancarios (Para facturación y nómina): *</label>
-                            <input type="text" id="e_datosBancarios" placeholder="Ej. BBVA Bancomer - Cuenta CLABE: 012813001234567890 (Facturación e ingresos)" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="e_datosTecnograficos">Datos tecnográficos (Software, hardware y sistemas informáticos que utiliza): *</label>
-                            <textarea id="e_datosTecnograficos" rows="3" placeholder="Ej. Linux Ubuntu Server, PostgreSQL, Docker, Node.js, Windows 11 Pro, MikroTik Router..." required></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-big-actions">
-                    <button type="submit" class="btn-primary-huge">
-                        ✅ Actualizar Datos de la Empresa
-                    </button>
-                </div>
-            </form>
-
-            <!-- SUBSECCIÓN: PUBLICAR VACANTE DE FORMA RÁPIDA -->
-            <div class="card-box mt-4">
+            <!-- ESTADO 1: FORMULARIO DE CV CON FOTO Y DATOS PERSONALES -->
+            <div id="candidateFormContainer" class="card-box">
                 <div class="card-box-header">
-                    <h3>➕ Publicar Nueva Oferta de Empleo</h3>
-                    <p>Las vacantes pasarán a revisión por el Administrador antes de activarse.</p>
+                    <h3>📄 Elaboración de Currículum Vitae (CV)</h3>
+                    <p>Completa tus datos personales, formación y sube una fotografía para que el Administrador valide
+                        tu cuenta.</p>
                 </div>
 
-                <form id="postJobForm" onsubmit="handleCompanyPostJob(event)" class="compact-form">
+                <form id="candidateCvForm" onsubmit="handleSaveCandidateCv(event)">
                     <div class="form-grid-3">
                         <div class="form-field">
-                            <label for="p_puesto">Puesto de trabajo ofrecido: *</label>
-                            <input type="text" id="p_puesto" placeholder="Ej. Desarrollador Web Jr." required>
+                            <label for="cvNombreCompleto">Nombre Completo: *</label>
+                            <input type="text" id="cvNombreCompleto" placeholder="Ej. Carlos Eduardo Garza Morales"
+                                required>
                         </div>
                         <div class="form-field">
-                            <label for="p_giro">Giro / Área: *</label>
-                            <select id="p_giro" required>
-                                <option value="Tecnología y Software">Tecnología y Software</option>
-                                <option value="Salud y Servicios Médicos">Salud y Servicios Médicos</option>
-                                <option value="Agroindustria y Manufactura">Agroindustria y Manufactura</option>
-                                <option value="Comercio y Administración">Comercio y Administración</option>
-                                <option value="Publicidad y Mercadotecnia">Publicidad y Diseño</option>
-                            </select>
+                            <label for="cvPuestoSolicitado">Puesto que buscas o especialidad: *</label>
+                            <input type="text" id="cvPuestoSolicitado"
+                                placeholder="Ej. Auxiliar Administrativo, Programador Jr." required>
                         </div>
                         <div class="form-field">
-                            <label for="p_ubicacion">Ubicación en Ciudad Mante: *</label>
-                            <select id="p_ubicacion" required>
-                                <option value="Zona Centro">Zona Centro</option>
-                                <option value="Zona Norte">Zona Norte</option>
-                                <option value="Zona Sur">Zona Sur</option>
-                                <option value="Zona Industrial">Zona Industrial / Libramiento</option>
-                                <option value="Zona Cañera">Zona Cañera</option>
-                            </select>
+                            <label for="cvEdad">Edad: *</label>
+                            <input type="number" id="cvEdad" min="16" max="80" placeholder="Ej. 23" required>
                         </div>
                         <div class="form-field">
-                            <label for="p_sueldo">Sueldo mensual ofrecido: *</label>
-                            <input type="text" id="p_sueldo" placeholder="Ej. $12,000 - $15,000 mensuales" required>
+                            <label for="cvTelefono">Teléfono de contacto (Celular / Recados): *</label>
+                            <input type="tel" id="cvTelefono" placeholder="831-145-8921" required>
                         </div>
                         <div class="form-field">
-                            <label for="p_modalidad">Modalidad de trabajo: *</label>
-                            <select id="p_modalidad" required>
-                                <option value="Presencial">Presencial en El Mante</option>
-                                <option value="Híbrida">Híbrida</option>
-                                <option value="Remota">Remota</option>
-                                <option value="Medio Tiempo / Flexible para Estudiantes">Medio Tiempo para Estudiantes</option>
-                            </select>
+                            <label for="cvCorreo">Correo Electrónico: *</label>
+                            <input type="email" id="cvCorreo" placeholder="carlos.garza@correo.com" required>
                         </div>
                         <div class="form-field">
-                            <label for="p_escolaridad">Escolaridad mínima requerida: *</label>
-                            <input type="text" id="p_escolaridad" placeholder="Ej. Estudiante o Egresado de Lic./Ing." required>
+                            <label for="cvFotoUrl">URL de Fotografía personal: *</label>
+                            <input type="url" id="cvFotoUrl" placeholder="https://... o usa la foto por defecto">
                         </div>
                         <div class="form-field full-width">
-                            <label for="p_requisitos">Requisitos, perfil y habilidades requeridas: *</label>
-                            <textarea id="p_requisitos" rows="3" placeholder="Detalla los conocimientos necesarios..." required></textarea>
+                            <label for="cvDireccion">Dirección en Ciudad Mante (Calle, colonia, CP): *</label>
+                            <input type="text" id="cvDireccion"
+                                placeholder="Calle Juárez #402 Ote., Zona Centro, Cd. Mante, Tam." required>
                         </div>
                         <div class="form-field full-width">
-                            <label for="p_contacto">Datos de contacto para postulaciones: *</label>
-                            <input type="text" id="p_contacto" placeholder="rh@empresa.com.mx | Tel: 831-232-1144" required>
+                            <label for="cvEscolaridad">Nivel de Escolaridad e Institución Educativa: *</label>
+                            <input type="text" id="cvEscolaridad"
+                                placeholder="Ej. Licenciatura / Ingeniería en Tecnologías - UAM Mante UAT" required>
+                        </div>
+                        <div class="form-field full-width">
+                            <label for="cvExperiencia">Experiencia Laboral o Prácticas Profesionales: *</label>
+                            <textarea id="cvExperiencia" rows="3"
+                                placeholder="Describe brevemente tus empleos anteriores o habilidades prácticas..."
+                                required></textarea>
+                        </div>
+                        <div class="form-field full-width">
+                            <label for="cvHabilidades">Conocimientos, Habilidades y Manejo de Herramientas: *</label>
+                            <input type="text" id="cvHabilidades"
+                                placeholder="Ej. Manejo de PC, Office, Atención al cliente, HTML, Conducción..."
+                                required>
                         </div>
                     </div>
-                    <div class="form-actions mt-3">
-                        <button type="submit" class="btn-primary-large">
-                            🚀 Enviar Vacante para Revisión
+
+                    <div class="form-actions mt-4">
+                        <button type="submit" class="btn-primary-huge">
+                            💾 Enviar Mis Datos al Administrador
+                        </button>
+                        <button type="button" class="btn-secondary-large" onclick="loadSampleCvData()">
+                            🪄 Llenar con Datos de Ejemplo
                         </button>
                     </div>
                 </form>
             </div>
 
-            <!-- CANDIDATOS POSTULADOS A MIS VACANTES -->
-            <div class="card-box mt-4">
-                <div class="card-box-header">
-                    <h3>👥 Candidatos Postulados a tus Vacantes</h3>
-                    <p>Revisa su expediente y agenda una cita virtual o presencial.</p>
+            <!-- ESTADO 2: AVISO DE ESPERA DE APROBACIÓN POR EL ADMINISTRADOR -->
+            <div id="candidatePendingNotice" class="alert-banner warning mt-4" style="display: none;">
+                <div class="alert-icon">⏳</div>
+                <div>
+                    <h4>Tus datos han sido enviados y están en revisión</h4>
+                    <p>Un <strong>Administrador de OFIMANTE</strong> debe aceptar tu perfil para habilitar la
+                        postulación a las vacantes de Ciudad Mante.</p>
+                    <small>Tip para evaluación: Puedes ir a la Pantalla 5 (Administrador) y hacer clic en "Aceptar
+                        Candidato" para aprobarlo de inmediato.</small>
                 </div>
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Candidato</th>
-                                <th>Vacante</th>
-                                <th>Escolaridad</th>
-                                <th>Contacto</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="companyApplicantsTableBody">
-                            <!-- Inyectado por JS -->
-                        </tbody>
-                    </table>
+            </div>
+
+            <!-- ESTADO 3: SECCIÓN DE EMPLEOS DISPONIBLES (SE ACTIVA TRAS APROBACIÓN) -->
+            <div id="candidateJobsSection" class="mt-4" style="display: none;">
+                <div class="view-header">
+                    <div>
+                        <h3>💼 Vacantes Disponibles para Mandar tu Currículum</h3>
+                        <p class="view-subtitle">¡Tu perfil ha sido aceptado! Puedes mandar tu solicitud a las ofertas
+                            vigentes.</p>
+                    </div>
+                </div>
+
+                <div id="candidateJobsGrid" class="jobs-responsive-grid">
+                    <!-- Se inyectan las tarjetas de empleos aprobados con botón "Mandar mi CV" -->
                 </div>
             </div>
         </section>
 
         <!-- ---------------------------------------------------------------- -->
-        <!-- VISTA 5: PANEL DE ADMINISTRADOR (MODERACIÓN Y CONTROL TOTAL) -->
+        <!-- PANTALLA 4: CUARTA PANTALLA (EMPRESA & VACANTES & SOLICITUDES) -->
         <!-- ---------------------------------------------------------------- -->
-        <section id="view-admin" class="app-view">
+        <section id="screen-4" class="screen-view">
             <div class="view-header">
                 <div>
-                    <h2>🛡️ Centro de Control y Moderación Administrativa</h2>
-                    <p class="view-subtitle">Supervisa vacantes, acepta solicitudes, gestiona usuarios y monitorea la plataforma.</p>
+                    <h2>🏢 Panel de la Empresa / Negocio Local</h2>
+                    <p class="view-subtitle">Registra tu local, publica ofertas con tarifa de $100 y gestiona las
+                        solicitudes recibidas.</p>
                 </div>
-                <div class="header-actions">
-                    <span class="admin-badge-indicator">Modo Super Admin Activo</span>
+                <div class="header-status-badge">
+                    <span id="companyStatusBadge" class="status-pill warning">⏳ En espera de validación</span>
                 </div>
             </div>
 
-            <!-- Tarjetas de Métricas del Sistema -->
+            <!-- PASO 1: REGISTRO DE DATOS DE LA EMPRESA -->
+            <div id="companyRegisterFormCard" class="card-box">
+                <div class="card-box-header">
+                    <h3>📝 Registro de Datos de la Empresa</h3>
+                    <p>Registra la información oficial de tu comercio o empresa en Ciudad Mante.</p>
+                </div>
+
+                <form id="formCompanyProfile" onsubmit="handleSaveCompanyProfile(event)">
+                    <div class="form-grid-2">
+                        <div class="form-field">
+                            <label for="compRazonSocial">Razón Social: *</label>
+                            <input type="text" id="compRazonSocial"
+                                placeholder="Ej. Soluciones Digitales del Mante S.A. de C.V." required>
+                        </div>
+                        <div class="form-field">
+                            <label for="compNombreComercial">Nombre Comercial / Nombre del Local: *</label>
+                            <input type="text" id="compNombreComercial" placeholder="Ej. Soluciones Digitales Mante"
+                                required>
+                        </div>
+                        <div class="form-field">
+                            <label for="compRfc">RFC o Identificación Fiscal: *</label>
+                            <input type="text" id="compRfc" placeholder="SDM190412AB1" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="compGiro">Giro o Actividad Económica: *</label>
+                            <select id="compGiro" required>
+                                <option value="Tecnología y Software">Tecnología y Software</option>
+                                <option value="Salud y Clínica Médica">Salud y Clínica Médica</option>
+                                <option value="Comercio y Tienda Local">Comercio y Tienda Local</option>
+                                <option value="Agroindustria y Campo">Agroindustria y Campo</option>
+                                <option value="Servicios Profesionales">Servicios Profesionales</option>
+                            </select>
+                        </div>
+                        <div class="form-field full-width">
+                            <label for="compDireccion">Dirección en Ciudad Mante: *</label>
+                            <input type="text" id="compDireccion"
+                                placeholder="Av. Manuel Cavazos Lerma #205, Col. Moderna, Cd. Mante" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="compTelefono">Teléfono de Contacto: *</label>
+                            <input type="tel" id="compTelefono" placeholder="831-232-5500" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="compCorreo">Correo Electrónico Corporativo: *</label>
+                            <input type="email" id="compCorreo" placeholder="contacto@empresa.com.mx" required>
+                        </div>
+                    </div>
+
+                    <div class="form-actions mt-4">
+                        <button type="submit" class="btn-primary-huge">
+                            💾 Registrar Empresa y Solicitar Aprobación
+                        </button>
+                        <button type="button" class="btn-secondary-large" onclick="loadSampleCompanyData()">
+                            🪄 Cargar Datos de Demostración
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- AVISO DE ESPERA DE APROBACIÓN DE EMPRESA -->
+            <div id="companyPendingNotice" class="alert-banner warning mt-4" style="display: none;">
+                <div class="alert-icon">⏳</div>
+                <div>
+                    <h4>Tu empresa ha sido registrada y está en proceso de aprobación</h4>
+                    <p>El <strong>Administrador</strong> debe validar y aceptar los datos de tu empresa antes de que
+                        puedas publicar vacantes o consultar candidatos.</p>
+                    <small>Tip para evaluación: Puedes ir a la Pantalla 5 (Administrador) y hacer clic en "Aceptar
+                        Empresa" para habilitar las opciones.</small>
+                </div>
+            </div>
+
+            <!-- PANTALLA DE OPCIONES PARA LA EMPRESA (SE ACTIVA TRAS APROBACIÓN) -->
+            <div id="companyActionMenuSection" class="mt-4" style="display: none;">
+
+                <!-- Selector de Modo de Empresa: Publicar Vacante VS Ver Solicitudes -->
+                <div class="company-subnav">
+                    <button id="btnCompanyTabPost" class="company-tab-btn active" onclick="switchCompanyMode('post')">
+                        ➕ Agregar Nueva Vacante ($100 MXN)
+                    </button>
+                    <button id="btnCompanyTabApplicants" class="company-tab-btn"
+                        onclick="switchCompanyMode('applicants')">
+                        📋 Ver Solicitudes de Candidatos (<span id="companyApplicantsCount">0</span>)
+                    </button>
+                </div>
+
+                <!-- OPCIÓN A: PUBLICAR VACANTE (CON SUELDO, BENEFICIOS Y TARIFA DE $100 PESOS) -->
+                <div id="companyPostJobContainer" class="card-box mt-3">
+                    <div class="card-box-header">
+                        <h3>➕ Publicar Oferta de Empleo en El Mante</h3>
+                        <p>Crea el anuncio detallando con exactitud lo que necesitas, el sueldo ofrecido y los
+                            beneficios.</p>
+                    </div>
+
+                    <!-- Cuadro informativo de la tarifa de servicio de $100 pesos obligatoria -->
+                    <div class="fee-card-highlight">
+                        <div class="fee-icon">🏷️</div>
+                        <div class="fee-info">
+                            <strong>Tarifa de Servicio por Publicación: $100 MXN</strong>
+                            <p>Cada vacante publicada tiene una tarifa promocional de $100 pesos para difusión en Ciudad
+                                Mante.</p>
+                        </div>
+                        <span class="fee-badge">Tarifa: $100.00</span>
+                    </div>
+
+                    <form id="formPostJobWithFee" onsubmit="handlePostJobWithFee(event)" class="mt-3">
+                        <div class="form-grid-2">
+                            <div class="form-field full-width">
+                                <label for="vacPuesto">Nombre exacto del puesto solicitado: *</label>
+                                <input type="text" id="vacPuesto"
+                                    placeholder="Ej. Auxiliar de Mostrador, Técnico en Sistemas" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="vacSueldo">Sueldo mensual exacto o rango ofrecido: *</label>
+                                <input type="text" id="vacSueldo" placeholder="Ej. $10,000 mensuales netos" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="vacUbicacion">Zona de trabajo en Ciudad Mante: *</label>
+                                <select id="vacUbicacion" required>
+                                    <option value="Zona Centro">Zona Centro</option>
+                                    <option value="Zona Norte">Zona Norte</option>
+                                    <option value="Zona Sur">Zona Sur</option>
+                                    <option value="Parque Industrial">Parque Industrial</option>
+                                    <option value="Zona Cañera">Zona Cañera</option>
+                                </select>
+                            </div>
+                            <div class="form-field full-width">
+                                <label for="vacBeneficios">Beneficios que ofrece la empresa: *</label>
+                                <textarea id="vacBeneficios" rows="2"
+                                    placeholder="Ej. Prestaciones de ley, IMSS, aguinaldo, capacitación pagada, bonos de puntualidad..."
+                                    required></textarea>
+                            </div>
+                            <div class="form-field full-width">
+                                <label for="vacDescripcion">Anuncio exacto de lo que necesita el negocio (Requisitos):
+                                    *</label>
+                                <textarea id="vacDescripcion" rows="3"
+                                    placeholder="Detalla los requisitos específicos, escolaridad, habilidades y responsabilidades..."
+                                    required></textarea>
+                            </div>
+                            <div class="form-field full-width">
+                                <label for="vacContacto">Datos de contacto para los candidatos: *</label>
+                                <input type="text" id="vacContacto"
+                                    placeholder="Tel: 831-232-5500 | Correo: rh@empresa.com" required>
+                            </div>
+                        </div>
+
+                        <!-- Confirmación de Tarifa de Servicio -->
+                        <div class="fee-payment-box mt-3">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="chkFeeConfirm" checked required>
+                                Confirmo la aceptación y pago de la <strong>tarifa de servicio de $100 pesos</strong>
+                                para publicar esta vacante.
+                            </label>
+                        </div>
+
+                        <div class="form-actions mt-3">
+                            <button type="submit" class="btn-primary-huge">
+                                💳 Pagar $100 y Publicar Vacante
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- OPCIÓN B: VER SOLICITUDES DE LOS CANDIDATOS (ORDENADAS POR DÍA Y HORA) -->
+                <div id="companyApplicantsContainer" class="card-box mt-3" style="display: none;">
+                    <div class="card-box-header">
+                        <h3>📋 Solicitudes de Empleo Recibidas</h3>
+                        <p>Lista cronológica clasificada exactamente por <strong>día y hora</strong> en que se realizó
+                            la postulación.</p>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Día y Hora de Solicitud</th>
+                                    <th>Candidato</th>
+                                    <th>Vacante</th>
+                                    <th>Teléfono / Correo</th>
+                                    <th>Estado</th>
+                                    <th>Acciones (Aceptar / Rechazar)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="companyApplicantsTableBody">
+                                <!-- Inyectado dinámicamente con JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ---------------------------------------------------------------- -->
+        <!-- PANTALLA 5: QUINTA PANTALLA (ADMINISTRADOR & CONTROL TOTAL) -->
+        <!-- ---------------------------------------------------------------- -->
+        <section id="screen-5" class="screen-view">
+            <div class="view-header">
+                <div>
+                    <h2>🛡️ Panel de Control del Administrador</h2>
+                    <p class="view-subtitle">Acepta empresas, valida candidatos, aprueba o modifica vacantes y modera
+                        usuarios.</p>
+                </div>
+                <div class="header-status-badge">
+                    <span class="status-pill success">🛡️ Super Admin Activo</span>
+                </div>
+            </div>
+
+            <!-- KPIs de Estadísticas -->
             <div class="kpi-grid">
                 <div class="kpi-card">
-                    <span class="kpi-icon">💼</span>
-                    <div>
-                        <span class="kpi-value" id="kpiTotalJobs">0</span>
-                        <span class="kpi-label">Vacantes Totales</span>
-                    </div>
-                </div>
-                <div class="kpi-card kpi-warning">
-                    <span class="kpi-icon">⏳</span>
-                    <div>
-                        <span class="kpi-value" id="kpiPendingJobs">0</span>
-                        <span class="kpi-label">Solicitudes Pendientes</span>
-                    </div>
-                </div>
-                <div class="kpi-card kpi-success">
                     <span class="kpi-icon">🎓</span>
                     <div>
-                        <span class="kpi-value" id="kpiCandidates">0</span>
+                        <span class="kpi-value" id="kpiCandidatesCount">0</span>
                         <span class="kpi-label">Candidatos Registrados</span>
                     </div>
                 </div>
-                <div class="kpi-card kpi-info">
+                <div class="kpi-card kpi-warning">
                     <span class="kpi-icon">🏢</span>
                     <div>
-                        <span class="kpi-value" id="kpiCompanies">0</span>
-                        <span class="kpi-label">Empresas Aliadas</span>
+                        <span class="kpi-value" id="kpiCompaniesCount">0</span>
+                        <span class="kpi-label">Empresas en Sistema</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-success">
+                    <span class="kpi-icon">💼</span>
+                    <div>
+                        <span class="kpi-value" id="kpiJobsCount">0</span>
+                        <span class="kpi-label">Vacantes Totales</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-info">
+                    <span class="kpi-icon">⏳</span>
+                    <div>
+                        <span class="kpi-value" id="kpiPendingTotal">0</span>
+                        <span class="kpi-label">Aprobaciones Pendientes</span>
                     </div>
                 </div>
             </div>
 
-            <!-- TABLA 1: GESTIÓN DE VACANTES (Aprobar, Editar, Eliminar) -->
+            <!-- SECCIÓN 1 ADMIN: ACEPTAR Y GESTIONAR CANDIDATOS -->
             <div class="card-box mt-4">
-                <div class="card-box-header flex-between">
-                    <div>
-                        <h3>📋 Gestión y Aprobación de Vacantes</h3>
-                        <p>Acepta solicitudes de vacantes enviadas por empresas, edítalas o elimínalas.</p>
-                    </div>
+                <div class="card-box-header">
+                    <h3>🎓 1. Aceptar y Gestionar Datos de Candidatos</h3>
+                    <p>Revisa los datos de los candidatos y acéptalos para permitirles ver vacantes y postularse.</p>
                 </div>
                 <div class="table-responsive">
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Puesto Ofrecido</th>
+                                <th>Nombre</th>
+                                <th>Puesto / Carrera</th>
+                                <th>Teléfono / Correo</th>
+                                <th>Estado de Datos</th>
+                                <th>Acciones de Administrador</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminCandidatesListBody">
+                            <!-- Inyectado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 2 ADMIN: ACEPTAR Y GESTIONAR EMPRESAS -->
+            <div class="card-box mt-4">
+                <div class="card-box-header">
+                    <h3>🏢 2. Aceptar y Gestionar Empresas</h3>
+                    <p>Verifica y acepta las empresas para autorizar la publicación de vacantes en Ciudad Mante.</p>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Razón Social / Comercial</th>
+                                <th>RFC</th>
+                                <th>Giro</th>
+                                <th>Estado de Aprobación</th>
+                                <th>Acciones de Administrador</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminCompaniesListBody">
+                            <!-- Inyectado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 3 ADMIN: ACEPTAR, MODIFICAR Y ELIMINAR VACANTES -->
+            <div class="card-box mt-4">
+                <div class="card-box-header">
+                    <h3>💼 3. Aceptar, Modificar y Eliminar Vacantes de Empleo</h3>
+                    <p>Acepta solicitudes de vacantes enviadas por empresas, modifica sus datos o elimínalas.</p>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Puesto</th>
                                 <th>Empresa</th>
-                                <th>Ubicación</th>
-                                <th>Sueldo</th>
+                                <th>Sueldo y Beneficios</th>
+                                <th>Tarifa ($100)</th>
                                 <th>Estado</th>
                                 <th>Acciones de Moderación</th>
                             </tr>
                         </thead>
-                        <tbody id="adminJobsTableBody">
+                        <tbody id="adminJobsListBody">
                             <!-- Inyectado por JS -->
                         </tbody>
                     </table>
                 </div>
-            </div>
-
-            <!-- TABLA 2: GESTIÓN DE CANDIDATOS (Banear, Eliminar, Ver CV) -->
-            <div class="card-box mt-4">
-                <div class="card-box-header">
-                    <h3>🎓 Gestión de Usuarios Candidatos</h3>
-                    <p>Banear usuarios infractores o dar de baja del sistema.</p>
-                </div>
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nombre</th>
-                                <th>Puesto / Carrera</th>
-                                <th>Teléfono / Correo</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adminCandidatesTableBody">
-                            <!-- Inyectado por JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- TABLA 3: GESTIÓN DE EMPRESAS (Banear, Eliminar) -->
-            <div class="card-box mt-4">
-                <div class="card-box-header">
-                    <h3>🏢 Gestión de Empresas Registradas</h3>
-                    <p>Revisión fiscal, control de acceso y suspensión de cuentas.</p>
-                </div>
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Razón Social / Comercial</th>
-                                <th>RFC</th>
-                                <th>Giro</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adminCompaniesTableBody">
-                            <!-- Inyectado por JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- ---------------------------------------------------------------- -->
-        <!-- VISTA 6: AGENDA VIRTUAL INTERACTIVA DE PROGRAMACIÓN -->
-        <!-- ---------------------------------------------------------------- -->
-        <section id="view-agenda" class="app-view">
-            <div class="view-header">
-                <div>
-                    <h2>📅 Agenda Virtual Interactiva de Programación</h2>
-                    <p class="view-subtitle">
-                        Organiza entrevistas laborales, citas de entrega de solicitudes y sesiones de programación para estudiantes de nivel superior.
-                    </p>
-                </div>
-                <button class="btn-primary-large" onclick="openNewEventModal()">
-                    ➕ Programar Nueva Cita / Entrevista
-                </button>
-            </div>
-
-            <!-- Barra de Filtros de la Agenda -->
-            <div class="search-filter-panel">
-                <div class="filter-controls">
-                    <select id="agendaFilterType" onchange="renderAgendaEvents()" class="filter-select">
-                        <option value="">Todos los tipos de cita</option>
-                        <option value="Entrevista Laboral">Entrevistas Laborales</option>
-                        <option value="Sesión de Programación Estudiantil">Sesiones de Programación</option>
-                        <option value="Entrega de Solicitud y Documentos">Entregas de Solicitud</option>
-                    </select>
-
-                    <select id="agendaFilterStatus" onchange="renderAgendaEvents()" class="filter-select">
-                        <option value="">Todos los estados</option>
-                        <option value="Programada">Programadas</option>
-                        <option value="Confirmada">Confirmadas</option>
-                        <option value="Concluida">Concluidas</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Listado y Tarjetas de la Agenda Interactiva -->
-            <div id="agendaGrid" class="agenda-timeline-grid">
-                <!-- Se cargan dinámicamente con JS -->
             </div>
         </section>
 
     </main>
 
     <!-- ==================================================================== -->
-    <!-- MODALES INTERACTIVOS -->
+    <!-- MODAL DE EDICIÓN DE VACANTES (PARA EL ROL ADMINISTRADOR) -->
     <!-- ==================================================================== -->
-
-    <!-- 1. MODAL DE INICIO DE SESIÓN CON GOOGLE (REALISTA & ELEGANTE) -->
-    <div id="authModal" class="modal-overlay" style="display: none;">
-        <div class="modal-card auth-modal-box">
-            <button class="modal-close-btn" onclick="closeAuthModal()">✕</button>
-            
-            <div class="auth-header text-center">
-                <img src="logo.png" alt="OFIMANTE" class="auth-brand-logo">
-                <h3>Acceso a OFIMANTE</h3>
-                <p class="auth-sub">Bolsa de Empleo & Agenda Virtual de Ciudad Mante</p>
-            </div>
-
-            <div class="auth-body">
-                <div class="google-official-box">
-                    <p class="google-hint">Inicia sesión de forma segura con tu cuenta institucional o personal:</p>
-                    
-                    <!-- Botón Principal Google Identity -->
-                    <button class="btn-google-official" onclick="triggerGoogleLogin('estudiante')">
-                        <svg class="google-icon-svg" viewBox="0 0 24 24" width="22" height="22">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                        </svg>
-                        <span>Continuar con Google</span>
-                    </button>
-                </div>
-
-                <div class="auth-divider">
-                    <span>O selecciona un perfil de demostración rápida</span>
-                </div>
-
-                <div class="demo-accounts-list">
-                    <div class="demo-acc-item" onclick="triggerGoogleLogin('candidato_carlos')">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80" alt="Avatar" class="demo-avatar">
-                        <div>
-                            <strong>Carlos Garza (Candidato UAMM)</strong>
-                            <span class="demo-email">carlos.garza@alumnos.uat.edu.mx</span>
-                        </div>
-                    </div>
-
-                    <div class="demo-acc-item" onclick="triggerGoogleLogin('empresa_soluciones')">
-                        <div class="demo-icon-avatar">🏢</div>
-                        <div>
-                            <strong>Soluciones Digitales Mante (Empresa)</strong>
-                            <span class="demo-email">contacto@solucionesmante.com.mx</span>
-                        </div>
-                    </div>
-
-                    <div class="demo-acc-item" onclick="triggerGoogleLogin('admin_general')">
-                        <div class="demo-icon-avatar admin">🛡️</div>
-                        <div>
-                            <strong>Administrador de OFIMANTE</strong>
-                            <span class="demo-email">admin.ofimante@mante.tam.gob.mx</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. MODAL DE EDICIÓN DE VACANTE (ADMIN / EMPRESA) -->
-    <div id="editJobModal" class="modal-overlay" style="display: none;">
+    <div id="modalEditJob" class="modal-overlay" style="display: none;">
         <div class="modal-card">
             <button class="modal-close-btn" onclick="closeEditJobModal()">✕</button>
-            <h3>✏️ Modificar Detalles de Vacante</h3>
-            <p class="modal-subtitle">Edita los parámetros solicitados para mantener la información clara y actualizada.</p>
+            <h3>✏️ Modificar Vacante (Administrador)</h3>
+            <p class="modal-subtitle">Modifica los detalles requeridos de la oferta de trabajo antes de publicarla.</p>
 
-            <form id="editJobForm" onsubmit="handleSaveEditedJob(event)">
+            <form id="formAdminEditJob" onsubmit="handleSaveEditedJob(event)">
                 <input type="hidden" id="editJobId">
                 <div class="form-grid-2">
                     <div class="form-field full-width">
-                        <label for="editPuesto">Puesto ofrecido:</label>
-                        <input type="text" id="editPuesto" required>
+                        <label for="mEditPuesto">Puesto de Empleo: *</label>
+                        <input type="text" id="mEditPuesto" required>
                     </div>
                     <div class="form-field">
-                        <label for="editEmpresa">Empresa:</label>
-                        <input type="text" id="editEmpresa" required>
+                        <label for="mEditSueldo">Sueldo mensual: *</label>
+                        <input type="text" id="mEditSueldo" required>
                     </div>
                     <div class="form-field">
-                        <label for="editUbicacion">Zona de El Mante:</label>
-                        <select id="editUbicacion" required>
-                            <option value="Zona Centro">Zona Centro</option>
-                            <option value="Zona Norte">Zona Norte</option>
-                            <option value="Zona Sur">Zona Sur</option>
-                            <option value="Zona Industrial">Zona Industrial</option>
-                            <option value="Zona Cañera">Zona Cañera</option>
-                        </select>
-                    </div>
-                    <div class="form-field">
-                        <label for="editSueldo">Sueldo mensual:</label>
-                        <input type="text" id="editSueldo" required>
-                    </div>
-                    <div class="form-field">
-                        <label for="editModalidad">Modalidad:</label>
-                        <input type="text" id="editModalidad" required>
+                        <label for="mEditUbicacion">Ubicación: *</label>
+                        <input type="text" id="mEditUbicacion" required>
                     </div>
                     <div class="form-field full-width">
-                        <label for="editRequisitos">Requisitos:</label>
-                        <textarea id="editRequisitos" rows="3" required></textarea>
+                        <label for="mEditBeneficios">Beneficios: *</label>
+                        <textarea id="mEditBeneficios" rows="2" required></textarea>
                     </div>
                     <div class="form-field full-width">
-                        <label for="editContacto">Contacto:</label>
-                        <input type="text" id="editContacto" required>
+                        <label for="mEditDescripcion">Descripción y Requisitos: *</label>
+                        <textarea id="mEditDescripcion" rows="3" required></textarea>
                     </div>
                 </div>
                 <div class="form-actions mt-3">
-                    <button type="submit" class="btn-primary-large">💾 Guardar Cambios</button>
+                    <button type="submit" class="btn-primary-large">💾 Guardar Modificaciones</button>
                     <button type="button" class="btn-secondary-large" onclick="closeEditJobModal()">Cancelar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- 3. MODAL DE PROGRAMAR NUEVA CITA EN LA AGENDA VIRTUAL -->
-    <div id="agendaEventModal" class="modal-overlay" style="display: none;">
+    <!-- MODAL DE CONTACTO CON EL CANDIDATO (PARA LA EMPRESA TRAS ACEPTARLO) -->
+    <div id="modalCandidateContact" class="modal-overlay" style="display: none;">
         <div class="modal-card">
-            <button class="modal-close-btn" onclick="closeNewEventModal()">✕</button>
-            <h3>📅 Programar Cita / Evento en la Agenda Virtual</h3>
-            <p class="modal-subtitle">Organiza entrevistas de trabajo o asesorías de programación para estudiantes.</p>
-
-            <form id="newEventForm" onsubmit="handleSaveAgendaEvent(event)">
-                <div class="form-grid-2">
-                    <div class="form-field full-width">
-                        <label for="ev_titulo">Título de la Cita / Sesión: *</label>
-                        <input type="text" id="ev_titulo" placeholder="Ej. Entrevista Técnica Web Jr." required>
-                    </div>
-                    <div class="form-field">
-                        <label for="ev_tipo">Tipo de Evento: *</label>
-                        <select id="ev_tipo" required>
-                            <option value="Entrevista Laboral">Entrevista Laboral</option>
-                            <option value="Sesión de Programación Estudiantil">Sesión de Programación Estudiantil</option>
-                            <option value="Entrega de Solicitud y Documentos">Entrega de Solicitud y Documentos</option>
-                        </select>
-                    </div>
-                    <div class="form-field">
-                        <label for="ev_modalidad">Modalidad: *</label>
-                        <select id="ev_modalidad" required>
-                            <option value="Presencial (Cd. Mante)">Presencial (Cd. Mante)</option>
-                            <option value="Virtual (Google Meet)">Virtual (Google Meet)</option>
-                            <option value="Virtual (Zoom / Teams)">Virtual (Zoom / Teams)</option>
-                        </select>
-                    </div>
-                    <div class="form-field">
-                        <label for="ev_fecha">Fecha: *</label>
-                        <input type="date" id="ev_fecha" required>
-                    </div>
-                    <div class="form-field">
-                        <label for="ev_hora">Hora: *</label>
-                        <input type="time" id="ev_hora" required>
-                    </div>
-                    <div class="form-field">
-                        <label for="ev_candidatoNombre">Candidato / Estudiante: *</label>
-                        <input type="text" id="ev_candidatoNombre" placeholder="Nombre del candidato" required>
-                    </div>
-                    <div class="form-field">
-                        <label for="ev_empresaNombre">Empresa / Institución: *</label>
-                        <input type="text" id="ev_empresaNombre" placeholder="Nombre de la empresa convocante" required>
-                    </div>
-                    <div class="form-field full-width">
-                        <label for="ev_lugarEnlace">Lugar o Enlace de reunión: *</label>
-                        <input type="text" id="ev_lugarEnlace" placeholder="Ej. Av. Cavazos Lerma #205 o https://meet.google.com/..." required>
-                    </div>
-                    <div class="form-field full-width">
-                        <label for="ev_notas">Notas / Instrucciones adicionales:</label>
-                        <textarea id="ev_notas" rows="2" placeholder="Requisitos que debe presentar el aspirante..."></textarea>
-                    </div>
-                </div>
-                <div class="form-actions mt-3">
-                    <button type="submit" class="btn-primary-large">💾 Confirmar y Agendar</button>
-                    <button type="button" class="btn-secondary-large" onclick="closeNewEventModal()">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 4. MODAL PARA VER EL CV COMPLETO DEL CANDIDATO (7 SECCIONES) -->
-    <div id="cvPreviewModal" class="modal-overlay" style="display: none;">
-        <div class="modal-card cv-modal-card">
-            <button class="modal-close-btn" onclick="closeCvPreviewModal()">✕</button>
-            <div id="cvPreviewContent" class="cv-document-render">
-                <!-- Inyectado por JS -->
+            <button class="modal-close-btn" onclick="closeContactModal()">✕</button>
+            <h3>📞 Datos de Contacto del Candidato</h3>
+            <p class="modal-subtitle">¡Has aceptado la solicitud! Ponte en contacto directo con el candidato:</p>
+            <div id="contactDetailsBody" class="contact-card-box">
+                <!-- Se inyecta con JS -->
             </div>
             <div class="modal-footer-actions">
-                <button class="btn-primary-large" onclick="window.print()">🖨️ Imprimir / Guardar en PDF</button>
-                <button class="btn-secondary-large" onclick="closeCvPreviewModal()">Cerrar</button>
+                <button class="btn-primary-large" onclick="closeContactModal()">Entendido</button>
             </div>
         </div>
     </div>
@@ -1174,36 +823,29 @@
                     <img src="logo.png" alt="OFIMANTE" class="brand-logo-small">
                     <span class="footer-title">OFIMANTE</span>
                 </div>
-                <p>Plataforma de Empleo & Agenda Virtual de Programación para Estudiantes de Nivel Superior.</p>
-                <p class="footer-mante">📍 Ciudad Mante, Tamaulipas, México • Código Postal 89800</p>
+                <p>Plataforma de vinculación laboral y conexión entre personas sin empleo y negocios en Ciudad Mante,
+                    Tamaulipas.</p>
+                <p class="footer-mante">📍 Ciudad Mante, Tam. • Creado con HTML, CSS, JavaScript y PHP con Base de
+                    Datos.</p>
             </div>
-
             <div class="footer-links">
-                <h4>Navegación Rápida</h4>
+                <h4>Navegación de Pantallas</h4>
                 <ul>
-                    <li><a href="#" onclick="switchView('landing')">Inicio</a></li>
-                    <li><a href="#" onclick="switchView('jobs')">Bolsa de Empleos</a></li>
-                    <li><a href="#" onclick="switchView('agenda')">Agenda Virtual</a></li>
-                    <li><a href="#" onclick="switchView('candidate')">Expediente Candidato</a></li>
-                    <li><a href="#" onclick="switchView('company')">Registro Empresa</a></li>
+                    <li><a href="#" onclick="goToScreen('screen-1')">1. Pantalla Inicial</a></li>
+                    <li><a href="#" onclick="goToScreen('screen-2')">2. Registro / Inicio de Sesión</a></li>
+                    <li><a href="#" onclick="goToScreen('screen-3')">3. Pantalla Candidato</a></li>
+                    <li><a href="#" onclick="goToScreen('screen-4')">4. Pantalla Empresa</a></li>
+                    <li><a href="#" onclick="goToScreen('screen-5')">5. Pantalla Administrador</a></li>
                 </ul>
-            </div>
-
-            <div class="footer-roles">
-                <h4>Roles y Accesos</h4>
-                <div class="footer-role-pills">
-                    <span onclick="setUserRole('candidato')">🎓 Candidato</span>
-                    <span onclick="setUserRole('empresa')">🏢 Empresa</span>
-                    <span onclick="setUserRole('admin')">🛡️ Administrador</span>
-                </div>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>OFIMANTE &copy; 2026 • Vinculación Académica y Laboral de El Mante, Tamaulipas. Desarrollado con HTML, CSS, JavaScript y Backend Node.js.</p>
+            <p>OFIMANTE &copy; 2026 • Ciudad Mante, Tamaulipas, México.</p>
         </div>
     </footer>
 
     <!-- SCRIPT PRINCIPAL UNIFICADO -->
     <script src="script.js"></script>
 </body>
+
 </html>

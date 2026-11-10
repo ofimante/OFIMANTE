@@ -269,6 +269,14 @@ const server = http.createServer((req, res) => {
     const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const pathname = parsedUrl.pathname;
 
+    // Soporte para endpoints PHP y REST
+    if (pathname === '/api.php') {
+        const action = parsedUrl.searchParams.get('action');
+        if (action === 'get_all_data') {
+            return sendJSON(res, 200, db);
+        }
+    }
+
     // --------------------------------------------------------------------------
     // RUTAS DE LA API REST (/api/...)
     // --------------------------------------------------------------------------

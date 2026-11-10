@@ -1,6 +1,6 @@
 # OFIMANTE 🌾
-### Plataforma de Búsqueda de Empleo y Agenda Virtual Interactiva
-**Ciudad Mante, Tamaulipas, México**
+### Plataforma de Empleo y Conexión Laboral en Ciudad Mante, Tamaulipas
+**Conectando personas sin empleo con empresas y locales de la región**
 
 ![OFIMANTE Logo](logo.png)
 
@@ -8,117 +8,99 @@
 
 ## 📋 Descripción del Proyecto
 
-**OFIMANTE** es una aplicación web integral diseñada específicamente para vincular a estudiantes de nivel superior (UAT UAM Mante, Instituto Tecnológico Superior de El Mante, etc.), profesionistas egresados y empresas comerciales, de salud, agroindustriales y de software en **Ciudad Mante, Tamaulipas**.
+**OFIMANTE** es una aplicación web integral enfocada a **Ciudad Mante, Tamaulipas**, cuyo objetivo primordial es conectar a personas sin empleo con comercios, clínicas, locales y empresas de la localidad que ofrecen vacantes laborales.
 
-La plataforma combina dos núcleos funcionales principales:
-1. **Bolsa de Empleo Regional Filtrable:** Búsqueda precisa de vacantes según requisitos técnicos, zona de la ciudad (Centro, Norte, Sur, Parque Industrial, Zona Cañera), giro y expectativas salariales.
-2. **Agenda Virtual Interactiva de Programación:** Módulo tipo cronograma/calendario para agendar entrevistas laborales presenciales o virtuales, entregas de solicitudes y sesiones de asesoría en programación para estudiantes.
+La plataforma opera bajo un flujo de **verificación y aceptación administrativa**, asegurando que los perfiles curriculares de los candidatos y los registros comerciales de las empresas sean validados antes de interactuar en la bolsa de trabajo.
 
 ---
 
-## 🚀 Cómo Ejecutar la Aplicación
+## 🚀 Arquitectura y Tecnologías
 
-El proyecto está diseñado bajo una arquitectura flexible y didáctica que permite dos modos de ejecución sin configuraciones complejas:
-
-### Opción A: Modo Directo en Navegador (Sin dependencias)
-1. Simplemente haz **doble clic en el archivo `index.html`** para abrirlo en cualquier navegador web moderno (Google Chrome, Microsoft Edge, Firefox, Brave).
-2. La aplicación detectará automáticamente el entorno y activará la persistencia de datos mediante **LocalStorage**, permitiendo que todas las altas, bajas, postulaciones y eventos de agenda se guarden en tu navegador de forma persistente.
-
-### Opción B: Modo Servidor Local (Backend REST con Node.js)
-1. Abre tu terminal o consola de comandos en la carpeta del proyecto.
-2. Ejecuta el comando:
-   ```bash
-   node server.js
-   ```
-3. Abre tu navegador web en:
-   ```text
-   http://localhost:3000
-   ```
-4. Los datos se almacenarán y sincronizarán en tiempo real en el archivo `database.json`.
+- **Frontend:** HTML5, CSS3 moderno (paleta azul oscuro con acentos cian y verde menta clínico/creativo, botones grandes y diseño responsivo) y JavaScript (ES6+).
+- **Backend & Base de Datos:**
+  - **PHP:** Archivos [`db.php`](file:///c:/Users/ismae/OneDrive/Escritorio/OFIMANTE/db.php) y [`api.php`](file:///c:/Users/ismae/OneDrive/Escritorio/OFIMANTE/api.php) con API REST y persistencia en base de datos JSON / SQLite, ideal para entornos con XAMPP / WampServer.
+  - **Node.js:** Servidor alternativo [`server.js`](file:///c:/Users/ismae/OneDrive/Escritorio/OFIMANTE/server.js) nativo.
+  - **Modo Local Autónomo (LocalStorage):** Permite ejecutar la aplicación directamente haciendo doble clic en [`index.html`](file:///c:/Users/ismae/OneDrive/Escritorio/OFIMANTE/index.html) en cualquier navegador sin necesidad de servidores externos.
+- **Inicio de Sesión con Google:** Botón estilizado con Google Identity y soporte para autenticación de candidatos, empresas y administradores.
 
 ---
 
-## 🛠️ Tecnologías Empleadas
+## 🖥️ Flujo de las 5 Pantallas Oficiales
 
-- **HTML5 Semántico:** Estructura limpia y accesible de vistas Single Page Application (SPA).
-- **CSS3 Moderno:** Diseño responsivo con enfoque **médico-tecnológico y creativo**, paleta de azul oscuro profundo (`#071324`, `#0b1e36`), toques cian clínicos (`#06b6d4`), verde menta (`#10b981`), botones grandes y tarjetas de elevación suave.
-- **JavaScript Moderno (ES6+):** Código didáctico, sin frameworks pesados, fácil de explicar en clases de programación universitaria (manipulación de DOM, eventos, promesas y consumo de API).
-- **Backend Node.js:** Servidor HTTP nativo con arquitectura RESTful (`/api/jobs`, `/api/candidates`, `/api/companies`, `/api/agenda`, `/api/sync`, `/api/stats`).
-- **Base de Datos:** Persistencia dual mediante archivo `database.json` en backend y sincronización con `LocalStorage` en el navegador.
-- **Google Sign-In:** Integración estilizada del botón oficial de Google Identity con modal de selección de cuentas institucionales (`@alumnos.uat.edu.mx` y personales `@gmail.com`).
-
----
-
-## 👥 Perfiles y Roles del Sistema
-
-### 1. 🎓 Perfil "Candidato"
-Cuenta con un formulario completo de **7 secciones obligatorias**:
-1. **Encabezado y objetivos:** Puesto solicitado, sueldo mensual deseado y fecha de entrega.
-2. **Datos personales y de contacto:** Nombre completo (según INE), edad, fecha de nacimiento, dirección completa en Cd. Mante, teléfonos celular y de recados, correo profesional y fotografía.
-3. **Documentación oficial:** CURP, RFC, NSS del IMSS y Folio del INE.
-4. **Escolaridad:** Nivel máximo alcanzado, institución educativa, períodos cursados y estatus de titulación.
-5. **Experiencia laboral:** Nombre de empresa, puesto, periodo laborado, principales logros y referencias de jefes anteriores.
-6. **Conocimientos y habilidades:** Idiomas y nivel, software y herramientas tecnológicas o de oficina.
-7. **Referencias personales:** Nombres, teléfonos y relación no familiar.
-
-*Funcionalidades adicionales:*
-- Postulación con 1 clic a vacantes de empleo.
-- Visualización y generación de CV oficial para imprimir o guardar en PDF.
-- Consulta de citas y entrevistas programadas en la Agenda Virtual.
+### 1. Pantalla Inicial (Home / Presentación)
+- **Logotipo e Identidad:** Marca oficial de OFIMANTE con los colores azul oscuro y verde médico-creativo.
+- **Información de la Plataforma:** Explicación de la misión de vincular a personas desempleadas con fuentes de trabajo en El Mante.
+- **Botón de Acción:** Acceso directo a **"Iniciar Sesión o Registrarse"** (lleva a la Segunda Pantalla).
+- **Galería de Ciudad Mante:** Fotografías representativas del *Cerro del Bernal*, *El Nacimiento*, *Cañón de la Servilleta* y la *Plaza Principal*.
 
 ---
 
-### 2. 🏢 Perfil "Empresa"
-Cuenta con el registro estructurado en **3 secciones oficiales**:
-1. **Identificación legal y fiscal:** Razón social, nombre comercial, RFC, actividad económica/giro y representante legal.
-2. **Contacto y localización:** Dirección fiscal en El Mante, teléfonos, correos corporativos, web y redes sociales.
-3. **Datos operacionales y firmográficos:** Tamaño/empleados, datos bancarios para facturación y tecnologías que utiliza.
-
-*Funcionalidades adicionales:*
-- Publicar ofertas laborales (quedan en revisión por el Administrador).
-- Ver candidatos postulados con acceso a su expediente curricular.
-- Agendar entrevistas en la Agenda Virtual con fecha, hora y modalidad (presencial en Mante o por Google Meet).
-
----
-
-### 3. 🛡️ Perfil "Administrador"
-- **Gestión de Vacantes:** Revisión de solicitudes pendientes, aprobación con 1 clic, modificación de campos y eliminación.
-- **Gestión de Candidatos:** Visualización de aspirantes, suspensión/baneo y baja del sistema.
-- **Gestión de Empresas:** Moderación de empresas, control de estados (Activa / Suspendida) y eliminación.
-- **Métricas del Sistema (KPIs):** Conteo de vacantes activas, pendientes, candidatos y empresas registradas.
+### 2. Segunda Pantalla (Registro / Inicio de Sesión)
+- **Selector de Rol Obligatorio:**
+  - 🎓 **Candidato:** Busca empleo.
+  - 🏢 **Empresa / Local:** Ofrece empleo.
+  - 🛡️ **Administrador:** Control y moderación de la página.
+- **Inicio de Sesión con Google:** Botón oficial para ingresar con cuentas institucionales o de Google.
+- **Pestañas de Formulario:** Iniciar sesión con credenciales o crear una cuenta nueva.
+- **Redirección Automática:**
+  - Si ingresas como Candidato -> Redirige a la **Pantalla 3**.
+  - Si ingresas como Empresa -> Redirige a la **Pantalla 4**.
+  - Si ingresas como Administrador -> Redirige a la **Pantalla 5**.
 
 ---
 
-### 4. 📅 Agenda Virtual Interactiva de Programación
-- Organización visual de entrevistas laborales, entregas de solicitud y sesiones de asesoría en programación para estudiantes.
-- Filtro por tipo de cita y estado (Programada, Confirmada, Concluida).
-- Creación rápida de nuevas citas con fecha, hora, modalidad y enlace de videoconferencia.
+### 3. Tercera Pantalla (Candidato & CV & Vacantes)
+- **Elaboración de Currículum Vitae (CV):** Datos personales completos, puesto solicitado, edad, teléfonos, correo, dirección en Ciudad Mante, escolaridad, experiencia y fotografía personal.
+- **Flujo de Aprobación por Administrador:**
+  - Al enviar los datos, se muestra el aviso: **"⏳ En espera de validación por el Administrador"**.
+  - Una vez que el Administrador acepta sus datos en la Pantalla 5, se desbloquea la sección de **Empleos Disponibles**.
+- **Postulación a Empleos:** Lista de vacantes verificadas en Ciudad Mante con botón **"📨 Mandar mi CV"** en 1 clic.
 
 ---
 
-## 📍 Identidad Cultural de Ciudad Mante
-
-La aplicación resalta el orgullo regional mantense a través de una galería interactiva con monumentos y parajes emblemáticos:
-- **El Cerro del Bernal de Horcasitas:** Símbolo natural y guardián de la región.
-- **El Nacimiento del Río Mante:** Aguas turquesas y manantial subterráneo de la Sierra de Cucharas.
-- **El Cañón de la Servilleta:** Belleza ecológica sobre el Río Boquillas.
-- **Plaza Principal y Centro Histórico:** Corazón cívico y comercial de El Mante.
+### 4. Cuarta Pantalla (Empresa & Tarifa $100 & Solicitudes)
+- **Registro de la Empresa:** Razón social, nombre comercial, RFC, giro, dirección en El Mante y contacto.
+- **Flujo de Aprobación por Administrador:**
+  - Tras registrar los datos, se muestra el estado: **"⏳ Empresa en proceso de aprobación por el Administrador"**.
+- **Opciones de la Empresa Aprobada:**
+  1. **➕ Agregar una Vacante de Empleo:**
+     - Anuncio exacto de las necesidades de la empresa.
+     - Sueldo ofrecido y **Beneficios** (prestaciones de ley, bonos, etc.).
+     - **Tarifa de Servicio Obligatoria:** Cobro de **$100 pesos** por cada vacante publicada.
+  2. **📋 Ver las Solicitudes de los Candidatos:**
+     - Lista completa clasificada exactamente por **día y hora** de la solicitud.
+     - Botones de acción: **✓ Aceptar** o **✕ Rechazar**.
+     - Al presionar **Aceptar**, se despliega el modal con los datos de contacto del candidato (teléfono, correo y dirección) para llamarlo o citarlo.
 
 ---
 
-## 📁 Estructura del Código
+### 5. Quinta Pantalla (Administrador & Control Total)
+Panel de control con las funciones clave solicitadas:
+- **Aceptar Candidatos:** Validación y activación de los datos de los candidatos para permitirles ver vacantes.
+- **Aceptar Empresas:** Autorización de empresas para publicar ofertas y revisar aspirantes.
+- **Aceptar Solicitudes de Vacantes:** Aprobación de vacantes creadas con tarifa de $100 antes de salir a la bolsa de trabajo.
+- **Modificar Vacantes:** Edición de sueldos, puestos, requisitos y beneficios.
+- **Eliminar Vacantes:** Baja definitiva de ofertas vencidas o inapropiadas.
+- **Banear / Suspender Usuarios:** Bloqueo de acceso a candidatos o empresas infractoras.
+- **Eliminar Usuarios:** Eliminación completa de registros del sistema.
+
+---
+
+## 📁 Archivos del Proyecto
 
 ```text
 OFIMANTE/
-├── index.html       # Estructura semántica de todas las vistas (SPA)
-├── style.css        # Hoja de estilos con paleta azul oscuro, cian y diseño responsivo
-├── script.js        # Lógica didáctica de frontend, roles, filtros y agenda
-├── server.js        # Servidor backend REST en Node.js (cero dependencias externas)
-├── database.json    # Base de datos persistente inicial con datos semilla de Cd. Mante
-├── logo.png         # Logotipo oficial de OFIMANTE proporcionado
-└── README.md        # Documentación técnica del proyecto
+├── index.html       # Estructura semántica de las 5 Pantallas (SPA)
+├── style.css        # Hoja de estilos (azul oscuro, grandes botones, responsivo)
+├── script.js        # Lógica frontend explicada y modular (roles, $100 pesos, aprobación)
+├── OFIMANTE.js      # Réplica sincronizada para compatibilidad
+├── api.php          # Backend REST en PHP
+├── db.php           # Conexión y gestión de base de datos en PHP
+├── server.js        # Backend alternativo en Node.js
+├── database.json    # Base de datos persistente inicial
+├── logo.png         # Logotipo oficial de OFIMANTE
+└── README.md        # Documentación oficial
 ```
 
 ---
-*OFIMANTE © 2026 • Vinculación Académica y Laboral de Ciudad Mante, Tamaulipas.*
-
+*OFIMANTE © 2026 • Vinculación Laboral y Desarrollo Productivo en Ciudad Mante, Tamaulipas.*

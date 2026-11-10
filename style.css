@@ -1,18 +1,17 @@
 /* ==============================================================================
    OFIMANTE - ESTILOS VISUALES
-   Estilo: Médico-Tecnológico, Creativo, Profesional y Responsivo
-   Colores Clave: Azul Oscuro (#08172c, #0b1e36, #162f52), Cyan Médico (#06b6d4), 
-                  Menta (#10b981) y Acento Eléctrico (#0284c7)
+   Diseño: Médico-Tecnológico, Creativo, Profesional y Responsivo
+   Colores: Azul Oscuro (#071324, #0b1e36, #102a4c), Cian (#06b6d4), Verde Menta (#10b981)
    ============================================================================== */
 
 :root {
-    /* Paleta Principal: Azul Oscuro Dominante & Toques Clínico-Creativos */
+    /* Paleta Principal: Azul Oscuro Dominante & Acentos del Logotipo */
     --navy-deep: #071324;
     --navy-dark: #0b1e36;
     --navy-surface: #102a4c;
     --navy-border: #1e3a63;
     
-    /* Acentos Clínicos y Creativos del Logo */
+    /* Acentos Clínico-Creativos del Logo */
     --cyan-med: #06b6d4;
     --cyan-light: #67e8f9;
     --cyan-glow: rgba(6, 182, 212, 0.25);
@@ -36,9 +35,8 @@
     --shadow-sm: 0 1px 3px rgba(11, 30, 54, 0.08);
     --shadow-md: 0 4px 12px rgba(11, 30, 54, 0.08), 0 2px 4px rgba(11, 30, 54, 0.04);
     --shadow-lg: 0 10px 25px -5px rgba(11, 30, 54, 0.12), 0 8px 10px -6px rgba(11, 30, 54, 0.06);
-    --shadow-glow: 0 0 20px rgba(6, 182, 212, 0.35);
 
-    /* Transiciones y Radios */
+    /* Radios y Transiciones */
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 18px;
@@ -70,7 +68,7 @@ h1, h2, h3, h4, .brand-title {
 }
 
 /* ==============================================================================
-   1. BARRA SUPERIOR Y NAVEGACIÓN (HEADER)
+   1. BARRA SUPERIOR (NAVBAR)
    ============================================================================== */
 .navbar {
     background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy-dark) 55%, var(--navy-surface) 100%);
@@ -138,59 +136,11 @@ h1, h2, h3, h4, .brand-title {
     font-weight: 500;
 }
 
-/* Selector Rápido de Roles (Pill) */
-.role-selector-pill {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    background: rgba(16, 42, 76, 0.8);
-    padding: 0.35rem 0.6rem;
-    border-radius: var(--radius-full);
-    border: 1px solid var(--navy-border);
-}
-
-.role-label {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding-left: 0.4rem;
-}
-
-.role-buttons {
-    display: flex;
-    gap: 0.3rem;
-}
-
-.role-btn {
-    background: transparent;
-    border: none;
-    color: #cbd5e1;
-    padding: 0.4rem 0.85rem;
-    border-radius: var(--radius-full);
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.role-btn:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.role-btn.active {
-    background: linear-gradient(135deg, var(--cyan-med) 0%, var(--blue-vivid) 100%);
-    color: #ffffff;
-    box-shadow: 0 2px 8px rgba(6, 182, 212, 0.4);
-}
-
-/* Menú de Navegación */
 .nav-links {
     display: flex;
     gap: 0.4rem;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .nav-btn {
@@ -199,7 +149,7 @@ h1, h2, h3, h4, .brand-title {
     color: #e2e8f0;
     padding: 0.55rem 0.95rem;
     border-radius: var(--radius-sm);
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
@@ -211,12 +161,11 @@ h1, h2, h3, h4, .brand-title {
 }
 
 .nav-btn.active {
-    background: rgba(6, 182, 212, 0.18);
+    background: rgba(6, 182, 212, 0.2);
     border-color: var(--cyan-med);
     color: var(--cyan-light);
 }
 
-/* Área de Autenticación & Botón Google */
 .user-auth-area {
     display: flex;
     align-items: center;
@@ -304,7 +253,7 @@ h1, h2, h3, h4, .brand-title {
 
 /* Barra de sincronización */
 .sync-banner {
-    background: linear-gradient(90deg, #0f2b4c, #07172b);
+    background: linear-gradient(90deg, #093322, #07172b);
     color: #cbd5e1;
     font-size: 0.78rem;
     padding: 0.35rem 1rem;
@@ -330,7 +279,7 @@ h1, h2, h3, h4, .brand-title {
 }
 
 /* ==============================================================================
-   2. ESTRUCTURA DE VISTAS (SPA)
+   2. ESTRUCTURA DE LAS 5 PANTALLAS
    ============================================================================== */
 .main-content {
     max-width: 1350px;
@@ -340,12 +289,12 @@ h1, h2, h3, h4, .brand-title {
     flex: 1;
 }
 
-.app-view {
+.screen-view {
     display: none;
     animation: fadeIn 0.3s ease-out;
 }
 
-.app-view.active {
+.screen-view.active {
     display: block;
 }
 
@@ -355,9 +304,9 @@ h1, h2, h3, h4, .brand-title {
 }
 
 /* ==============================================================================
-   3. BOTONES GRANDES & ESTILOS ACCIONABLES (REQUISITO: "GRANDES BOTONES")
+   3. BOTONES GRANDES & ESTILOS DE ACCIÓN (REQUISITO: "GRANDES BOTONES")
    ============================================================================== */
-.btn-primary-large, .btn-primary-huge, .btn-action-primary {
+.btn-primary-large, .btn-primary-huge {
     background: linear-gradient(135deg, var(--navy-dark) 0%, var(--blue-royal) 100%);
     color: #ffffff;
     border: none;
@@ -383,7 +332,7 @@ h1, h2, h3, h4, .brand-title {
     letter-spacing: 0.2px;
 }
 
-.btn-primary-large:hover, .btn-primary-huge:hover, .btn-action-primary:hover {
+.btn-primary-large:hover, .btn-primary-huge:hover {
     background: linear-gradient(135deg, #0e294d 0%, #1d4ed8 100%);
     box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
     transform: translateY(-2px);
@@ -393,7 +342,7 @@ h1, h2, h3, h4, .brand-title {
     background: linear-gradient(135deg, #0891b2 0%, var(--mint-green) 100%);
     color: #ffffff;
     border: none;
-    padding: 1rem 1.8rem;
+    padding: 1.15rem 2rem;
     border-radius: var(--radius-md);
     font-size: 1.05rem;
     font-weight: 700;
@@ -407,11 +356,13 @@ h1, h2, h3, h4, .brand-title {
     transform: translateY(-2px);
 }
 
-.btn-secondary-large, .btn-secondary-huge {
+.btn-secondary-large {
     background: #e2e8f0;
     color: var(--navy-dark);
     border: none;
     border-radius: var(--radius-md);
+    padding: 0.85rem 1.6rem;
+    font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
     display: inline-flex;
@@ -421,69 +372,17 @@ h1, h2, h3, h4, .brand-title {
     transition: var(--transition);
 }
 
-.btn-secondary-large {
-    padding: 0.85rem 1.6rem;
-    font-size: 0.95rem;
-}
-
-.btn-secondary-huge {
-    padding: 1.15rem 2rem;
-    font-size: 1.1rem;
-}
-
-.btn-secondary-large:hover, .btn-secondary-huge:hover {
+.btn-secondary-large:hover {
     background: #cbd5e1;
     transform: translateY(-2px);
 }
 
-.btn-action-google {
-    background: #ffffff;
-    color: #1f2937;
-    border: 1px solid #cbd5e1;
-    padding: 0.95rem 1.8rem;
-    border-radius: var(--radius-md);
-    font-size: 1rem;
-    font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    cursor: pointer;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-.btn-action-google:hover {
-    background: #f8fafc;
-    border-color: #94a3b8;
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-}
-
-.btn-apply-job {
-    background: linear-gradient(135deg, var(--blue-royal) 0%, var(--cyan-med) 100%);
-    color: white;
-    border: none;
-    padding: 0.75rem 1.4rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: var(--transition);
-    box-shadow: 0 3px 10px rgba(6, 182, 212, 0.3);
-}
-
-.btn-apply-job:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(6, 182, 212, 0.45);
-}
-
-.btn-apply-job.applied {
-    background: #10b981;
-    cursor: default;
+.full-width {
+    width: 100%;
 }
 
 /* ==============================================================================
-   4. HERO PRINCIPAL & PANTALLA INICIAL (LANDING)
+   4. PANTALLA 1 (INICIAL / LANDING)
    ============================================================================== */
 .hero-section {
     background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy-dark) 50%, #0d2847 100%);
@@ -497,19 +396,6 @@ h1, h2, h3, h4, .brand-title {
     gap: 2.5rem;
     align-items: center;
     margin-bottom: 3rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.hero-section::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
-    pointer-events: none;
 }
 
 .hero-badge {
@@ -588,7 +474,6 @@ h1, h2, h3, h4, .brand-title {
     font-weight: 500;
 }
 
-/* Tarjeta de Identidad Visual del Hero con el Logo */
 .hero-brand-card {
     background: rgba(16, 42, 76, 0.65);
     backdrop-filter: blur(12px);
@@ -617,11 +502,6 @@ h1, h2, h3, h4, .brand-title {
     transition: var(--transition);
 }
 
-.logo-circle-container:hover {
-    transform: scale(1.04) rotate(1deg);
-    box-shadow: 0 0 40px rgba(6, 182, 212, 0.6);
-}
-
 .hero-logo-img {
     width: 100%;
     height: 100%;
@@ -646,9 +526,7 @@ h1, h2, h3, h4, .brand-title {
     line-height: 1.6;
 }
 
-/* ==============================================================================
-   5. GALERÍA DE IMÁGENES DE CIUDAD MANTE (REQUISITO OBLIGATORIO)
-   ============================================================================== */
+/* Galería de Ciudad Mante */
 .mante-gallery-section {
     margin-bottom: 3.5rem;
 }
@@ -755,94 +633,204 @@ h1, h2, h3, h4, .brand-title {
 }
 
 /* ==============================================================================
-   6. SECCIÓN GUÍA DE ROLES
+   5. PANTALLA 2 (REGISTRO & LOGIN CON ROLES Y GOOGLE)
    ============================================================================== */
-.roles-guide-section {
-    margin-bottom: 3.5rem;
+.auth-page-container {
+    max-width: 650px;
+    margin: 2rem auto;
 }
 
-.roles-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1.8rem;
-}
-
-.role-feature-card {
+.auth-card-main {
     background: var(--card-bg);
     border-radius: var(--radius-lg);
-    padding: 2.2rem;
-    box-shadow: var(--shadow-md);
-    border: 1px solid var(--card-border);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: var(--transition);
-}
-
-.role-feature-card:hover {
-    transform: translateY(-4px);
+    padding: 2.8rem 2.4rem;
     box-shadow: var(--shadow-lg);
+    border: 1px solid var(--card-border);
 }
 
-.role-feature-card.featured-role {
-    border: 2px solid var(--cyan-med);
-    background: linear-gradient(180deg, #ffffff 0%, #f0fdfa 100%);
-}
-
-.role-card-icon {
-    font-size: 2.5rem;
+.auth-brand-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
     margin-bottom: 1rem;
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
 }
 
-.role-feature-card h3 {
-    font-size: 1.35rem;
-    margin-bottom: 1rem;
-    color: var(--navy-dark);
-}
-
-.role-features-list {
-    list-style: none;
+.auth-sub {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-top: 0.3rem;
     margin-bottom: 1.8rem;
 }
 
-.role-features-list li {
-    font-size: 0.93rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.6rem;
-}
-
-.btn-card-role {
-    width: 100%;
-    padding: 0.85rem;
-    background: #f1f5f9;
-    color: var(--navy-dark);
-    border: 1px solid #cbd5e1;
-    border-radius: var(--radius-sm);
+.block-label {
+    display: block;
     font-weight: 700;
-    cursor: pointer;
-    transition: var(--transition);
+    color: var(--navy-dark);
+    margin-bottom: 0.8rem;
     font-size: 0.95rem;
 }
 
-.btn-card-role:hover {
-    background: var(--navy-dark);
-    color: #ffffff;
-    border-color: var(--navy-dark);
+.role-selector-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+    margin-bottom: 1.8rem;
 }
 
-.btn-card-role.btn-role-primary {
-    background: linear-gradient(135deg, var(--navy-dark) 0%, var(--blue-royal) 100%);
-    color: #ffffff;
+.role-opt-card {
+    background: #f8fafc;
+    border: 2px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: 1rem 0.6rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.role-opt-card:hover {
+    border-color: var(--cyan-med);
+    background: #f0fdfa;
+}
+
+.role-opt-card.active {
+    border-color: var(--blue-royal);
+    background: #eff6ff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.role-opt-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.2rem;
+}
+
+.role-opt-card strong {
+    font-size: 0.95rem;
+    color: var(--navy-dark);
+}
+
+.role-opt-card small {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.btn-google-official {
+    width: 100%;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: var(--radius-full);
+    padding: 0.95rem 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: var(--transition);
+}
+
+.btn-google-official:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.8rem 0;
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.auth-divider::before, .auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.auth-divider span {
+    padding: 0 0.8rem;
+}
+
+.auth-tabs {
+    display: flex;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 1.5rem;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    background: transparent;
     border: none;
+    padding: 0.85rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
 }
 
-.btn-card-role.btn-role-primary:hover {
-    background: linear-gradient(135deg, #0e294d 0%, #1d4ed8 100%);
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+.auth-tab-btn.active {
+    color: var(--blue-royal);
+    border-bottom: 3px solid var(--blue-royal);
+    margin-bottom: -2px;
+}
+
+.demo-quick-box {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: var(--radius-md);
+    padding: 1rem;
+}
+
+.demo-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--navy-dark);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.demo-pills {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.demo-btn {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-full);
+    padding: 0.4rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.demo-btn:hover {
+    background: #f1f5f9;
+    border-color: var(--blue-royal);
+    color: var(--blue-royal);
+}
+
+.demo-btn.admin:hover {
+    border-color: var(--warning);
+    color: var(--warning);
 }
 
 /* ==============================================================================
-   7. VISTA: BOLSA DE EMPLEOS (SEARCH, FILTERS & CARDS)
+   6. PANTALLA 3, 4 Y 5 (ESTILOS GENERALES, CARDS Y FORMULARIOS)
    ============================================================================== */
 .view-header {
     display: flex;
@@ -850,7 +838,7 @@ h1, h2, h3, h4, .brand-title {
     align-items: center;
     flex-wrap: wrap;
     gap: 1.2rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.8rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #e2e8f0;
 }
@@ -866,288 +854,57 @@ h1, h2, h3, h4, .brand-title {
     margin-top: 0.2rem;
 }
 
-.search-filter-panel {
-    background: var(--card-bg);
-    padding: 1.6rem;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--card-border);
-    margin-bottom: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-}
-
-.search-input-wrapper {
-    position: relative;
-    width: 100%;
-}
-
-.search-icon {
-    position: absolute;
-    left: 1.2rem;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1.1rem;
-}
-
-.search-input-wrapper input {
-    width: 100%;
-    padding: 1rem 1rem 1rem 3.2rem;
-    border: 2px solid var(--card-border);
-    border-radius: var(--radius-md);
-    font-size: 1.05rem;
-    outline: none;
-    transition: var(--transition);
-    background-color: #f8fafc;
-}
-
-.search-input-wrapper input:focus {
-    border-color: var(--cyan-med);
-    background-color: #ffffff;
-    box-shadow: 0 0 0 4px var(--cyan-glow);
-}
-
-.filter-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.9rem;
-    align-items: center;
-}
-
-.filter-select {
-    flex: 1;
-    min-width: 180px;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-sm);
-    font-size: 0.9rem;
-    color: var(--text-primary);
-    background: #ffffff;
-    outline: none;
-    transition: var(--transition);
-}
-
-.filter-select:focus {
-    border-color: var(--blue-royal);
-}
-
-.btn-clean-filters {
-    padding: 0.75rem 1.4rem;
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 0.88rem;
-    transition: var(--transition);
-}
-
-.btn-clean-filters:hover {
-    background: #e2e8f0;
-}
-
-.results-counter-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.92rem;
-    color: var(--text-secondary);
-    margin-bottom: 1.2rem;
-    font-weight: 600;
-}
-
-.location-badge {
-    background: #e0f2fe;
-    color: var(--blue-royal);
-    padding: 0.25rem 0.7rem;
+.status-pill {
+    padding: 0.45rem 1rem;
     border-radius: var(--radius-full);
-    font-size: 0.8rem;
-}
-
-/* Tarjetas de Vacantes */
-.jobs-responsive-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-    gap: 1.6rem;
-}
-
-.job-card-item {
-    background: var(--card-bg);
-    border-radius: var(--radius-md);
-    padding: 1.8rem;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--card-border);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: var(--transition);
-    position: relative;
-}
-
-.job-card-item:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
-    border-color: #93c5fd;
-}
-
-.job-card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 0.6rem;
-    margin-bottom: 0.5rem;
-}
-
-.job-card-title {
-    font-size: 1.25rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    color: var(--navy-dark);
-    line-height: 1.3;
-}
-
-.job-status-pill {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    padding: 0.25rem 0.65rem;
-    border-radius: var(--radius-full);
     white-space: nowrap;
 }
 
-.job-status-pill.aprobada {
-    background: #dcfce7;
-    color: #15803d;
-}
-
-.job-status-pill.pendiente {
+.status-pill.warning {
     background: #fef3c7;
-    color: #b45309;
+    color: #92400e;
+    border: 1px solid #fde68a;
 }
 
-.job-company-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin-bottom: 0.8rem;
+.status-pill.success {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
 }
 
-.job-meta-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-    margin-bottom: 1.1rem;
+.status-pill.danger {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
 }
 
-.meta-tag {
-    background: #f1f5f9;
-    color: #334155;
-    font-size: 0.78rem;
-    padding: 0.25rem 0.65rem;
-    border-radius: var(--radius-sm);
-    font-weight: 500;
-}
-
-.meta-tag.salary {
-    background: #ecfdf5;
-    color: #065f46;
-    font-weight: 700;
-}
-
-.meta-tag.location {
-    background: #eff6ff;
-    color: #1e40af;
-}
-
-.job-card-body {
-    font-size: 0.92rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: 1.4rem;
-    flex: 1;
-}
-
-.job-card-bottom {
-    border-top: 1px solid #f1f5f9;
-    padding-top: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.8rem;
-}
-
-.job-contact-info {
-    font-size: 0.82rem;
-    color: var(--text-muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* ==============================================================================
-   8. FORMULARIOS DE REGISTRO & EXPEDIENTES (CANDIDATO & EMPRESA)
-   ============================================================================== */
-.expediente-form {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
-
-.form-card-section {
+.card-box {
     background: var(--card-bg);
     border-radius: var(--radius-lg);
     padding: 2.2rem;
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--card-border);
-    transition: var(--transition);
 }
 
-.form-card-section:hover {
-    box-shadow: var(--shadow-md);
-}
-
-.section-badge-header {
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-    margin-bottom: 1.8rem;
+.card-box-header {
+    margin-bottom: 1.5rem;
     border-bottom: 1px solid #f1f5f9;
-    padding-bottom: 1.2rem;
+    padding-bottom: 1rem;
 }
 
-.badge-number {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--navy-dark) 0%, var(--blue-royal) 100%);
-    color: #ffffff;
-    font-size: 1.3rem;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
-}
-
-.section-badge-header h3 {
+.card-box-header h3 {
     font-size: 1.35rem;
     color: var(--navy-dark);
 }
 
-.section-desc {
-    font-size: 0.88rem;
+.card-box-header p {
+    font-size: 0.9rem;
     color: var(--text-muted);
 }
 
-.form-grid-1 {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.2rem;
-}
-
+/* Grids de formulario */
 .form-grid-2 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -1194,104 +951,152 @@ h1, h2, h3, h4, .brand-title {
     box-shadow: 0 0 0 3px var(--cyan-glow);
 }
 
-.form-big-actions {
+.form-actions {
     display: flex;
-    gap: 1.2rem;
-    justify-content: center;
+    gap: 1rem;
     flex-wrap: wrap;
-    margin-top: 1.5rem;
 }
 
-/* ==============================================================================
-   9. PANEL ADMINISTRADOR & TABLAS DE GESTIÓN
-   ============================================================================== */
-.admin-badge-indicator {
-    background: #fef3c7;
-    color: #92400e;
-    font-size: 0.85rem;
-    font-weight: 700;
-    padding: 0.45rem 1rem;
-    border-radius: var(--radius-full);
-    border: 1px solid #fde68a;
-}
+.mt-3 { margin-top: 1.2rem; }
+.mt-4 { margin-top: 2rem; }
 
-.kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.4rem;
-    margin-bottom: 2rem;
-}
-
-.kpi-card {
-    background: var(--card-bg);
-    border-radius: var(--radius-md);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--card-border);
+/* Banners de estado y alertas */
+.alert-banner {
     display: flex;
     align-items: center;
     gap: 1.2rem;
-    transition: var(--transition);
-}
-
-.kpi-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.kpi-icon {
-    font-size: 2.2rem;
-    padding: 0.8rem;
-    background: #eff6ff;
+    padding: 1.5rem 1.8rem;
     border-radius: var(--radius-md);
 }
 
-.kpi-value {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--navy-dark);
-    font-family: 'Outfit', sans-serif;
+.alert-banner.warning {
+    background: #fffbeb;
+    border: 2px solid #fde68a;
+    color: #92400e;
+}
+
+.alert-banner.success {
+    background: #f0fdf4;
+    border: 2px solid #bbf7d0;
+    color: #166534;
+}
+
+.alert-icon {
+    font-size: 2.2rem;
+}
+
+.alert-banner h4 {
+    color: inherit;
+    font-size: 1.15rem;
+    margin-bottom: 0.3rem;
+}
+
+.alert-banner p {
+    font-size: 0.93rem;
+    line-height: 1.5;
+}
+
+.alert-banner small {
     display: block;
-    line-height: 1.1;
+    margin-top: 0.5rem;
+    font-style: italic;
+    opacity: 0.9;
 }
 
-.kpi-label {
-    font-size: 0.82rem;
-    color: var(--text-muted);
-    font-weight: 600;
+/* ==============================================================================
+   7. PANTALLA 4: TARIFA DE SERVICIO $100 PESOS Y SUBNAV DE EMPRESA
+   ============================================================================== */
+.company-subnav {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
 }
 
-.kpi-warning .kpi-icon { background: #fef3c7; }
-.kpi-success .kpi-icon { background: #dcfce7; }
-.kpi-info .kpi-icon { background: #e0f2fe; }
-
-.card-box {
-    background: var(--card-bg);
-    border-radius: var(--radius-lg);
-    padding: 2rem;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--card-border);
-}
-
-.card-box-header {
-    margin-bottom: 1.5rem;
-}
-
-.card-box-header h3 {
-    font-size: 1.35rem;
+.company-tab-btn {
+    flex: 1;
+    padding: 1rem 1.4rem;
+    background: #ffffff;
+    border: 2px solid var(--card-border);
+    border-radius: var(--radius-md);
+    font-size: 1.05rem;
+    font-weight: 700;
     color: var(--navy-dark);
+    cursor: pointer;
+    transition: var(--transition);
 }
 
-.card-box-header p {
-    font-size: 0.9rem;
-    color: var(--text-muted);
+.company-tab-btn:hover {
+    border-color: var(--cyan-med);
+    background: #f0fdfa;
 }
 
-.mt-4 { margin-top: 2rem; }
-.mt-3 { margin-top: 1.2rem; }
-.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.company-tab-btn.active {
+    background: linear-gradient(135deg, var(--navy-dark) 0%, var(--blue-royal) 100%);
+    color: #ffffff;
+    border-color: var(--blue-royal);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
 
-/* Tablas Responsivas */
+/* Cuadro destacado de tarifa de $100 pesos */
+.fee-card-highlight {
+    background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%);
+    border: 2px solid #38bdf8;
+    border-radius: var(--radius-md);
+    padding: 1.2rem 1.6rem;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.fee-icon {
+    font-size: 2.2rem;
+}
+
+.fee-info {
+    flex: 1;
+}
+
+.fee-info strong {
+    font-size: 1.1rem;
+    color: var(--navy-dark);
+    display: block;
+}
+
+.fee-info p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+}
+
+.fee-badge {
+    background: #0284c7;
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 800;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+}
+
+.fee-payment-box {
+    background: #f8fafc;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.93rem;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+/* ==============================================================================
+   8. TABLAS DE ADMINISTRADOR Y SOLICITUDES CRONOLÓGICAS
+   ============================================================================== */
 .table-responsive {
     overflow-x: auto;
     border-radius: var(--radius-sm);
@@ -1324,7 +1129,15 @@ h1, h2, h3, h4, .brand-title {
     background: #f8fafc;
 }
 
-/* Botones de acción en tablas */
+.time-badge {
+    background: #f1f5f9;
+    color: var(--navy-dark);
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 0.82rem;
+}
+
 .action-btn-group {
     display: flex;
     gap: 0.4rem;
@@ -1333,10 +1146,10 @@ h1, h2, h3, h4, .brand-title {
 
 .btn-table-action {
     border: none;
-    padding: 0.4rem 0.8rem;
+    padding: 0.45rem 0.85rem;
     border-radius: var(--radius-sm);
     font-size: 0.82rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: var(--transition);
 }
@@ -1347,6 +1160,12 @@ h1, h2, h3, h4, .brand-title {
 }
 .btn-table-approve:hover { background: #059669; }
 
+.btn-table-reject {
+    background: #ef4444;
+    color: white;
+}
+.btn-table-reject:hover { background: #dc2626; }
+
 .btn-table-edit {
     background: #0284c7;
     color: white;
@@ -1354,10 +1173,10 @@ h1, h2, h3, h4, .brand-title {
 .btn-table-edit:hover { background: #0369a1; }
 
 .btn-table-delete {
-    background: #ef4444;
+    background: #475569;
     color: white;
 }
-.btn-table-delete:hover { background: #dc2626; }
+.btn-table-delete:hover { background: #334155; }
 
 .btn-table-ban {
     background: #f59e0b;
@@ -1365,107 +1184,120 @@ h1, h2, h3, h4, .brand-title {
 }
 .btn-table-ban:hover { background: #d97706; }
 
-.btn-table-view {
-    background: #64748b;
-    color: white;
-}
-.btn-table-view:hover { background: #475569; }
-
-/* ==============================================================================
-   10. AGENDA VIRTUAL INTERACTIVA (TIMELINE & EVENTOS)
-   ============================================================================== */
-.agenda-timeline-grid {
+/* Grid de vacantes */
+.jobs-responsive-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
+    gap: 1.6rem;
 }
 
-.agenda-card {
+.job-card-item {
     background: var(--card-bg);
     border-radius: var(--radius-md);
-    padding: 1.6rem;
+    padding: 1.8rem;
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--card-border);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     transition: var(--transition);
-    border-left: 5px solid var(--cyan-med);
 }
 
-.agenda-card:hover {
-    transform: translateY(-3px);
+.job-card-item:hover {
+    transform: translateY(-4px);
     box-shadow: var(--shadow-md);
+    border-color: #93c5fd;
 }
 
-.agenda-card.confirmada { border-left-color: var(--mint-green); }
-.agenda-card.programada { border-left-color: var(--blue-royal); }
-.agenda-card.concluida { border-left-color: #64748b; }
-
-.agenda-card-top {
+.job-card-top {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 0.8rem;
-}
-
-.agenda-type-badge {
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.25rem 0.65rem;
-    border-radius: var(--radius-full);
-    background: #e0f2fe;
-    color: var(--blue-royal);
-}
-
-.agenda-status-badge {
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.25rem 0.65rem;
-    border-radius: var(--radius-full);
-}
-
-.agenda-status-badge.confirmada { background: #dcfce7; color: #166534; }
-.agenda-status-badge.programada { background: #eff6ff; color: #1e40af; }
-.agenda-status-badge.concluida { background: #f1f5f9; color: #475569; }
-
-.agenda-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--navy-dark);
+    gap: 0.6rem;
     margin-bottom: 0.5rem;
 }
 
-.agenda-datetime-box {
+.job-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--navy-dark);
+}
+
+.job-benefits-box {
+    background: #f0fdf4;
+    border-left: 3px solid var(--mint-green);
+    padding: 0.5rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #166534;
+    margin-top: 0.6rem;
+    margin-bottom: 0.8rem;
+}
+
+.btn-apply-job {
+    background: linear-gradient(135deg, var(--blue-royal) 0%, var(--cyan-med) 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.4rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-apply-job:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.45);
+}
+
+/* KPIs Administrador */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.4rem;
+    margin-bottom: 2rem;
+}
+
+.kpi-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--card-border);
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    background: #f8fafc;
-    padding: 0.5rem 0.8rem;
-    border-radius: var(--radius-sm);
-    margin-bottom: 0.9rem;
-    font-size: 0.88rem;
+    gap: 1.2rem;
+}
+
+.kpi-icon {
+    font-size: 2.2rem;
+    padding: 0.8rem;
+    background: #eff6ff;
+    border-radius: var(--radius-md);
+}
+
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 800;
     color: var(--navy-dark);
+    font-family: 'Outfit', sans-serif;
+    display: block;
+    line-height: 1.1;
+}
+
+.kpi-label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
     font-weight: 600;
 }
 
-.agenda-details {
-    font-size: 0.88rem;
-    color: var(--text-secondary);
-    margin-bottom: 1.2rem;
-    line-height: 1.5;
-}
-
-.agenda-actions {
-    display: flex;
-    gap: 0.5rem;
-    border-top: 1px solid #f1f5f9;
-    padding-top: 0.8rem;
-}
+.kpi-warning .kpi-icon { background: #fef3c7; }
+.kpi-success .kpi-icon { background: #dcfce7; }
+.kpi-info .kpi-icon { background: #e0f2fe; }
 
 /* ==============================================================================
-   11. MODALES FLOTANTES & VISTA DE AUTENTICACIÓN GOOGLE
+   9. MODALES FLOTANTES
    ============================================================================== */
 .modal-overlay {
     position: fixed;
@@ -1496,10 +1328,6 @@ h1, h2, h3, h4, .brand-title {
     border: 1px solid var(--card-border);
 }
 
-.modal-card.cv-modal-card {
-    max-width: 850px;
-}
-
 .modal-close-btn {
     position: absolute;
     top: 1.2rem;
@@ -1523,179 +1351,22 @@ h1, h2, h3, h4, .brand-title {
     color: var(--navy-dark);
 }
 
-/* Modal de Inicio con Google */
-.auth-brand-logo {
-    width: 70px;
-    height: 70px;
-    border-radius: 16px;
-    margin-bottom: 0.8rem;
-}
-
-.text-center { text-align: center; }
-
-.auth-sub {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-bottom: 1.5rem;
-}
-
-.google-official-box {
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-
-.google-hint {
-    font-size: 0.88rem;
-    color: var(--text-secondary);
-    margin-bottom: 1rem;
-}
-
-.btn-google-official {
-    width: 100%;
-    background: #ffffff;
-    border: 1.5px solid #cbd5e1;
-    border-radius: var(--radius-full);
-    padding: 0.85rem 1.4rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.9rem;
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #1e293b;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: var(--transition);
-}
-
-.btn-google-official:hover {
-    background: #f8fafc;
-    border-color: #94a3b8;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-    transform: translateY(-2px);
-}
-
-.auth-divider {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    margin: 1.5rem 0;
-    color: #94a3b8;
-    font-size: 0.82rem;
-}
-
-.auth-divider::before, .auth-divider::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.auth-divider span {
-    padding: 0 0.8rem;
-}
-
-.demo-accounts-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-}
-
-.demo-acc-item {
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-    padding: 0.8rem 1rem;
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: var(--transition);
-    background: #f8fafc;
-}
-
-.demo-acc-item:hover {
+.contact-card-box {
     background: #f0fdf4;
-    border-color: var(--mint-green);
-    transform: translateX(4px);
-}
-
-.demo-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.demo-icon-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #e0f2fe;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-}
-
-.demo-icon-avatar.admin {
-    background: #fef3c7;
-}
-
-.demo-email {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    display: block;
-}
-
-/* Documento de CV Imprimible */
-.cv-document-render {
+    border: 2px solid #bbf7d0;
+    border-radius: var(--radius-md);
     padding: 1.5rem;
-    background: #ffffff;
-    color: #0f172a;
-    line-height: 1.6;
+    margin: 1.2rem 0;
+    line-height: 1.7;
 }
 
-.cv-header-banner {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-    border-bottom: 2px solid var(--navy-dark);
-    padding-bottom: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.cv-photo {
-    width: 90px;
-    height: 90px;
-    border-radius: 14px;
-    object-fit: cover;
-    border: 2px solid var(--navy-dark);
-}
-
-.cv-section-block {
-    margin-bottom: 1.3rem;
-}
-
-.cv-section-block h4 {
-    font-size: 1.05rem;
-    color: var(--navy-dark);
-    border-bottom: 1px solid #e2e8f0;
-    padding-bottom: 0.3rem;
-    margin-bottom: 0.6rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.modal-footer-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-    margin-top: 1.5rem;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 1rem;
+.contact-card-box p {
+    font-size: 1rem;
+    color: #166534;
 }
 
 /* ==============================================================================
-   12. PIE DE PÁGINA (FOOTER)
+   10. PIE DE PÁGINA (FOOTER)
    ============================================================================== */
 .app-footer {
     background: var(--navy-deep);
@@ -1709,7 +1380,7 @@ h1, h2, h3, h4, .brand-title {
     max-width: 1350px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1.8fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
     gap: 2.5rem;
     margin-bottom: 2rem;
 }
@@ -1732,7 +1403,7 @@ h1, h2, h3, h4, .brand-title {
     margin-top: 0.5rem;
 }
 
-.footer-links h4, .footer-roles h4 {
+.footer-links h4 {
     color: #ffffff;
     font-size: 1.05rem;
     margin-bottom: 1rem;
@@ -1757,26 +1428,6 @@ h1, h2, h3, h4, .brand-title {
     color: var(--cyan-light);
 }
 
-.footer-role-pills {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.footer-role-pills span {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 0.4rem 0.8rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.footer-role-pills span:hover {
-    background: var(--navy-surface);
-    color: #ffffff;
-}
-
 .footer-bottom {
     max-width: 1350px;
     margin: 0 auto;
@@ -1788,16 +1439,12 @@ h1, h2, h3, h4, .brand-title {
 }
 
 /* ==============================================================================
-   13. RESPONSIVIDAD (MOBILE & TABLET)
+   11. RESPONSIVIDAD (MOBILE & TABLET)
    ============================================================================== */
 @media (max-width: 1024px) {
     .hero-section {
         grid-template-columns: 1fr;
         padding: 2.5rem 1.8rem;
-    }
-    
-    .footer-container {
-        grid-template-columns: 1fr 1fr;
     }
 }
 
@@ -1807,21 +1454,16 @@ h1, h2, h3, h4, .brand-title {
         align-items: stretch;
     }
 
-    .role-selector-pill {
-        justify-content: center;
-    }
-
     .nav-links {
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .user-auth-area {
         justify-content: center;
     }
 
     .hero-title {
         font-size: 2.2rem;
+    }
+
+    .role-selector-cards {
+        grid-template-columns: 1fr;
     }
 
     .footer-container {
