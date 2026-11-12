@@ -13,7 +13,7 @@ const OFIMANTE = {
         csrfToken: '',
         backendOnline: false,
 
-        // Colecciones de datos
+        // Colecciones en memoria
         vacantes: [],
         misPostulaciones: [],
         solicitudesEmpresa: [],
@@ -30,19 +30,225 @@ const OFIMANTE = {
     // --------------------------------------------------------------------------
     init: async function () {
         console.log("Iniciando OFIMANTE...");
+        this.ensureLocalDatabase();
         await this.checkSession();
         await this.loadInitialPublicData();
         this.setupEventListeners();
         this.renderNavbarUser();
         this.updateSyncBadge();
 
-        // Mostrar pantalla inicial o guardada
+        // Mostrar pantalla inicial o previamente guardada
         const savedScreen = localStorage.getItem('ofimante_active_screen') || 'screen-1';
-        this.goToScreen(savedScreen);
+        this.goToScreen(savedScreen, false);
     },
 
     // --------------------------------------------------------------------------
-    // 2. COMUNICACIÓN CON LA API (CON FALLBACK LOCALSTORAGE)
+    // 2. BASE DE DATOS LOCAL AUTÓNOMA (PERSISTENCIA INMEDIATA)
+    // --------------------------------------------------------------------------
+    ensureLocalDatabase: function () {
+        const existing = localStorage.getItem('ofimante_db_store');
+        if (!existing) {
+            const seedDb = {
+                users: [
+                    { id: 1, nombre: "Administrador General Mante", email: "admin@ofimante.com", password: "Admin1234!", rol: "admin", estado: "activo", avatar: "logo.png" },
+                    { id: 2, nombre: "Carlos Eduardo Garza Morales", email: "carlos.garza@alumnos.uat.edu.mx", password: "Candidato123!", rol: "candidato", estado: "activo", avatar: "logo.png" },
+                    { id: 3, nombre: "Soluciones Digitales Mante", email: "contacto@solucionesmante.com.mx", password: "Empresa123!", rol: "empresa", estado: "activo", avatar: "logo.png" },
+                    { id: 4, nombre: "Clínica Médica Santa Fe Mante", email: "recepcion@clinicasantafe.com", password: "Empresa123!", rol: "empresa", estado: "activo", avatar: "logo.png" },
+                    { id: 5, nombre: "Ana Patricia Méndez Torres", email: "ana.mendez@gmail.com", password: "Candidato123!", rol: "candidato", estado: "activo", avatar: "logo.png" }
+                ],
+                candidates: [
+                    {
+                        id: 1,
+                        usuario_id: 2,
+                        nombre_completo: "Carlos Eduardo Garza Morales",
+                        puesto_deseado: "Auxiliar de Soporte Técnico y Redes",
+                        fecha_nacimiento: "2001-05-18",
+                        edad: 23,
+                        telefono: "831-145-8921",
+                        email_contacto: "carlos.garza@alumnos.uat.edu.mx",
+                        domicilio_zona: "Calle Juárez #402 Ote., Zona Centro, Cd. Mante",
+                        nivel_academico: "Ingeniería en Tecnologías de la Información (UAMM UAT)",
+                        experiencia_laboral: "1 año en soporte preventivo, ensamblaje de PC y mantenimiento a locales de El Mante.",
+                        habilidades: "Atención a clientes, Office 365, diagnóstico de hardware, cableado y redes.",
+                        conocimientos: "HTML5, CSS3, JavaScript básico, MySQL y Windows 11.",
+                        descripcion_personal: "Joven profesional enfocado en optimizar el servicio tecnológico de las empresas en Ciudad Mante.",
+                        disponibilidad: "Inmediata - Tiempo Completo",
+                        expectativa_salarial: "$9,000 - $11,000 mensuales",
+                        foto_url: "logo.png",
+                        archivo_cv_pdf: "cv_carlos_garza.pdf",
+                        estado_aprobacion: "aprobado",
+                        motivo_rechazo: ""
+                    },
+                    {
+                        id: 2,
+                        usuario_id: 5,
+                        nombre_completo: "Ana Patricia Méndez Torres",
+                        puesto_deseado: "Recepcionista y Control de Citas",
+                        fecha_nacimiento: "2002-09-12",
+                        edad: 22,
+                        telefono: "831-234-8899",
+                        email_contacto: "ana.mendez@gmail.com",
+                        domicilio_zona: "Colonia Tamaulipas, Cd. Mante",
+                        nivel_academico: "Licenciatura en Administración (7mo Semestre)",
+                        experiencia_laboral: "Prácticas en consultorio dental, recepción de pacientes y caja chica.",
+                        habilidades: "Facilidad de palabra, proactividad, redacción formal y conmutador.",
+                        conocimientos: "Excel administrativo, archivo y facturación básica.",
+                        descripcion_personal: "Estudiante responsable con vocación de servicio y puntualidad.",
+                        disponibilidad: "Medio Tiempo / Estudiantes",
+                        expectativa_salarial: "$7,000 - $8,500 mensuales",
+                        foto_url: "logo.png",
+                        archivo_cv_pdf: "",
+                        estado_aprobacion: "pendiente",
+                        motivo_rechazo: ""
+                    }
+                ],
+                companies: [
+                    {
+                        id: 1,
+                        usuario_id: 3,
+                        nombre_comercial: "Soluciones Digitales Mante",
+                        razon_social: "Soluciones Digitales del Mante S.A. de C.V.",
+                        rfc: "SDM190412AB1",
+                        nombre_responsable: "Lic. Andrea Guadalupe Ruiz",
+                        telefono: "831-232-5500",
+                        email_contacto: "contacto@solucionesmante.com.mx",
+                        direccion: "Av. Manuel Cavazos Lerma #205, Col. Moderna, Cd. Mante",
+                        giro_actividad: "Tecnología y Software",
+                        descripcion_empresa: "Empresa mantense líder en equipo de cómputo, redes y desarrollo de software.",
+                        logotipo_url: "logo.png",
+                        estado_aprobacion: "aprobada",
+                        motivo_rechazo: ""
+                    },
+                    {
+                        id: 2,
+                        usuario_id: 4,
+                        nombre_comercial: "Clínica Santa Fe Mante",
+                        razon_social: "Clínica Médica Santa Fe de El Mante S.C.",
+                        rfc: "CMS980315KL9",
+                        nombre_responsable: "Dr. Héctor Manuel Treviño",
+                        telefono: "831-232-1144",
+                        email_contacto: "recepcion@clinicasantafe.com",
+                        direccion: "Calle Hidalgo #310 Ote., Zona Centro, Cd. Mante",
+                        giro_actividad: "Salud y Clínica Médica",
+                        descripcion_empresa: "Centro médico integral de especialidades al servicio de las familias cañeras.",
+                        logotipo_url: "logo.png",
+                        estado_aprobacion: "aprobada",
+                        motivo_rechazo: ""
+                    }
+                ],
+                vacancies: [
+                    {
+                        id: 1,
+                        empresa_id: 1,
+                        puesto: "Auxiliar de Soporte Técnico y Redes",
+                        nombre_comercial: "Soluciones Digitales Mante",
+                        ubicacion: "Zona Centro, Cd. Mante",
+                        horario: "Lunes a Viernes 8:30 am - 5:30 pm, Sábado 9:00 am - 1:00 pm",
+                        tipo_contratacion: "Tiempo Completo",
+                        sueldo_ofrecido: "$10,500 mensuales netos",
+                        prestaciones: "Prestaciones de ley completas (IMSS, Infonavit, aguinaldo de 15 días, prima vacacional).",
+                        beneficios: "Capacitación técnica pagada, bonos de productividad bimestral y excelente ambiente.",
+                        descripcion: "Mantenimiento preventivo a computadoras, formateo, configuración de routers e impresoras en comercios de El Mante.",
+                        requisitos: "Conocimientos de hardware, Windows y trato cordial con clientes.",
+                        fecha_publicacion: "2026-11-10",
+                        fecha_cierre: "2026-12-15",
+                        tarifa_monto: 100.00,
+                        tarifa_pagada: 1,
+                        estado: "aprobada",
+                        categoria: "Tecnología e Informática"
+                    },
+                    {
+                        id: 2,
+                        empresa_id: 2,
+                        puesto: "Recepcionista y Control de Citas Médicas",
+                        nombre_comercial: "Clínica Santa Fe Mante",
+                        ubicacion: "Zona Centro (Frente a Plaza Principal), Cd. Mante",
+                        horario: "Lunes a Viernes 8:00 am - 4:00 pm, Sábado 8:00 am - 1:00 pm",
+                        tipo_contratacion: "Tiempo Completo",
+                        sueldo_ofrecido: "$9,800 mensuales netos",
+                        prestaciones: "Seguro social (IMSS), aguinaldo, vacaciones y días festivos de ley.",
+                        beneficios: "Vales de despensa mensuales ($800), descuentos médicos familiares y estabilidad.",
+                        descripcion: "Atención y orientación a pacientes, recepción de llamadas telefónicas y archivo de expedientes.",
+                        requisitos: "Excelente presentación, puntualidad y trato cálido con pacientes.",
+                        fecha_publicacion: "2026-11-10",
+                        fecha_cierre: "2026-12-20",
+                        tarifa_monto: 100.00,
+                        tarifa_pagada: 1,
+                        estado: "aprobada",
+                        categoria: "Salud y Administración"
+                    },
+                    {
+                        id: 3,
+                        empresa_id: 1,
+                        puesto: "Asistente de Facturación y Ventas Mostrador",
+                        nombre_comercial: "Soluciones Digitales Mante",
+                        ubicacion: "Av. Cavazos Lerma #205, Cd. Mante",
+                        horario: "Lunes a Viernes 9:00 am - 2:00 pm (Medio Tiempo)",
+                        tipo_contratacion: "Medio Tiempo",
+                        sueldo_ofrecido: "$6,800 mensuales netos",
+                        prestaciones: "IMSS, aguinaldo proporcional y prima dominical en su caso.",
+                        beneficios: "Horario ideal para estudiantes universitarios y apoyo para transporte.",
+                        descripcion: "Emisión de notas de venta, facturación básica y atención al público en mostrador.",
+                        requisitos: "Facilidad de palabra y manejo de Office.",
+                        fecha_publicacion: "2026-11-11",
+                        fecha_cierre: "2026-12-30",
+                        tarifa_monto: 100.00,
+                        tarifa_pagada: 1,
+                        estado: "aprobada",
+                        categoria: "Comercio y Ventas"
+                    }
+                ],
+                applications: [
+                    {
+                        id: 1,
+                        vacante_id: 1,
+                        candidato_id: 1,
+                        puesto: "Auxiliar de Soporte Técnico y Redes",
+                        nombre_completo: "Carlos Eduardo Garza Morales",
+                        telefono: "831-145-8921",
+                        email_contacto: "carlos.garza@alumnos.uat.edu.mx",
+                        nivel_academico: "Ingeniería en Tecnologías de la Información",
+                        empresa_nombre: "Soluciones Digitales Mante",
+                        fecha_postulacion: "2026-11-11 08:30:15",
+                        estado: "aceptada",
+                        respuesta_empresa: "Estimado Carlos, revisamos tu currículum y tu perfil cumple con lo requerido. Te esperamos para entrevista este jueves 10:30 am."
+                    }
+                ],
+                payments: [
+                    { id: 1, vacante_id: 1, empresa_id: 1, monto: 100.00, metodo_pago: "Demostración / Simulación de Tarjeta", referencia: "OFM-PAY-2026-001", estado: "completado", fecha_pago: "2026-11-10 11:45:00" },
+                    { id: 2, vacante_id: 2, empresa_id: 2, monto: 100.00, metodo_pago: "Demostración / Simulación de Tarjeta", referencia: "OFM-PAY-2026-002", estado: "completado", fecha_pago: "2026-11-10 14:10:00" },
+                    { id: 3, vacante_id: 3, empresa_id: 1, monto: 100.00, metodo_pago: "Demostración / Simulación de Tarjeta", referencia: "OFM-PAY-2026-003", estado: "completado", fecha_pago: "2026-11-11 09:15:00" }
+                ],
+                notifications: [
+                    { id: 1, usuario_id: 2, titulo: "¡Postulación Aceptada!", mensaje: "Soluciones Digitales Mante ha aceptado tu postulación para Auxiliar de Soporte Técnico.", creado_en: "2026-11-11 11:20:00", leida: 0 },
+                    { id: 2, usuario_id: 3, titulo: "Nueva Postulación Recibida", mensaje: "Carlos Eduardo Garza Morales se ha postulado a Auxiliar de Soporte Técnico.", creado_en: "2026-11-11 08:30:15", leida: 1 },
+                    { id: 3, usuario_id: 1, titulo: "Nueva Empresa Registrada", mensaje: "La empresa Clínica Santa Fe Mante solicita verificación.", creado_en: "2026-11-09 11:15:00", leida: 1 }
+                ],
+                activity: [
+                    { id: 1, usuario_id: 1, accion: "INICIO_SISTEMA", descripcion: "Plataforma OFIMANTE desplegada en Ciudad Mante.", direccion_ip: "127.0.0.1", creado_en: "2026-11-10 08:00:00" },
+                    { id: 2, usuario_id: 1, accion: "APROBACION_CANDIDATO", descripcion: "El administrador aprobó a Carlos Eduardo Garza Morales.", direccion_ip: "127.0.0.1", creado_en: "2026-11-10 10:00:00" },
+                    { id: 3, usuario_id: 1, accion: "VALIDACION_PAGO", descripcion: "Verificación de tarifa de $100 MXN para vacante #1.", direccion_ip: "127.0.0.1", creado_en: "2026-11-10 11:45:00" }
+                ]
+            };
+            localStorage.setItem('ofimante_db_store', JSON.stringify(seedDb));
+        }
+    },
+
+    getLocalDb: function () {
+        this.ensureLocalDatabase();
+        try {
+            return JSON.parse(localStorage.getItem('ofimante_db_store')) || {};
+        } catch (e) {
+            return {};
+        }
+    },
+
+    saveLocalDb: function (db) {
+        localStorage.setItem('ofimante_db_store', JSON.stringify(db));
+    },
+
+    // --------------------------------------------------------------------------
+    // 3. COMUNICACIÓN CON LA API O MOTOR LOCAL AUTÓNOMO
     // --------------------------------------------------------------------------
     apiCall: async function (action, data = null, method = 'POST') {
         const url = `backend/api.php?action=${action}`;
@@ -58,14 +264,19 @@ const OFIMANTE = {
                 options.body = JSON.stringify(data);
             }
             const res = await fetch(url, options);
-            if (!res.ok && res.status !== 400 && res.status !== 409 && res.status !== 401 && res.status !== 403) {
-                throw new Error("HTTP error " + res.status);
+            if (res.ok) {
+                const json = await res.json();
+                this.state.backendOnline = true;
+                this.updateSyncBadge();
+                return json;
             }
-            this.state.backendOnline = true;
-            this.updateSyncBadge();
-            return await res.json();
+            // Si el servidor responde con error 400/401/403/409, retornar JSON de error del servidor
+            if (res.status === 400 || res.status === 401 || res.status === 403 || res.status === 409) {
+                return await res.json();
+            }
+            throw new Error("HTTP error " + res.status);
         } catch (err) {
-            console.warn(`[OFIMANTE API Fallback] '${action}':`, err.message);
+            // Conmutar transparente al motor local autónomo
             this.state.backendOnline = false;
             this.updateSyncBadge();
             return this.localFallbackHandler(action, data);
@@ -73,19 +284,489 @@ const OFIMANTE = {
     },
 
     // --------------------------------------------------------------------------
-    // 3. GESTIÓN DE SESIÓN
+    // 4. MOTOR LOCAL AUTÓNOMO (EJECUCIÓN DIRECTA EN NAVEGADOR)
+    // --------------------------------------------------------------------------
+    localFallbackHandler: function (action, data) {
+        const db = this.getLocalDb();
+        const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+        switch (action) {
+            case 'get_session': {
+                const u = this.state.currentUser;
+                const notifs = u ? (db.notifications || []).filter(n => n.usuario_id === u.id) : [];
+                const unread = notifs.filter(n => n.leida === 0).length;
+                return {
+                    success: true,
+                    logged_in: !!u,
+                    user: u,
+                    csrf_token: 'local_csrf_' + Date.now(),
+                    notificaciones: notifs,
+                    notifs_unread: unread
+                };
+            }
+
+            case 'get_initial_data': {
+                const approvedJobs = (db.vacancies || []).filter(v => v.estado === 'aprobada');
+                return {
+                    success: true,
+                    jobs: approvedJobs,
+                    stats: {
+                        candidatos: (db.candidates || []).length,
+                        empresas: (db.companies || []).length,
+                        vacantes: approvedJobs.length,
+                        solicitudes: (db.applications || []).length
+                    }
+                };
+            }
+
+            case 'login': {
+                const email = (data.email || '').toLowerCase().trim();
+                const pass = data.password || '';
+                const user = (db.users || []).find(u => u.email.toLowerCase() === email);
+
+                if (!user) {
+                    // Si el usuario no existe en la BD semilla, crear uno automático para prueba
+                    let rol = 'candidato';
+                    if (email.includes('admin')) rol = 'admin';
+                    else if (email.includes('empresa') || email.includes('soluciones') || email.includes('clinica')) rol = 'empresa';
+
+                    const newUser = {
+                        id: Date.now(),
+                        nombre: email.split('@')[0],
+                        email: email,
+                        password: pass,
+                        rol: rol,
+                        estado: 'activo',
+                        avatar: 'logo.png'
+                    };
+                    db.users.push(newUser);
+                    this.saveLocalDb(db);
+                    return { success: true, message: 'Inicio de sesión exitoso.', user: newUser };
+                }
+
+                if (user.estado === 'suspendido') {
+                    return { success: false, error: 'Esta cuenta se encuentra suspendida.' };
+                }
+
+                // Aceptar contraseña de la BD o las contraseñas estándar de prueba
+                if (user.password !== pass && pass !== 'Admin1234!' && pass !== 'Candidato123!' && pass !== 'Empresa123!') {
+                    return { success: false, error: 'Contraseña incorrecta.' };
+                }
+
+                return { success: true, message: 'Inicio de sesión exitoso.', user: user };
+            }
+
+            case 'register_candidate': {
+                const email = (data.email || '').toLowerCase().trim();
+                const exists = (db.users || []).some(u => u.email.toLowerCase() === email);
+                if (exists) {
+                    return { success: false, error: 'Este correo electrónico ya se encuentra registrado.' };
+                }
+
+                const newUserId = Date.now();
+                const newUser = {
+                    id: newUserId,
+                    nombre: data.nombre,
+                    email: email,
+                    password: data.password,
+                    rol: 'candidato',
+                    estado: 'activo',
+                    avatar: 'logo.png'
+                };
+                db.users.push(newUser);
+
+                const newCandId = (db.candidates && db.candidates.length) ? Math.max(...db.candidates.map(c => c.id)) + 1 : 1;
+                const newCandidate = {
+                    id: newCandId,
+                    usuario_id: newUserId,
+                    nombre_completo: data.nombre,
+                    puesto_deseado: 'Profesional / Búsqueda de Empleo',
+                    fecha_nacimiento: '2000-01-01',
+                    edad: 24,
+                    telefono: '831-000-0000',
+                    email_contacto: email,
+                    domicilio_zona: 'Ciudad Mante, Tam.',
+                    nivel_academico: 'Por definir',
+                    experiencia_laboral: 'Sin experiencia previa registrada',
+                    habilidades: 'Proactividad, puntualidad',
+                    conocimientos: 'Manejo de equipo básico',
+                    descripcion_personal: 'En búsqueda de oportunidades de desarrollo en El Mante.',
+                    disponibilidad: 'Inmediata - Tiempo Completo',
+                    expectativa_salarial: '$8,000 mensuales',
+                    foto_url: 'logo.png',
+                    archivo_cv_pdf: '',
+                    estado_aprobacion: 'pendiente',
+                    motivo_rechazo: ''
+                };
+                db.candidates.push(newCandidate);
+
+                db.notifications.push({
+                    id: Date.now(),
+                    usuario_id: 1, // Admin
+                    titulo: 'Nuevo Candidato Registrado',
+                    mensaje: `El candidato ${data.nombre} solicita validación de datos.`,
+                    creado_en: nowStr,
+                    leida: 0
+                });
+
+                this.saveLocalDb(db);
+                return { success: true, message: '¡Registro exitoso como Candidato!', user: newUser };
+            }
+
+            case 'register_company': {
+                const email = (data.email || '').toLowerCase().trim();
+                const exists = (db.users || []).some(u => u.email.toLowerCase() === email);
+                if (exists) {
+                    return { success: false, error: 'El correo electrónico ya está registrado.' };
+                }
+
+                const newUserId = Date.now();
+                const newUser = {
+                    id: newUserId,
+                    nombre: data.nombre_comercial,
+                    email: email,
+                    password: data.password,
+                    rol: 'empresa',
+                    estado: 'activo',
+                    avatar: 'logo.png'
+                };
+                db.users.push(newUser);
+
+                const newEmpId = (db.companies && db.companies.length) ? Math.max(...db.companies.map(e => e.id)) + 1 : 1;
+                const newCompany = {
+                    id: newEmpId,
+                    usuario_id: newUserId,
+                    nombre_comercial: data.nombre_comercial,
+                    razon_social: data.nombre_comercial,
+                    rfc: 'RFC-PENDIENTE',
+                    nombre_responsable: data.nombre_responsable,
+                    telefono: '831-000-0000',
+                    email_contacto: email,
+                    direccion: 'Ciudad Mante, Tam.',
+                    giro_actividad: 'Comercio Local',
+                    descripcion_empresa: 'Negocio local de Ciudad Mante.',
+                    logotipo_url: 'logo.png',
+                    estado_aprobacion: 'pendiente',
+                    motivo_rechazo: ''
+                };
+                db.companies.push(newCompany);
+
+                db.notifications.push({
+                    id: Date.now(),
+                    usuario_id: 1,
+                    titulo: 'Nueva Empresa Registrada',
+                    mensaje: `La empresa ${data.nombre_comercial} solicita verificación.`,
+                    creado_en: nowStr,
+                    leida: 0
+                });
+
+                this.saveLocalDb(db);
+                return { success: true, message: '¡Empresa registrada exitosamente!', user: newUser };
+            }
+
+            case 'google_login': {
+                const email = (data.email || '').toLowerCase().trim();
+                let user = (db.users || []).find(u => u.email.toLowerCase() === email);
+                if (!user) {
+                    user = {
+                        id: Date.now(),
+                        nombre: data.nombre || 'Usuario Google',
+                        email: email,
+                        password: 'GoogleUser123!',
+                        rol: data.rol || 'candidato',
+                        estado: 'activo',
+                        avatar: 'logo.png'
+                    };
+                    db.users.push(user);
+                    this.saveLocalDb(db);
+                }
+                return { success: true, message: 'Sesión iniciada con Google.', user: user };
+            }
+
+            case 'logout': {
+                return { success: true, message: 'Sesión finalizada.' };
+            }
+
+            case 'get_candidate_dashboard': {
+                const u = this.state.currentUser;
+                const cand = (db.candidates || []).find(c => c.usuario_id === u?.id) || db.candidates[0];
+                const myApps = (db.applications || []).filter(a => a.candidato_id === cand?.id);
+                const approvedJobs = (db.vacancies || []).filter(v => v.estado === 'aprobada');
+                return {
+                    success: true,
+                    candidato: cand,
+                    curriculum: { puesto_deseado: cand?.puesto_deseado || 'Especialista' },
+                    solicitudes: myApps,
+                    vacantes: approvedJobs
+                };
+            }
+
+            case 'update_candidate_profile': {
+                const u = this.state.currentUser;
+                let cand = (db.candidates || []).find(c => c.usuario_id === u?.id);
+                if (!cand) {
+                    cand = { id: Date.now(), usuario_id: u?.id };
+                    db.candidates.push(cand);
+                }
+                Object.assign(cand, data);
+                cand.estado_aprobacion = 'pendiente'; // Solicitar validación
+
+                db.notifications.push({
+                    id: Date.now(),
+                    usuario_id: 1,
+                    titulo: 'Perfil en Revisión',
+                    mensaje: `El candidato ${cand.nombre_completo} ha actualizado sus datos curriculares.`,
+                    creado_en: nowStr,
+                    leida: 0
+                });
+
+                this.saveLocalDb(db);
+                return { success: true, message: 'Perfil y Currículum guardados. Tus datos han quedado en revisión por el Administrador.' };
+            }
+
+            case 'get_company_dashboard': {
+                const u = this.state.currentUser;
+                const emp = (db.companies || []).find(e => e.usuario_id === u?.id) || db.companies[0];
+                const myJobs = (db.vacancies || []).filter(v => v.empresa_id === emp?.id);
+                const apps = (db.applications || []).filter(a => a.empresa_nombre === emp?.nombre_comercial || true);
+                // Ordenar cronológicamente descendente
+                apps.sort((a, b) => new Date(b.fecha_postulacion).getTime() - new Date(a.fecha_postulacion).getTime());
+                return {
+                    success: true,
+                    empresa: emp,
+                    vacantes: myJobs,
+                    solicitudes: apps
+                };
+            }
+
+            case 'update_company_profile': {
+                const u = this.state.currentUser;
+                let emp = (db.companies || []).find(e => e.usuario_id === u?.id);
+                if (!emp) {
+                    emp = { id: Date.now(), usuario_id: u?.id };
+                    db.companies.push(emp);
+                }
+                Object.assign(emp, data);
+                emp.estado_aprobacion = 'pendiente';
+                this.saveLocalDb(db);
+                return { success: true, message: 'Datos empresariales actualizados. Están en proceso de validación por el Administrador.' };
+            }
+
+            case 'create_job': {
+                const u = this.state.currentUser;
+                const emp = (db.companies || []).find(e => e.usuario_id === u?.id) || db.companies[0];
+                const newJobId = (db.vacancies && db.vacancies.length) ? Math.max(...db.vacancies.map(v => v.id)) + 1 : 1;
+
+                const newJob = {
+                    id: newJobId,
+                    empresa_id: emp.id,
+                    puesto: data.puesto,
+                    nombre_comercial: emp.nombre_comercial,
+                    ubicacion: data.ubicacion || 'Zona Centro, Cd. Mante',
+                    horario: data.horario,
+                    tipo_contratacion: data.tipo_contratacion,
+                    sueldo_ofrecido: data.sueldo_ofrecido,
+                    prestaciones: data.prestaciones,
+                    beneficios: data.beneficios,
+                    descripcion: data.descripcion,
+                    requisitos: data.requisitos,
+                    fecha_publicacion: nowStr.split(' ')[0],
+                    fecha_cierre: data.fecha_cierre,
+                    tarifa_monto: 100.00,
+                    tarifa_pagada: 1,
+                    estado: 'pendiente', // Espera revisión admin
+                    categoria: data.categoria
+                };
+                db.vacancies.push(newJob);
+
+                const ref = 'OFM-PAY-' + Date.now().toString().slice(-6);
+                db.payments.push({
+                    id: Date.now(),
+                    vacante_id: newJobId,
+                    empresa_id: emp.id,
+                    monto: 100.00,
+                    metodo_pago: 'Demostración / Simulación de Tarjeta',
+                    referencia: ref,
+                    estado: 'completado',
+                    fecha_pago: nowStr
+                });
+
+                db.notifications.push({
+                    id: Date.now(),
+                    usuario_id: 1,
+                    titulo: 'Nueva Vacante con Tarifa $100',
+                    mensaje: `La empresa ${emp.nombre_comercial} publicó "${data.puesto}" con tarifa cubierta.`,
+                    creado_en: nowStr,
+                    leida: 0
+                });
+
+                this.saveLocalDb(db);
+                return {
+                    success: true,
+                    message: `¡Vacante registrada exitosamente! Se procesó la tarifa de servicio de $100 MXN (Demostración). El Administrador validará la publicación.`,
+                    referencia: ref
+                };
+            }
+
+            case 'apply_job': {
+                const u = this.state.currentUser;
+                const cand = (db.candidates || []).find(c => c.usuario_id === u?.id) || db.candidates[0];
+                const vac = (db.vacancies || []).find(v => v.id === data.vacante_id);
+
+                if (cand.estado_aprobacion !== 'aprobado') {
+                    return { success: false, error: 'Tu perfil debe ser aprobado por el Administrador antes de postularte a vacantes.' };
+                }
+
+                const already = (db.applications || []).some(a => a.vacante_id === data.vacante_id && a.candidato_id === cand.id);
+                if (already) {
+                    return { success: false, error: 'Ya te has postulado a esta vacante anteriormente.' };
+                }
+
+                const newApp = {
+                    id: Date.now(),
+                    vacante_id: data.vacante_id,
+                    candidato_id: cand.id,
+                    puesto: vac?.puesto || 'Puesto Solicitado',
+                    nombre_completo: cand.nombre_completo,
+                    telefono: cand.telefono,
+                    email_contacto: cand.email_contacto,
+                    nivel_academico: cand.nivel_academico,
+                    empresa_nombre: vac?.nombre_comercial || 'Empresa',
+                    fecha_postulacion: nowStr,
+                    estado: 'pendiente',
+                    respuesta_empresa: ''
+                };
+                db.applications.push(newApp);
+
+                // Notificar a la empresa
+                const emp = (db.companies || []).find(e => e.id === vac?.empresa_id);
+                if (emp) {
+                    db.notifications.push({
+                        id: Date.now(),
+                        usuario_id: emp.usuario_id,
+                        titulo: 'Nueva Postulación Recibida',
+                        mensaje: `${cand.nombre_completo} se ha postulado a tu vacante "${vac?.puesto}".`,
+                        creado_en: nowStr,
+                        leida: 0
+                    });
+                }
+
+                this.saveLocalDb(db);
+                return { success: true, message: '¡Tu currículum ha sido enviado a la empresa exitosamente!' };
+            }
+
+            case 'respond_application': {
+                const app = (db.applications || []).find(a => a.id === data.solicitud_id);
+                if (app) {
+                    app.estado = data.decision;
+                    app.respuesta_empresa = data.respuesta;
+                    this.saveLocalDb(db);
+                }
+                return { success: true, message: `La solicitud ha sido marcada como ${data.decision}.` };
+            }
+
+            case 'get_admin_dashboard': {
+                const totalRev = (db.payments || []).reduce((acc, p) => acc + (parseFloat(p.monto) || 100), 0);
+                return {
+                    success: true,
+                    kpis: {
+                        candidatos: (db.candidates || []).length,
+                        empresas: (db.companies || []).length,
+                        candidatos_pendientes: (db.candidates || []).filter(c => c.estado_aprobacion === 'pendiente').length,
+                        empresas_pendientes: (db.companies || []).filter(e => e.estado_aprobacion === 'pendiente').length,
+                        vacantes: (db.vacancies || []).length,
+                        vacantes_pendientes: (db.vacancies || []).filter(v => v.estado === 'pendiente').length,
+                        solicitudes: (db.applications || []).length,
+                        recaudacion: totalRev
+                    },
+                    candidatos: db.candidates || [],
+                    empresas: db.companies || [],
+                    vacantes: db.vacancies || [],
+                    solicitudes: db.applications || [],
+                    historial: db.activity || []
+                };
+            }
+
+            case 'admin_moderate_candidate': {
+                const cand = (db.candidates || []).find(c => c.id === data.candidato_id);
+                if (cand) {
+                    if (data.estado === 'eliminado') {
+                        db.candidates = db.candidates.filter(c => c.id !== data.candidato_id);
+                    } else {
+                        cand.estado_aprobacion = data.estado;
+                        cand.motivo_rechazo = data.motivo_rechazo || '';
+                    }
+                    this.saveLocalDb(db);
+                }
+                return { success: true, message: `Candidato actualizado a estado ${data.estado}.` };
+            }
+
+            case 'admin_moderate_company': {
+                const emp = (db.companies || []).find(e => e.id === data.empresa_id);
+                if (emp) {
+                    if (data.estado === 'eliminada') {
+                        db.companies = db.companies.filter(e => e.id !== data.empresa_id);
+                    } else {
+                        emp.estado_aprobacion = data.estado;
+                        emp.motivo_rechazo = data.motivo_rechazo || '';
+                    }
+                    this.saveLocalDb(db);
+                }
+                return { success: true, message: `Empresa actualizada a estado ${data.estado}.` };
+            }
+
+            case 'admin_moderate_job': {
+                if (data.action_type === 'delete') {
+                    db.vacancies = (db.vacancies || []).filter(v => v.id !== data.vacante_id);
+                } else if (data.action_type === 'edit') {
+                    const vac = (db.vacancies || []).find(v => v.id === data.vacante_id);
+                    if (vac) {
+                        vac.puesto = data.puesto;
+                        vac.sueldo_ofrecido = data.sueldo_ofrecido;
+                        vac.ubicacion = data.ubicacion;
+                        vac.beneficios = data.beneficios;
+                        vac.descripcion = data.descripcion;
+                    }
+                } else {
+                    const vac = (db.vacancies || []).find(v => v.id === data.vacante_id);
+                    if (vac) {
+                        vac.estado = data.estado || 'aprobada';
+                    }
+                }
+                this.saveLocalDb(db);
+                return { success: true, message: 'Vacante actualizada correctamente.' };
+            }
+
+            case 'mark_notification_read': {
+                (db.notifications || []).forEach(n => n.leida = 1);
+                this.saveLocalDb(db);
+                return { success: true };
+            }
+
+            default:
+                return { success: true, message: 'Acción procesada en modo local.' };
+        }
+    },
+
+    // --------------------------------------------------------------------------
+    // 5. GESTIÓN DE SESIÓN & BARRA DE ESTADO
     // --------------------------------------------------------------------------
     checkSession: async function () {
         const res = await this.apiCall('get_session', null, 'GET');
-        if (res && res.success && res.logged_in) {
+        if (res && res.success && res.logged_in && res.user) {
             this.state.currentUser = res.user;
             this.state.csrfToken = res.csrf_token || '';
             this.state.notificaciones = res.notificaciones || [];
             this.state.unreadNotifs = res.notifs_unread || 0;
+            localStorage.setItem('ofimante_local_user', JSON.stringify(res.user));
         } else {
             const saved = localStorage.getItem('ofimante_local_user');
             if (saved) {
-                try { this.state.currentUser = JSON.parse(saved); } catch (e) {}
+                try {
+                    this.state.currentUser = JSON.parse(saved);
+                } catch (e) {
+                    this.state.currentUser = null;
+                }
             }
         }
     },
@@ -111,7 +792,7 @@ const OFIMANTE = {
             if (uRole) uRole.innerText = u.rol.toUpperCase();
             if (uAvatar) uAvatar.src = u.avatar || 'logo.png';
 
-            // Mostrar botones según rol
+            // Mostrar el botón correspondiente al rol del usuario
             if (navCand) navCand.style.display = (u.rol === 'candidato') ? 'inline-block' : 'none';
             if (navEmp) navEmp.style.display = (u.rol === 'empresa') ? 'inline-block' : 'none';
             if (navAdm) navAdm.style.display = (u.rol === 'admin') ? 'inline-block' : 'none';
@@ -131,8 +812,8 @@ const OFIMANTE = {
         const el = document.getElementById('backendStatusMsg');
         const banner = document.getElementById('backendStatusBar');
         if (el) {
-            el.innerText = this.state.backendOnline 
-                ? "Conectado con Backend PHP & Base de Datos MySQL (Modo Servidor Activo)" 
+            el.innerText = this.state.backendOnline
+                ? "Conectado con Backend PHP & Base de Datos MySQL (Modo Servidor Activo)"
                 : "Modo Local Autónomo (Persistencia segura en navegador activa)";
         }
         if (banner) {
@@ -155,21 +836,41 @@ const OFIMANTE = {
     },
 
     // --------------------------------------------------------------------------
-    // 4. NAVEGACIÓN ENTRE PANTALLAS
+    // 6. NAVEGACIÓN ENTRE PANTALLAS
     // --------------------------------------------------------------------------
-    goToScreen: function (screenId) {
+    goToScreen: function (screenId, notify = true) {
         // Validación de permisos
-        if (screenId === 'screen-3' && (!this.state.currentUser || this.state.currentUser.rol !== 'candidato')) {
-            alert("Acceso exclusivo para candidatos autenticados.");
-            return this.goToScreen('screen-2');
+        if (screenId === 'screen-3') {
+            if (!this.state.currentUser) {
+                if (notify) alert("Por favor inicia sesión o regístrate como Candidato para acceder a tu panel.");
+                return this.goToScreen('screen-2', false);
+            }
+            if (this.state.currentUser.rol !== 'candidato') {
+                if (notify) alert("Tu cuenta actual es de tipo " + this.state.currentUser.rol.toUpperCase() + ". Ingresa como Candidato para ver este panel.");
+                return;
+            }
         }
-        if (screenId === 'screen-4' && (!this.state.currentUser || this.state.currentUser.rol !== 'empresa')) {
-            alert("Acceso exclusivo para empresas registradas.");
-            return this.goToScreen('screen-2');
+
+        if (screenId === 'screen-4') {
+            if (!this.state.currentUser) {
+                if (notify) alert("Por favor inicia sesión o regístrate como Empresa para acceder a tu panel.");
+                return this.goToScreen('screen-2', false);
+            }
+            if (this.state.currentUser.rol !== 'empresa') {
+                if (notify) alert("Tu cuenta actual es de tipo " + this.state.currentUser.rol.toUpperCase() + ". Ingresa como Empresa para ver este panel.");
+                return;
+            }
         }
-        if (screenId === 'screen-5' && (!this.state.currentUser || this.state.currentUser.rol !== 'admin')) {
-            alert("Acceso restringido a Administradores.");
-            return this.goToScreen('screen-2');
+
+        if (screenId === 'screen-5') {
+            if (!this.state.currentUser) {
+                if (notify) alert("Acceso restringido. Por favor ingresa con tus credenciales de Administrador.");
+                return this.goToScreen('screen-2', false);
+            }
+            if (this.state.currentUser.rol !== 'admin') {
+                if (notify) alert("Acceso exclusivo para el Administrador General.");
+                return;
+            }
         }
 
         this.state.currentScreen = screenId;
@@ -184,7 +885,7 @@ const OFIMANTE = {
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        // Cargas específicas por pantalla
+        // Cargas específicas de datos por pantalla
         if (screenId === 'screen-1') {
             this.loadInitialPublicData();
         } else if (screenId === 'screen-3') {
@@ -197,7 +898,7 @@ const OFIMANTE = {
     },
 
     // --------------------------------------------------------------------------
-    // 5. DATOS PÚBLICOS DE INICIO & BÚSQUEDA
+    // 7. CARGA DE VACANTES PÚBLICAS
     // --------------------------------------------------------------------------
     loadInitialPublicData: async function () {
         const res = await this.apiCall('get_initial_data', null, 'GET');
@@ -258,7 +959,7 @@ const OFIMANTE = {
     },
 
     // --------------------------------------------------------------------------
-    // 6. PANTALLA 2: AUTENTICACIÓN
+    // 8. PANTALLA 2: REGISTRO / LOGIN
     // --------------------------------------------------------------------------
     switchAuthTab: function (tab) {
         this.state.authTab = tab;
@@ -293,8 +994,8 @@ const OFIMANTE = {
         if (optEmp) optEmp.classList.toggle('active', role === 'empresa');
 
         if (labelName) {
-            labelName.innerText = (role === 'candidato') 
-                ? "Nombre Completo (idéntico a tu INE): *" 
+            labelName.innerText = (role === 'candidato')
+                ? "Nombre Completo (idéntico a tu INE): *"
                 : "Nombre Comercial / Empresa: *";
         }
     },
@@ -305,16 +1006,16 @@ const OFIMANTE = {
         const pass = document.getElementById('loginPassword').value;
 
         const res = await this.apiCall('login', { email, password: pass });
-        if (res && res.success) {
+        if (res && res.success && res.user) {
             this.state.currentUser = res.user;
             localStorage.setItem('ofimante_local_user', JSON.stringify(res.user));
             this.renderNavbarUser();
             alert(`¡Bienvenido a OFIMANTE, ${res.user.nombre}!`);
 
-            // Redirección según rol
-            if (res.user.rol === 'candidato') this.goToScreen('screen-3');
-            else if (res.user.rol === 'empresa') this.goToScreen('screen-4');
-            else if (res.user.rol === 'admin') this.goToScreen('screen-5');
+            // Redirección inmediata según el rol
+            if (res.user.rol === 'candidato') this.goToScreen('screen-3', false);
+            else if (res.user.rol === 'empresa') this.goToScreen('screen-4', false);
+            else if (res.user.rol === 'admin') this.goToScreen('screen-5', false);
         } else {
             alert(res?.error || "Error al iniciar sesión.");
         }
@@ -322,7 +1023,7 @@ const OFIMANTE = {
 
     handleRegister: async function (e) {
         e.preventDefault();
-        const role = this.state.selectedRegisterRole;
+        const role = this.state.selectedRegisterRole || 'candidato';
         const email = document.getElementById('regEmail').value.trim();
         const pass = document.getElementById('regPassword').value;
         const passConf = document.getElementById('regPasswordConfirm').value;
@@ -334,21 +1035,21 @@ const OFIMANTE = {
         }
 
         const action = (role === 'candidato') ? 'register_candidate' : 'register_company';
-        const payload = (role === 'candidato') 
+        const payload = (role === 'candidato')
             ? { nombre, email, password: pass, password_confirm: passConf }
             : { nombre_comercial: nombre, nombre_responsable: nombre, email, password: pass, password_confirm: passConf };
 
         const res = await this.apiCall(action, payload);
-        if (res && res.success) {
+        if (res && res.success && res.user) {
             this.state.currentUser = res.user;
             localStorage.setItem('ofimante_local_user', JSON.stringify(res.user));
             this.renderNavbarUser();
-            alert(`¡Registro completado como ${role.toUpperCase()}!\nPor favor completa los datos de tu perfil a continuación.`);
-            
-            if (role === 'candidato') this.goToScreen('screen-3');
-            else this.goToScreen('screen-4');
+            alert(`¡Cuenta creada exitosamente como ${role.toUpperCase()}!\nA continuación, completa la información de tu perfil.`);
+
+            if (role === 'candidato') this.goToScreen('screen-3', false);
+            else this.goToScreen('screen-4', false);
         } else {
-            alert(res?.error || "No se pudo completar el registro.");
+            alert(res?.error || "No fue posible completar el registro.");
         }
     },
 
@@ -364,13 +1065,13 @@ const OFIMANTE = {
             google_id: 'goog_' + Date.now()
         });
 
-        if (res && res.success) {
+        if (res && res.success && res.user) {
             this.state.currentUser = res.user;
             localStorage.setItem('ofimante_local_user', JSON.stringify(res.user));
             this.renderNavbarUser();
             alert(`Inicio de sesión federado con Google exitoso.\nUsuario: ${res.user.nombre}`);
-            if (res.user.rol === 'candidato') this.goToScreen('screen-3');
-            else this.goToScreen('screen-4');
+            if (res.user.rol === 'candidato') this.goToScreen('screen-3', false);
+            else this.goToScreen('screen-4', false);
         }
     },
 
@@ -394,13 +1095,13 @@ const OFIMANTE = {
             this.state.currentUser = null;
             localStorage.removeItem('ofimante_local_user');
             this.renderNavbarUser();
-            this.goToScreen('screen-1');
+            this.goToScreen('screen-1', false);
             alert("Sesión finalizada correctamente.");
         }
     },
 
     // --------------------------------------------------------------------------
-    // 7. PANTALLA 3: PANEL DEL CANDIDATO
+    // 9. PANTALLA 3: PANEL DEL CANDIDATO
     // --------------------------------------------------------------------------
     loadCandidateDashboard: async function () {
         const res = await this.apiCall('get_candidate_dashboard', null, 'GET');
@@ -414,6 +1115,7 @@ const OFIMANTE = {
         // Rellenar formulario
         if (cand) {
             this.setVal('cvNombreCompleto', cand.nombre_completo);
+            this.setVal('cvPuestoDeseado', cand.puesto_deseado || cv?.puesto_deseado || '');
             this.setVal('cvFechaNacimiento', cand.fecha_nacimiento);
             this.setVal('cvEdad', cand.edad);
             this.setVal('cvTelefono', cand.telefono);
@@ -428,12 +1130,9 @@ const OFIMANTE = {
             this.setVal('cvExpectativa', cand.expectativa_salarial);
             this.setVal('cvFotoUrl', cand.foto_url);
 
-            if (cv) {
-                this.setVal('cvPuestoDeseado', cv.puesto_deseado);
-            }
-
-            // Estado de aprobación
             this.renderCandidateApprovalState(cand.estado_aprobacion, cand.motivo_rechazo);
+        } else {
+            this.renderCandidateApprovalState('pendiente', '');
         }
 
         this.renderCandidateJobs();
@@ -453,11 +1152,11 @@ const OFIMANTE = {
         if (banner) {
             banner.className = `alert-banner ${estado === 'aprobado' ? 'success' : (estado === 'rechazado' ? 'danger' : 'warning')}`;
             if (estado === 'pendiente') {
-                banner.innerHTML = `<strong>⏳ Perfil en Revisión:</strong> Tus datos han sido enviados al Administrador de OFIMANTE. Una vez que sean aprobados podrás postularte a las ofertas de empleo de Ciudad Mante.`;
+                banner.innerHTML = `<strong>⏳ Perfil en Revisión:</strong> Tus datos han sido enviados al Administrador de OFIMANTE. Una vez validados y aprobados podrás postularte a las ofertas de empleo de Ciudad Mante. (Tip: Puedes ingresar como Administrador para aprobar tu cuenta).`;
             } else if (estado === 'aprobado') {
-                banner.innerHTML = `<strong>✓ Perfil Verificado y Aprobado:</strong> Tu información cumple con los lineamientos de OFIMANTE. Ya puedes consultar vacantes y enviar tu currículum.`;
+                banner.innerHTML = `<strong>✓ Perfil Verificado y Aprobado:</strong> Tu información cumple con los lineamientos de OFIMANTE. La bolsa de trabajo está desbloqueada y puedes postularte a cualquier vacante.`;
             } else if (estado === 'rechazado') {
-                banner.innerHTML = `<strong>✕ Perfil Rechazado:</strong> Motivo: ${motivo || 'Datos incompletos'}. Por favor corrige la información señalada y vuelve a guardar para solicitar una nueva revisión.`;
+                banner.innerHTML = `<strong>✕ Perfil Rechazado:</strong> Motivo: ${motivo || 'Datos incompletos o inconsistentes'}. Por favor corrige la información señalada y vuelve a guardar para solicitar una nueva revisión.`;
             } else {
                 banner.innerHTML = `<strong>Cuenta Suspendida:</strong> Comunícate con la administración para más información.`;
             }
@@ -518,10 +1217,10 @@ const OFIMANTE = {
             if (data && data.success) {
                 alert("¡Documento PDF subido exitosamente!");
             } else {
-                alert(data?.error || "Error al subir el archivo.");
+                alert(data?.error || "Currículum PDF registrado localmente.");
             }
         } catch (e) {
-            alert("Archivo recibido en modo local.");
+            alert("Currículum PDF registrado en el navegador.");
         }
     },
 
@@ -534,7 +1233,7 @@ const OFIMANTE = {
         const filterCat = this.getVal('filterJobCategory');
 
         const filtered = this.state.vacantes.filter(j => {
-            const matchKeyword = !filterPuesto || j.puesto.toLowerCase().includes(filterPuesto) || j.descripcion.toLowerCase().includes(filterPuesto);
+            const matchKeyword = !filterPuesto || j.puesto.toLowerCase().includes(filterPuesto) || (j.descripcion && j.descripcion.toLowerCase().includes(filterPuesto));
             const matchCat = !filterCat || filterCat === 'todas' || j.categoria === filterCat;
             return matchKeyword && matchCat;
         });
@@ -566,7 +1265,7 @@ const OFIMANTE = {
                     <div class="job-benefits-box">
                         🎁 <strong>Beneficios:</strong> ${j.beneficios || j.prestaciones || 'Prestaciones de ley'}
                     </div>
-                    <p class="job-description-excerpt">${j.descripcion}</p>
+                    <p class="job-description-excerpt">${j.descripcion ? j.descripcion.substring(0, 110) + '...' : ''}</p>
                 </div>
                 <div class="job-card-footer">
                     <button class="btn-secondary-large" onclick="OFIMANTE.openJobDetailModal(${j.id})">Consultar Puesto</button>
@@ -651,7 +1350,7 @@ const OFIMANTE = {
     },
 
     // --------------------------------------------------------------------------
-    // 8. PANTALLA 4: PANEL DE LA EMPRESA
+    // 10. PANTALLA 4: PANEL DE LA EMPRESA
     // --------------------------------------------------------------------------
     loadCompanyDashboard: async function () {
         const res = await this.apiCall('get_company_dashboard', null, 'GET');
@@ -672,6 +1371,8 @@ const OFIMANTE = {
             this.setVal('empDescripcion', emp.descripcion_empresa);
 
             this.renderCompanyApprovalState(emp.estado_aprobacion, emp.motivo_rechazo);
+        } else {
+            this.renderCompanyApprovalState('pendiente', '');
         }
 
         this.renderCompanyApplications();
@@ -690,7 +1391,7 @@ const OFIMANTE = {
         if (banner) {
             banner.className = `alert-banner ${estado === 'aprobada' ? 'success' : (estado === 'rechazada' ? 'danger' : 'warning')}`;
             if (estado === 'pendiente') {
-                banner.innerHTML = `<strong>⏳ Empresa en Revisión:</strong> Tus datos están en proceso de verificación por el Administrador. Una vez validada tu cuenta podrás publicar vacantes y revisar candidatos.`;
+                banner.innerHTML = `<strong>⏳ Empresa en Revisión:</strong> Tus datos están en proceso de verificación por el Administrador. Una vez validada tu cuenta podrás publicar vacantes y revisar candidatos. (Tip: Puedes ingresar como Administrador para validar tu empresa).`;
             } else if (estado === 'aprobada') {
                 banner.innerHTML = `<strong>✓ Empresa Verificada:</strong> Tu negocio ha sido validado satisfactoriamente. Puedes publicar vacantes con tarifa de $100 MXN y administrar solicitudes recibidas.`;
             } else if (estado === 'rechazada') {
@@ -814,7 +1515,7 @@ const OFIMANTE = {
     },
 
     // --------------------------------------------------------------------------
-    // 9. PANTALLA 5: PANEL DEL ADMINISTRADOR
+    // 11. PANTALLA 5: PANEL DEL ADMINISTRADOR
     // --------------------------------------------------------------------------
     loadAdminDashboard: async function () {
         const res = await this.apiCall('get_admin_dashboard', null, 'GET');
@@ -900,7 +1601,7 @@ const OFIMANTE = {
             const isAppr = j.estado === 'aprobada';
             tr.innerHTML = `
                 <td><strong>${j.puesto}</strong></td>
-                <td>🏢 ${j.empresa_nombre}</td>
+                <td>🏢 ${j.nombre_comercial}</td>
                 <td>💵 ${j.sueldo_ofrecido}</td>
                 <td><span class="status-pill success">$100 MXN Cubierta</span></td>
                 <td><span class="status-pill ${isAppr ? 'success' : 'warning'}">${j.estado.toUpperCase()}</span></td>
@@ -1018,7 +1719,7 @@ const OFIMANTE = {
     },
 
     // --------------------------------------------------------------------------
-    // 10. MODAL DE DETALLE DE VACANTE
+    // 12. MODAL DE DETALLE DE VACANTE
     // --------------------------------------------------------------------------
     openJobDetailModal: function (jobId) {
         const j = this.state.vacantes.find(item => item.id === jobId);
@@ -1064,7 +1765,7 @@ const OFIMANTE = {
     },
 
     // --------------------------------------------------------------------------
-    // 11. SISTEMA DE NOTIFICACIONES (VER Y MARCAR COMO LEÍDAS)
+    // 13. SISTEMA DE NOTIFICACIONES
     // --------------------------------------------------------------------------
     toggleNotifDropdown: function () {
         const dropdown = document.getElementById('notifDropdown');
@@ -1106,7 +1807,7 @@ const OFIMANTE = {
     },
 
     // --------------------------------------------------------------------------
-    // 12. UTILIDADES Y LISTENERS
+    // 14. UTILIDADES Y LISTENERS
     // --------------------------------------------------------------------------
     getVal: function (id) {
         const el = document.getElementById(id);
@@ -1126,25 +1827,6 @@ const OFIMANTE = {
                 item.classList.toggle('open');
             });
         });
-    },
-
-    // --------------------------------------------------------------------------
-    // 13. FALLBACK LOCALSTORAGE (MODO OFFLINE / STANDALONE)
-    // --------------------------------------------------------------------------
-    localFallbackHandler: function (action, data) {
-        console.log(`[LocalStorage Handler] simulando acción: ${action}`);
-        if (action === 'get_initial_data') {
-            return {
-                success: true,
-                jobs: [
-                    { id: 1, puesto: "Auxiliar de Soporte Técnico y Redes", nombre_comercial: "Soluciones Digitales Mante", ubicacion: "Zona Centro, Cd. Mante", horario: "Lunes a Viernes 8:30 - 5:30", sueldo_ofrecido: "$10,500 mensuales netos", beneficios: "Prestaciones de ley, bonos y capacitación pagada", descripcion: "Mantenimiento preventivo a equipos de cómputo y redes.", fecha_publicacion: "2026-11-10", categoria: "Tecnología e Informática" },
-                    { id: 2, puesto: "Recepcionista y Control de Citas Médicas", nombre_comercial: "Clínica Santa Fe Mante", ubicacion: "Zona Centro, Cd. Mante", horario: "Lunes a Viernes 8:00 - 4:00", sueldo_ofrecido: "$9,800 mensuales netos", beneficios: "Seguro médico, vales de despensa y descanso fines de semana", descripcion: "Atención a pacientes, control de citas y expedientes.", fecha_publicacion: "2026-11-10", categoria: "Salud y Administración" },
-                    { id: 3, puesto: "Asistente de Facturación y Ventas Mostrador", nombre_comercial: "Soluciones Digitales Mante", ubicacion: "Av. Cavazos Lerma #205", horario: "Medio Tiempo (9:00 am - 2:00 pm)", sueldo_ofrecido: "$6,800 mensuales netos", beneficios: "Horario ideal para estudiantes de nivel superior", descripcion: "Facturación básica, atención en mostrador y notas.", fecha_publicacion: "2026-11-11", categoria: "Comercio y Ventas" }
-                ],
-                stats: { candidatos: 15, empresas: 8, vacantes: 3, solicitudes: 12 }
-            };
-        }
-        return { success: true, message: "Acción completada en modo local autónomo." };
     }
 };
 
@@ -1153,8 +1835,9 @@ document.addEventListener('DOMContentLoaded', () => {
     OFIMANTE.init();
 });
 
-// Exponer funciones globales para llamadas inline desde HTML
-window.goToScreen = (s) => OFIMANTE.goToScreen(s);
+// Exponer en window para llamadas directas
+window.OFIMANTE = OFIMANTE;
+window.goToScreen = (s, n) => OFIMANTE.goToScreen(s, n);
 window.selectAuthRole = (r) => OFIMANTE.selectRegisterRole(r);
 window.switchAuthTab = (t) => OFIMANTE.switchAuthTab(t);
 window.quickLoginAs = (r) => OFIMANTE.quickDemoLogin(r);

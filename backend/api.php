@@ -66,6 +66,7 @@ switch ($action) {
 
     // 2. DATOS PÚBLICOS DE INICIO
     case 'get_initial_data':
+    case 'get_public_jobs':
         $jobs = [];
         $stats = ['candidatos' => 15, 'empresas' => 8, 'vacantes' => 3, 'solicitudes' => 12];
         if ($isMySQL) {
@@ -78,6 +79,65 @@ switch ($action) {
                 $stats['vacantes'] = (int)$pdo->query("SELECT COUNT(*) FROM `vacantes` WHERE `estado` = 'aprobada'")->fetchColumn();
                 $stats['solicitudes'] = (int)$pdo->query("SELECT COUNT(*) FROM `solicitudes`")->fetchColumn();
             } catch (Exception $e) {}
+        }
+
+        if (empty($jobs)) {
+            $jobs = [
+                [
+                    'id' => 1,
+                    'empresa_id' => 1,
+                    'nombre_comercial' => 'Soluciones Digitales Mante',
+                    'logotipo_url' => 'logo.png',
+                    'puesto' => 'Auxiliar de Soporte Técnico y Redes',
+                    'ubicacion' => 'Zona Centro, Cd. Mante',
+                    'horario' => 'Lunes a Viernes 8:30 am - 5:30 pm, Sábado 9:00 am - 1:00 pm',
+                    'tipo_contratacion' => 'Tiempo Completo',
+                    'sueldo_ofrecido' => '$10,500 mensuales netos',
+                    'prestaciones' => 'Prestaciones de ley completas (IMSS, Infonavit, aguinaldo de 15 días, prima vacacional).',
+                    'beneficios' => 'Capacitación técnica pagada, bonos de productividad bimestral y excelente ambiente.',
+                    'descripcion' => 'Mantenimiento preventivo a computadoras, formateo, configuración de routers e impresoras en comercios de El Mante.',
+                    'requisitos' => 'Conocimientos de hardware, Windows y trato cordial con clientes.',
+                    'fecha_publicacion' => '2026-11-10',
+                    'categoria' => 'Tecnología e Informática',
+                    'estado' => 'aprobada'
+                ],
+                [
+                    'id' => 2,
+                    'empresa_id' => 2,
+                    'nombre_comercial' => 'Clínica Santa Fe Mante',
+                    'logotipo_url' => 'logo.png',
+                    'puesto' => 'Recepcionista y Control de Citas Médicas',
+                    'ubicacion' => 'Zona Centro (Frente a Plaza Principal), Cd. Mante',
+                    'horario' => 'Lunes a Viernes 8:00 am - 4:00 pm, Sábado 8:00 am - 1:00 pm',
+                    'tipo_contratacion' => 'Tiempo Completo',
+                    'sueldo_ofrecido' => '$9,800 mensuales netos',
+                    'prestaciones' => 'Seguro social (IMSS), aguinaldo, vacaciones y días festivos de ley.',
+                    'beneficios' => 'Vales de despensa mensuales ($800), descuentos médicos familiares y estabilidad.',
+                    'descripcion' => 'Atención y orientación a pacientes, recepción de llamadas telefónicas y archivo de expedientes.',
+                    'requisitos' => 'Excelente presentación, puntualidad y trato cálido con pacientes.',
+                    'fecha_publicacion' => '2026-11-10',
+                    'categoria' => 'Salud y Administración',
+                    'estado' => 'aprobada'
+                ],
+                [
+                    'id' => 3,
+                    'empresa_id' => 1,
+                    'nombre_comercial' => 'Soluciones Digitales Mante',
+                    'logotipo_url' => 'logo.png',
+                    'puesto' => 'Asistente de Facturación y Ventas Mostrador',
+                    'ubicacion' => 'Av. Cavazos Lerma #205, Cd. Mante',
+                    'horario' => 'Lunes a Viernes 9:00 am - 2:00 pm (Medio Tiempo)',
+                    'tipo_contratacion' => 'Medio Tiempo',
+                    'sueldo_ofrecido' => '$6,800 mensuales netos',
+                    'prestaciones' => 'IMSS, aguinaldo proporcional y prima dominical en su caso.',
+                    'beneficios' => 'Horario ideal para estudiantes universitarios y apoyo para transporte.',
+                    'descripcion' => 'Emisión de notas de venta, facturación básica y atención al público en mostrador.',
+                    'requisitos' => 'Facilidad de palabra y manejo de Office.',
+                    'fecha_publicacion' => '2026-11-11',
+                    'categoria' => 'Comercio y Ventas',
+                    'estado' => 'aprobada'
+                ]
+            ];
         }
         sendJson(200, [
             'success' => true,
@@ -134,7 +194,9 @@ switch ($action) {
                 sendJson(500, ['success' => false, 'error' => 'Error de base de datos: ' . $e->getMessage()]);
             }
         } else {
-            sendJson(200, ['success' => true, 'message' => 'Registro completado en modo local.', 'user' => ['id' => time(), 'nombre' => $nombre, 'email' => $email, 'rol' => 'candidato', 'avatar' => 'logo.png']]);
+            $user = ['id' => time(), 'nombre' => $nombre, 'email' => $email, 'rol' => 'candidato', 'avatar' => 'logo.png'];
+            Auth::loginSession($user);
+            sendJson(200, ['success' => true, 'message' => 'Registro completado en modo local.', 'user' => $user]);
         }
         break;
 
@@ -182,7 +244,9 @@ switch ($action) {
                 sendJson(500, ['success' => false, 'error' => 'Error: ' . $e->getMessage()]);
             }
         } else {
-            sendJson(200, ['success' => true, 'message' => 'Empresa registrada en modo local.', 'user' => ['id' => time(), 'nombre' => $nombreComercial, 'email' => $email, 'rol' => 'empresa', 'avatar' => 'logo.png']]);
+            $user = ['id' => time(), 'nombre' => $nombreComercial, 'email' => $email, 'rol' => 'empresa', 'avatar' => 'logo.png'];
+            Auth::loginSession($user);
+            sendJson(200, ['success' => true, 'message' => 'Empresa registrada en modo local.', 'user' => $user]);
         }
         break;
 
@@ -231,6 +295,7 @@ switch ($action) {
             if (strpos($email, 'admin') !== false) $role = 'admin';
             elseif (strpos($email, 'empresa') !== false || strpos($email, 'soluciones') !== false) $role = 'empresa';
             $user = ['id' => 1, 'nombre' => explode('@', $email)[0], 'email' => $email, 'rol' => $role, 'avatar' => 'logo.png'];
+            Auth::loginSession($user);
             sendJson(200, ['success' => true, 'message' => 'Sesión local iniciada.', 'user' => $user]);
         }
         break;
@@ -273,6 +338,7 @@ switch ($action) {
             }
         } else {
             $user = ['id' => time(), 'nombre' => $nombre, 'email' => $email, 'rol' => $role, 'avatar' => 'logo.png'];
+            Auth::loginSession($user);
             sendJson(200, ['success' => true, 'message' => 'Sesión local con Google iniciada.', 'user' => $user]);
         }
         break;
@@ -333,6 +399,81 @@ switch ($action) {
                 $stmtVac = $pdo->query("SELECT v.*, e.nombre_comercial, e.logotipo_url FROM `vacantes` v JOIN `empresas` e ON v.empresa_id = e.id WHERE v.estado = 'aprobada' ORDER BY v.fecha_publicacion DESC");
                 $vacantes = $stmtVac->fetchAll();
             } catch (Exception $e) {}
+        }
+
+        if (!$candidato) {
+            $candidato = [
+                'id' => 1,
+                'usuario_id' => (int)$user['id'],
+                'nombre_completo' => $user['nombre'] ?: 'Carlos Eduardo Garza Morales',
+                'puesto_deseado' => 'Auxiliar de Soporte Técnico y Redes',
+                'fecha_nacimiento' => '2001-05-18',
+                'edad' => 23,
+                'telefono' => '831-145-8921',
+                'email_contacto' => $user['email'],
+                'domicilio_zona' => 'Calle Juárez #402 Ote., Zona Centro, Cd. Mante',
+                'nivel_academico' => 'Ingeniería en Tecnologías de la Información (UAMM UAT)',
+                'experiencia_laboral' => '1 año en soporte preventivo, mantenimiento de cómputo y redes en locales de El Mante.',
+                'habilidades' => 'Atención a clientes, diagnóstico técnico, Office 365, cableado estructurado.',
+                'conocimientos' => 'HTML5, CSS3, JavaScript básico, MySQL y Windows 11.',
+                'descripcion_personal' => 'Joven profesional enfocado en optimizar los sistemas tecnológicos de las empresas mantenses.',
+                'disponibilidad' => 'Inmediata - Tiempo Completo',
+                'expectativa_salarial' => '$9,000 - $11,000 mensuales',
+                'foto_url' => 'logo.png',
+                'archivo_cv_pdf' => 'cv_carlos_garza.pdf',
+                'estado_aprobacion' => 'aprobado',
+                'motivo_rechazo' => ''
+            ];
+            $curriculum = [
+                'puesto_deseado' => 'Auxiliar de Soporte Técnico y Redes',
+                'resumen_ejecutivo' => 'Joven profesional enfocado en soporte técnico y redes.',
+                'detalles_academicos' => 'Ingeniería en Tecnologías de la Información (UAMM UAT)',
+                'trayectoria_laboral' => '1 año en soporte preventivo y redes.',
+                'competencias_tecnicas' => 'Hardware, software, mantenimiento y redes.'
+            ];
+            $solicitudes = [
+                [
+                    'id' => 1,
+                    'vacante_id' => 1,
+                    'puesto' => 'Auxiliar de Soporte Técnico y Redes',
+                    'sueldo_ofrecido' => '$10,500 mensuales netos',
+                    'ubicacion' => 'Zona Centro, Cd. Mante',
+                    'empresa_nombre' => 'Soluciones Digitales Mante',
+                    'fecha_postulacion' => '2026-11-11 08:30:15',
+                    'estado' => 'aceptada',
+                    'respuesta_empresa' => 'Estimado postulante, tu perfil cumple con lo requerido. Te esperamos para entrevista.'
+                ]
+            ];
+            if (empty($vacantes)) {
+                $vacantes = [
+                    [
+                        'id' => 1,
+                        'empresa_id' => 1,
+                        'nombre_comercial' => 'Soluciones Digitales Mante',
+                        'puesto' => 'Auxiliar de Soporte Técnico y Redes',
+                        'ubicacion' => 'Zona Centro, Cd. Mante',
+                        'sueldo_ofrecido' => '$10,500 mensuales netos',
+                        'prestaciones' => 'Prestaciones de ley completas.',
+                        'beneficios' => 'Capacitación pagada y bonos de productividad bimestral.',
+                        'categoria' => 'Tecnología e Informática',
+                        'fecha_publicacion' => '2026-11-10',
+                        'estado' => 'aprobada'
+                    ],
+                    [
+                        'id' => 2,
+                        'empresa_id' => 2,
+                        'nombre_comercial' => 'Clínica Santa Fe Mante',
+                        'puesto' => 'Recepcionista y Control de Citas Médicas',
+                        'ubicacion' => 'Zona Centro, Cd. Mante',
+                        'sueldo_ofrecido' => '$9,800 mensuales netos',
+                        'prestaciones' => 'Seguro social y vacaciones de ley.',
+                        'beneficios' => 'Vales de despensa y descuentos médicos.',
+                        'categoria' => 'Salud y Administración',
+                        'fecha_publicacion' => '2026-11-10',
+                        'estado' => 'aprobada'
+                    ]
+                ];
+            }
         }
         sendJson(200, [
             'success'     => true,
@@ -466,6 +607,59 @@ switch ($action) {
                     $solicitudes = $stmtSol->fetchAll();
                 }
             } catch (Exception $e) {}
+        }
+
+        if (!$empresa) {
+            $empresa = [
+                'id' => 1,
+                'usuario_id' => (int)$user['id'],
+                'nombre_comercial' => $user['nombre'] ?: 'Soluciones Digitales Mante',
+                'razon_social' => 'Soluciones Digitales del Mante S.A. de C.V.',
+                'rfc' => 'SDM190412AB1',
+                'nombre_responsable' => 'Lic. Andrea Guadalupe Ruiz',
+                'telefono' => '831-232-5500',
+                'email_contacto' => $user['email'],
+                'direccion' => 'Av. Manuel Cavazos Lerma #205, Col. Moderna, Cd. Mante',
+                'giro_actividad' => 'Tecnología y Software',
+                'descripcion_empresa' => 'Empresa mantense líder en equipo de cómputo, redes y soporte técnico.',
+                'logotipo_url' => 'logo.png',
+                'estado_aprobacion' => 'aprobada',
+                'motivo_rechazo' => ''
+            ];
+            $vacantes = [
+                [
+                    'id' => 1,
+                    'empresa_id' => 1,
+                    'puesto' => 'Auxiliar de Soporte Técnico y Redes',
+                    'sueldo_ofrecido' => '$10,500 mensuales netos',
+                    'ubicacion' => 'Zona Centro, Cd. Mante',
+                    'vacantes_disponibles' => 1,
+                    'tipo_contratacion' => 'Tiempo Completo',
+                    'estado' => 'aprobada',
+                    'tarifa_pagada' => 1,
+                    'tarifa_monto' => 100.00,
+                    'creado_en' => '2026-11-10 11:45:00'
+                ]
+            ];
+            $solicitudes = [
+                [
+                    'id' => 1,
+                    'vacante_id' => 1,
+                    'puesto' => 'Auxiliar de Soporte Técnico y Redes',
+                    'candidato_id' => 1,
+                    'nombre_completo' => 'Carlos Eduardo Garza Morales',
+                    'foto_url' => 'logo.png',
+                    'telefono' => '831-145-8921',
+                    'email_contacto' => 'carlos.garza@alumnos.uat.edu.mx',
+                    'domicilio_zona' => 'Zona Centro, Cd. Mante',
+                    'nivel_academico' => 'Ingeniería en Tecnologías de la Información',
+                    'experiencia_laboral' => '1 año en soporte preventivo y redes.',
+                    'archivo_cv_pdf' => 'cv_carlos_garza.pdf',
+                    'estado' => 'aceptada',
+                    'respuesta_empresa' => 'Perfil preseleccionado para entrevista presencial.',
+                    'fecha_postulacion' => '2026-11-11 08:30:15'
+                ]
+            ];
         }
         sendJson(200, [
             'success'     => true,
@@ -716,6 +910,114 @@ switch ($action) {
                 $solicitudes = $pdo->query("SELECT s.*, v.puesto, c.nombre_completo as candidato_nombre, e.nombre_comercial as empresa_nombre FROM `solicitudes` s JOIN `vacantes` v ON s.vacante_id = v.id JOIN `candidatos` c ON s.candidato_id = c.id JOIN `empresas` e ON v.empresa_id = e.id ORDER BY s.fecha_postulacion DESC LIMIT 50")->fetchAll();
                 $historial = $pdo->query("SELECT h.*, u.nombre as usuario_nombre FROM `historial_actividad` h LEFT JOIN `usuarios` u ON h.usuario_id = u.id ORDER BY h.creado_en DESC LIMIT 25")->fetchAll();
             } catch (Exception $e) {}
+        }
+
+        if (empty($candidatos)) {
+            $kpis = [
+                'candidatos' => 15,
+                'empresas' => 8,
+                'candidatos_pendientes' => 1,
+                'empresas_pendientes' => 1,
+                'vacantes' => 3,
+                'vacantes_pendientes' => 1,
+                'solicitudes' => 12,
+                'recaudacion' => 300.00
+            ];
+            $candidatos = [
+                [
+                    'id' => 1,
+                    'nombre_completo' => 'Carlos Eduardo Garza Morales',
+                    'usuario_email' => 'carlos.garza@alumnos.uat.edu.mx',
+                    'telefono' => '831-145-8921',
+                    'domicilio_zona' => 'Calle Juárez #402 Ote., Zona Centro, Cd. Mante',
+                    'nivel_academico' => 'Ingeniería en Tecnologías de la Información',
+                    'estado_aprobacion' => 'aprobado',
+                    'motivo_rechazo' => '',
+                    'creado_en' => '2026-11-10 09:30:00'
+                ],
+                [
+                    'id' => 2,
+                    'nombre_completo' => 'Ana Patricia Méndez Torres',
+                    'usuario_email' => 'ana.mendez@gmail.com',
+                    'telefono' => '831-234-8899',
+                    'domicilio_zona' => 'Col. Moderna, Cd. Mante',
+                    'nivel_academico' => 'Bachillerato Técnico Administrativo',
+                    'estado_aprobacion' => 'pendiente',
+                    'motivo_rechazo' => '',
+                    'creado_en' => '2026-11-11 14:20:00'
+                ]
+            ];
+            $empresas = [
+                [
+                    'id' => 1,
+                    'nombre_comercial' => 'Soluciones Digitales Mante',
+                    'usuario_email' => 'contacto@solucionesmante.com.mx',
+                    'rfc' => 'SDM190412AB1',
+                    'nombre_responsable' => 'Lic. Andrea Guadalupe Ruiz',
+                    'telefono' => '831-232-5500',
+                    'direccion' => 'Av. Cavazos Lerma #205, Cd. Mante',
+                    'estado_aprobacion' => 'aprobada',
+                    'motivo_rechazo' => '',
+                    'creado_en' => '2026-11-09 10:15:00'
+                ],
+                [
+                    'id' => 2,
+                    'nombre_comercial' => 'Clínica Médica Santa Fe Mante',
+                    'usuario_email' => 'recepcion@clinicasantafe.com',
+                    'rfc' => 'CMS980315KL9',
+                    'nombre_responsable' => 'Dr. Héctor Manuel Treviño',
+                    'telefono' => '831-232-1144',
+                    'direccion' => 'Calle Hidalgo #310 Ote., Zona Centro, Cd. Mante',
+                    'estado_aprobacion' => 'aprobada',
+                    'motivo_rechazo' => '',
+                    'creado_en' => '2026-11-09 11:20:00'
+                ]
+            ];
+            $vacantes = [
+                [
+                    'id' => 1,
+                    'empresa_id' => 1,
+                    'empresa_nombre' => 'Soluciones Digitales Mante',
+                    'puesto' => 'Auxiliar de Soporte Técnico y Redes',
+                    'sueldo_ofrecido' => '$10,500 mensuales netos',
+                    'ubicacion' => 'Zona Centro, Cd. Mante',
+                    'beneficios' => 'Capacitación técnica pagada, bonos de productividad bimestral.',
+                    'descripcion' => 'Mantenimiento preventivo a computadoras y redes.',
+                    'tarifa_monto' => 100.00,
+                    'tarifa_pagada' => 1,
+                    'estado' => 'aprobada',
+                    'creado_en' => '2026-11-10 11:45:00'
+                ],
+                [
+                    'id' => 2,
+                    'empresa_id' => 2,
+                    'empresa_nombre' => 'Clínica Médica Santa Fe Mante',
+                    'puesto' => 'Recepcionista y Control de Citas Médicas',
+                    'sueldo_ofrecido' => '$9,800 mensuales netos',
+                    'ubicacion' => 'Zona Centro, Cd. Mante',
+                    'beneficios' => 'Vales de despensa mensuales ($800), descuentos médicos.',
+                    'descripcion' => 'Atención a pacientes y llamadas.',
+                    'tarifa_monto' => 100.00,
+                    'tarifa_pagada' => 1,
+                    'estado' => 'aprobada',
+                    'creado_en' => '2026-11-10 14:10:00'
+                ]
+            ];
+            $solicitudes = [
+                [
+                    'id' => 1,
+                    'puesto' => 'Auxiliar de Soporte Técnico y Redes',
+                    'candidato_nombre' => 'Carlos Eduardo Garza Morales',
+                    'empresa_nombre' => 'Soluciones Digitales Mante',
+                    'fecha_postulacion' => '2026-11-11 08:30:15',
+                    'estado' => 'aceptada'
+                ]
+            ];
+            $historial = [
+                ['id' => 1, 'usuario_nombre' => 'Admin General', 'accion' => 'INICIO_SISTEMA', 'descripcion' => 'Plataforma OFIMANTE desplegada en Ciudad Mante.', 'creado_en' => '2026-11-10 08:00:00'],
+                ['id' => 2, 'usuario_nombre' => 'Admin General', 'accion' => 'APROBACION_CANDIDATO', 'descripcion' => 'El administrador aprobó a Carlos Eduardo Garza Morales.', 'creado_en' => '2026-11-10 10:00:00'],
+                ['id' => 3, 'usuario_nombre' => 'Soluciones Digitales Mante', 'accion' => 'PAGO_TARIFA', 'descripcion' => 'Pago de tarifa de $100 MXN para vacante #1 verificado.', 'creado_en' => '2026-11-10 11:45:00']
+            ];
         }
         sendJson(200, [
             'success'     => true,

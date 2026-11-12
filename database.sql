@@ -237,17 +237,19 @@ CREATE TABLE `historial_actividad` (
 
 -- ==============================================================================
 -- DATOS SEMILLA (SEED DATA) DE DEMOSTRACIÓN PARA CIUDAD MANTE
--- Contraseñas con BCRYPT ('Admin1234!', 'Candidato123!', 'Empresa123!')
--- Hash: $2y$10$wE4p8L2mK9X5Q1rB3c4v.cK7QpYm6Q0k5h8QzM4C2d8V6A9wP0Gy (Demo universal)
+-- Contraseñas con BCRYPT verificado con password_verify():
+-- Admin1234!    => $2y$10$sgu/pCTGZqfiMgzFzVEoe.uLYvnC7JriYyE/om18D4QMldnjT46W6
+-- Candidato123! => $2y$10$mLPAzbYeXeOEw5hX3VrfmeIzQDA0aEV2wHihmC2rF7Wk07gX8ZzLy
+-- Empresa123!   => $2y$10$sqIFzN8qk19iK5YaYMTpXeSuN0Ie7uIP1H37F20ooPCqByEp7.eJu
 -- ==============================================================================
 
 -- 1. Usuarios
 INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password`, `rol`, `estado`, `avatar`) VALUES
-(1, 'Administrador General Mante', 'admin@ofimante.com', '$2y$10$wE4p8L2mK9X5Q1rB3c4v.cK7QpYm6Q0k5h8QzM4C2d8V6A9wP0Gy', 'admin', 'activo', 'logo.png'),
-(2, 'Carlos Eduardo Garza Morales', 'carlos.garza@alumnos.uat.edu.mx', '$2y$10$wE4p8L2mK9X5Q1rB3c4v.cK7QpYm6Q0k5h8QzM4C2d8V6A9wP0Gy', 'candidato', 'activo', 'logo.png'),
-(3, 'Soluciones Digitales del Mante', 'contacto@solucionesmante.com.mx', '$2y$10$wE4p8L2mK9X5Q1rB3c4v.cK7QpYm6Q0k5h8QzM4C2d8V6A9wP0Gy', 'empresa', 'activo', 'logo.png'),
-(4, 'Clínica Médica Santa Fe Mante', 'recepcion@clinicasantafe.com', '$2y$10$wE4p8L2mK9X5Q1rB3c4v.cK7QpYm6Q0k5h8QzM4C2d8V6A9wP0Gy', 'empresa', 'activo', 'logo.png'),
-(5, 'Ana Patricia Méndez Torres', 'ana.mendez@gmail.com', '$2y$10$wE4p8L2mK9X5Q1rB3c4v.cK7QpYm6Q0k5h8QzM4C2d8V6A9wP0Gy', 'candidato', 'activo', 'logo.png');
+(1, 'Administrador General Mante', 'admin@ofimante.com', '$2y$10$sgu/pCTGZqfiMgzFzVEoe.uLYvnC7JriYyE/om18D4QMldnjT46W6', 'admin', 'activo', 'logo.png'),
+(2, 'Carlos Eduardo Garza Morales', 'carlos.garza@alumnos.uat.edu.mx', '$2y$10$mLPAzbYeXeOEw5hX3VrfmeIzQDA0aEV2wHihmC2rF7Wk07gX8ZzLy', 'candidato', 'activo', 'logo.png'),
+(3, 'Soluciones Digitales del Mante', 'contacto@solucionesmante.com.mx', '$2y$10$sqIFzN8qk19iK5YaYMTpXeSuN0Ie7uIP1H37F20ooPCqByEp7.eJu', 'empresa', 'activo', 'logo.png'),
+(4, 'Clínica Médica Santa Fe Mante', 'recepcion@clinicasantafe.com', '$2y$10$sqIFzN8qk19iK5YaYMTpXeSuN0Ie7uIP1H37F20ooPCqByEp7.eJu', 'empresa', 'activo', 'logo.png'),
+(5, 'Ana Patricia Méndez Torres', 'ana.mendez@gmail.com', '$2y$10$mLPAzbYeXeOEw5hX3VrfmeIzQDA0aEV2wHihmC2rF7Wk07gX8ZzLy', 'candidato', 'activo', 'logo.png');
 
 -- 2. Candidatos
 INSERT INTO `candidatos` (`id`, `usuario_id`, `nombre_completo`, `fecha_nacimiento`, `edad`, `telefono`, `email_contacto`, `domicilio_zona`, `nivel_academico`, `experiencia_laboral`, `habilidades`, `conocimientos`, `descripcion_personal`, `disponibilidad`, `expectativa_salarial`, `archivo_cv_pdf`, `foto_url`, `estado_aprobacion`, `aprobado_por`, `fecha_aprobacion`) VALUES

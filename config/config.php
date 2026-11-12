@@ -4,12 +4,21 @@
  * Ciudad Mante, Tamaulipas, México
  */
 
-// Iniciar sesión con configuración de seguridad estricta
+// Configurar directorio seguro y con permisos para sesiones
+$sessionSavePath = __DIR__ . '/../uploads/sessions';
+if (!file_exists($sessionSavePath)) {
+    @mkdir($sessionSavePath, 0777, true);
+}
+if (is_dir($sessionSavePath) && is_writable($sessionSavePath)) {
+    @session_save_path($sessionSavePath);
+}
+
+// Iniciar sesión con configuración segura
 if (session_status() === PHP_SESSION_NONE) {
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.use_only_cookies', 1);
-    ini_set('session.cookie_samesite', 'Lax');
-    session_start();
+    @ini_set('session.cookie_httponly', 1);
+    @ini_set('session.use_only_cookies', 1);
+    @ini_set('session.cookie_samesite', 'Lax');
+    @session_start();
 }
 
 // Configuración general de la plataforma
@@ -43,9 +52,10 @@ define('DIR_UPLOADS', DIR_ROOT . '/uploads');
 define('DIR_UPLOADS_CVS', DIR_UPLOADS . '/cvs');
 define('DIR_UPLOADS_FOTOS', DIR_UPLOADS . '/fotos');
 define('DIR_UPLOADS_LOGOS', DIR_UPLOADS . '/logos');
+define('DIR_UPLOADS_SESSIONS', DIR_UPLOADS . '/sessions');
 
 // Asegurar existencia de directorios de subida
-$uploadDirs = [DIR_UPLOADS, DIR_UPLOADS_CVS, DIR_UPLOADS_FOTOS, DIR_UPLOADS_LOGOS];
+$uploadDirs = [DIR_UPLOADS, DIR_UPLOADS_CVS, DIR_UPLOADS_FOTOS, DIR_UPLOADS_LOGOS, DIR_UPLOADS_SESSIONS];
 foreach ($uploadDirs as $dir) {
     if (!file_exists($dir)) {
         @mkdir($dir, 0777, true);
@@ -67,4 +77,3 @@ function verifyCsrfToken(?string $token): bool {
     }
     return hash_equals($_SESSION['csrf_token'], $token);
 }
-
