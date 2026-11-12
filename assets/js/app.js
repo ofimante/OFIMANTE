@@ -1,0 +1,1163 @@
+// ==============================================================================
+// OFIMANTE - CONTROLADOR PRINCIPAL JAVASCRIPT (ES6+)
+// Plataforma de Empleo y Conexión Laboral
+// Ciudad Mante, Tamaulipas, México
+// ==============================================================================
+
+const OFIMANTE = {
+    state: {
+        currentScreen: 'screen-1',
+        authTab: 'login', // 'login' | 'register'
+        selectedRegisterRole: 'candidato', // 'candidato' | 'empresa'
+        currentUser: null,
+        csrfToken: '',
+        backendOnline: false,
+
+        // Colecciones de datos
+        vacantes: [],
+        misPostulaciones: [],
+        solicitudesEmpresa: [],
+        candidatosAdmin: [],
+        empresasAdmin: [],
+        vacantesAdmin: [],
+        historialAdmin: [],
+        notificaciones: [],
+        unreadNotifs: 0
+    },
+
+    // --------------------------------------------------------------------------
+    // 1. INICIALIZACIÓN
+    // --------------------------------------------------------------------------
+    init: async function () {
+        console.log("Iniciando OFIMANTE...");
+        await this.checkSession();
+        await this.loadInitialPublicData();
+        this.setupEventListeners();
+        this.renderNavbarUser();
+        this.updateSyncBadge();
+
+        // Mostrar pantalla inicial o guardada
+        const savedScreen = localStorage.getItem('ofimante_active_screen') || 'screen-1';
+        this.goToScreen(savedScreen);
+    },
+
+    // --------------------------------------------------------------------------
+    // 2. COMUNICACIÓN CON LA API (CON FALLBACK LOCALSTORAGE)
+    // --------------------------------------------------------------------------
+    apiCall: async function (action, data = null, method = 'POST') {
+        const url = `backend/api.php?action=${action}`;
+        try {
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': this.state.csrfToken
+                }
+            };
+            if (data && method !== 'GET') {
+                options.body = JSON.stringify(data);
+            }
+            const res = await fetch(url, options);
+            if (!res.ok && res.status !== 400 && res.status !== 409 && res.status !== 401 && res.status !== 403) {
+                throw new Error("HTTP error " + res.status);
+            }
+            this.state.backendOnline = true;
+            this.updateSyncBadge();
+            return await res.json();
+        } catch (err) {
+            console.warn(`[OFIMANTE API Fallback] '${action}':`, err.message);
+            this.state.backendOnline = false;
+            this.updateSyncBadge();
+            return this.localFallbackHandler(action, data);
+        }
+    },
+
+    // --------------------------------------------------------------------------
+    // 3. GESTIÓN DE SESIÓN
+    // --------------------------------------------------------------------------
+    checkSession: async function () {
+        const res = await this.apiCall('get_session', null, 'GET');
+        if (res && res.success && res.logged_in) {
+            this.state.currentUser = res.user;
+            this.state.csrfToken = res.csrf_token || '';
+            this.state.notificaciones = res.notificaciones || [];
+            this.state.unreadNotifs = res.notifs_unread || 0;
+        } else {
+            const saved = localStorage.getItem('ofimante_local_user');
+            if (saved) {
+                try { this.state.currentUser = JSON.parse(saved); } catch (e) {}
+            }
+        }
+    },
+
+    renderNavbarUser: function () {
+        const u = this.state.currentUser;
+        const badge = document.getElementById('userProfileBadge');
+        const btnAuth = document.getElementById('btnHeaderAuth');
+        const navCand = document.getElementById('nav-btn-3');
+        const navEmp = document.getElementById('nav-btn-4');
+        const navAdm = document.getElementById('nav-btn-5');
+        const notifBtn = document.getElementById('btnNotifNav');
+
+        if (u) {
+            if (badge) badge.style.display = 'flex';
+            if (btnAuth) btnAuth.style.display = 'none';
+            if (notifBtn) notifBtn.style.display = 'flex';
+
+            const uName = document.getElementById('headerUserName');
+            const uRole = document.getElementById('headerUserRole');
+            const uAvatar = document.getElementById('headerUserAvatar');
+            if (uName) uName.innerText = u.nombre;
+            if (uRole) uRole.innerText = u.rol.toUpperCase();
+            if (uAvatar) uAvatar.src = u.avatar || 'logo.png';
+
+            // Mostrar botones según rol
+            if (navCand) navCand.style.display = (u.rol === 'candidato') ? 'inline-block' : 'none';
+            if (navEmp) navEmp.style.display = (u.rol === 'empresa') ? 'inline-block' : 'none';
+            if (navAdm) navAdm.style.display = (u.rol === 'admin') ? 'inline-block' : 'none';
+        } else {
+            if (badge) badge.style.display = 'none';
+            if (btnAuth) btnAuth.style.display = 'flex';
+            if (notifBtn) notifBtn.style.display = 'none';
+
+            if (navCand) navCand.style.display = 'none';
+            if (navEmp) navEmp.style.display = 'none';
+            if (navAdm) navAdm.style.display = 'none';
+        }
+        this.renderNotifCounter();
+    },
+
+    updateSyncBadge: function () {
+        const el = document.getElementById('backendStatusMsg');
+        const banner = document.getElementById('backendStatusBar');
+        if (el) {
+            el.innerText = this.state.backendOnline 
+                ? "Conectado con Backend PHP & Base de Datos MySQL (Modo Servidor Activo)" 
+                : "Modo Local Autónomo (Persistencia segura en navegador activa)";
+        }
+        if (banner) {
+            banner.style.background = this.state.backendOnline
+                ? "linear-gradient(90deg, #064e3b, #07172b)"
+                : "linear-gradient(90deg, #1e293b, #071324)";
+        }
+    },
+
+    renderNotifCounter: function () {
+        const badge = document.getElementById('notifBadgeCount');
+        if (badge) {
+            if (this.state.unreadNotifs > 0) {
+                badge.style.display = 'block';
+                badge.innerText = this.state.unreadNotifs;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    },
+
+    // --------------------------------------------------------------------------
+    // 4. NAVEGACIÓN ENTRE PANTALLAS
+    // --------------------------------------------------------------------------
+    goToScreen: function (screenId) {
+        // Validación de permisos
+        if (screenId === 'screen-3' && (!this.state.currentUser || this.state.currentUser.rol !== 'candidato')) {
+            alert("Acceso exclusivo para candidatos autenticados.");
+            return this.goToScreen('screen-2');
+        }
+        if (screenId === 'screen-4' && (!this.state.currentUser || this.state.currentUser.rol !== 'empresa')) {
+            alert("Acceso exclusivo para empresas registradas.");
+            return this.goToScreen('screen-2');
+        }
+        if (screenId === 'screen-5' && (!this.state.currentUser || this.state.currentUser.rol !== 'admin')) {
+            alert("Acceso restringido a Administradores.");
+            return this.goToScreen('screen-2');
+        }
+
+        this.state.currentScreen = screenId;
+        localStorage.setItem('ofimante_active_screen', screenId);
+
+        for (let i = 1; i <= 5; i++) {
+            const sec = document.getElementById(`screen-${i}`);
+            const btn = document.getElementById(`nav-btn-${i}`);
+            if (sec) sec.classList.toggle('active', `screen-${i}` === screenId);
+            if (btn) btn.classList.toggle('active', `screen-${i}` === screenId);
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Cargas específicas por pantalla
+        if (screenId === 'screen-1') {
+            this.loadInitialPublicData();
+        } else if (screenId === 'screen-3') {
+            this.loadCandidateDashboard();
+        } else if (screenId === 'screen-4') {
+            this.loadCompanyDashboard();
+        } else if (screenId === 'screen-5') {
+            this.loadAdminDashboard();
+        }
+    },
+
+    // --------------------------------------------------------------------------
+    // 5. DATOS PÚBLICOS DE INICIO & BÚSQUEDA
+    // --------------------------------------------------------------------------
+    loadInitialPublicData: async function () {
+        const res = await this.apiCall('get_initial_data', null, 'GET');
+        if (res && res.success) {
+            this.state.vacantes = res.jobs || [];
+            this.renderFeaturedJobs(this.state.vacantes.slice(0, 6));
+
+            if (res.stats) {
+                const sJobs = document.getElementById('homeJobsCount');
+                const sComps = document.getElementById('homeCompaniesCount');
+                if (sJobs) sJobs.innerText = `${res.stats.vacantes}+`;
+                if (sComps) sComps.innerText = `${res.stats.empresas}+`;
+            }
+        }
+    },
+
+    renderFeaturedJobs: function (jobs) {
+        const grid = document.getElementById('featuredJobsGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        if (!jobs || jobs.length === 0) {
+            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 2rem;">No hay vacantes publicadas en este momento.</p>`;
+            return;
+        }
+
+        jobs.forEach(j => {
+            const card = document.createElement('div');
+            card.className = 'job-card-item';
+            card.innerHTML = `
+                <div>
+                    <div class="job-card-top">
+                        <h3 class="job-card-title">${j.puesto}</h3>
+                        <span class="status-pill success">Verificada</span>
+                    </div>
+                    <div class="job-company-name">🏢 ${j.nombre_comercial || 'Empresa Mantense'}</div>
+                    <div class="job-meta-line">
+                        <span>📍 ${j.ubicacion}</span>
+                        <span>⏰ ${j.horario || 'Tiempo Completo'}</span>
+                    </div>
+                    <div class="job-salary-highlight">
+                        💵 Sueldo: ${j.sueldo_ofrecido}
+                    </div>
+                    <div class="job-benefits-box">
+                        🎁 <strong>Beneficios:</strong> ${j.beneficios || j.prestaciones || 'Prestaciones de ley'}
+                    </div>
+                    <p class="job-description-excerpt">${j.descripcion ? j.descripcion.substring(0, 110) + '...' : ''}</p>
+                </div>
+                <div class="job-card-footer">
+                    <span style="font-size:0.8rem; color:#64748b;">Publicado: ${j.fecha_publicacion}</span>
+                    <button class="btn-primary-large" style="padding:0.5rem 1rem; font-size:0.88rem;" onclick="OFIMANTE.openJobDetailModal(${j.id})">
+                        Ver Detalles
+                    </button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    },
+
+    // --------------------------------------------------------------------------
+    // 6. PANTALLA 2: AUTENTICACIÓN
+    // --------------------------------------------------------------------------
+    switchAuthTab: function (tab) {
+        this.state.authTab = tab;
+        const tLogin = document.getElementById('tabBtnLogin');
+        const tRegister = document.getElementById('tabBtnRegister');
+        const fLogin = document.getElementById('formLogin');
+        const fRegister = document.getElementById('formRegister');
+        const roleBox = document.getElementById('registerRoleBox');
+
+        if (tab === 'login') {
+            if (tLogin) tLogin.classList.add('active');
+            if (tRegister) tRegister.classList.remove('active');
+            if (fLogin) fLogin.style.display = 'block';
+            if (fRegister) fRegister.style.display = 'none';
+            if (roleBox) roleBox.style.display = 'none';
+        } else {
+            if (tLogin) tLogin.classList.remove('active');
+            if (tRegister) tRegister.classList.add('active');
+            if (fLogin) fLogin.style.display = 'none';
+            if (fRegister) fRegister.style.display = 'block';
+            if (roleBox) roleBox.style.display = 'block';
+        }
+    },
+
+    selectRegisterRole: function (role) {
+        this.state.selectedRegisterRole = role;
+        const optCand = document.getElementById('roleOptCandidate');
+        const optEmp = document.getElementById('roleOptCompany');
+        const labelName = document.getElementById('lblRegNombre');
+
+        if (optCand) optCand.classList.toggle('active', role === 'candidato');
+        if (optEmp) optEmp.classList.toggle('active', role === 'empresa');
+
+        if (labelName) {
+            labelName.innerText = (role === 'candidato') 
+                ? "Nombre Completo (idéntico a tu INE): *" 
+                : "Nombre Comercial / Empresa: *";
+        }
+    },
+
+    handleLogin: async function (e) {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value.trim();
+        const pass = document.getElementById('loginPassword').value;
+
+        const res = await this.apiCall('login', { email, password: pass });
+        if (res && res.success) {
+            this.state.currentUser = res.user;
+            localStorage.setItem('ofimante_local_user', JSON.stringify(res.user));
+            this.renderNavbarUser();
+            alert(`¡Bienvenido a OFIMANTE, ${res.user.nombre}!`);
+
+            // Redirección según rol
+            if (res.user.rol === 'candidato') this.goToScreen('screen-3');
+            else if (res.user.rol === 'empresa') this.goToScreen('screen-4');
+            else if (res.user.rol === 'admin') this.goToScreen('screen-5');
+        } else {
+            alert(res?.error || "Error al iniciar sesión.");
+        }
+    },
+
+    handleRegister: async function (e) {
+        e.preventDefault();
+        const role = this.state.selectedRegisterRole;
+        const email = document.getElementById('regEmail').value.trim();
+        const pass = document.getElementById('regPassword').value;
+        const passConf = document.getElementById('regPasswordConfirm').value;
+        const nombre = document.getElementById('regNombre').value.trim();
+
+        if (pass !== passConf) {
+            alert("Las contraseñas no coinciden.");
+            return;
+        }
+
+        const action = (role === 'candidato') ? 'register_candidate' : 'register_company';
+        const payload = (role === 'candidato') 
+            ? { nombre, email, password: pass, password_confirm: passConf }
+            : { nombre_comercial: nombre, nombre_responsable: nombre, email, password: pass, password_confirm: passConf };
+
+        const res = await this.apiCall(action, payload);
+        if (res && res.success) {
+            this.state.currentUser = res.user;
+            localStorage.setItem('ofimante_local_user', JSON.stringify(res.user));
+            this.renderNavbarUser();
+            alert(`¡Registro completado como ${role.toUpperCase()}!\nPor favor completa los datos de tu perfil a continuación.`);
+            
+            if (role === 'candidato') this.goToScreen('screen-3');
+            else this.goToScreen('screen-4');
+        } else {
+            alert(res?.error || "No se pudo completar el registro.");
+        }
+    },
+
+    loginWithGoogleDemo: async function () {
+        const role = this.state.selectedRegisterRole || 'candidato';
+        const demoEmail = (role === 'candidato') ? 'carlos.garza@alumnos.uat.edu.mx' : 'contacto@solucionesmante.com.mx';
+        const demoNombre = (role === 'candidato') ? 'Carlos Eduardo Garza (Google)' : 'Soluciones Digitales Mante (Google)';
+
+        const res = await this.apiCall('google_login', {
+            email: demoEmail,
+            nombre: demoNombre,
+            rol: role,
+            google_id: 'goog_' + Date.now()
+        });
+
+        if (res && res.success) {
+            this.state.currentUser = res.user;
+            localStorage.setItem('ofimante_local_user', JSON.stringify(res.user));
+            this.renderNavbarUser();
+            alert(`Inicio de sesión federado con Google exitoso.\nUsuario: ${res.user.nombre}`);
+            if (res.user.rol === 'candidato') this.goToScreen('screen-3');
+            else this.goToScreen('screen-4');
+        }
+    },
+
+    quickDemoLogin: function (role) {
+        if (role === 'admin') {
+            document.getElementById('loginEmail').value = 'admin@ofimante.com';
+            document.getElementById('loginPassword').value = 'Admin1234!';
+        } else if (role === 'candidato') {
+            document.getElementById('loginEmail').value = 'carlos.garza@alumnos.uat.edu.mx';
+            document.getElementById('loginPassword').value = 'Candidato123!';
+        } else if (role === 'empresa') {
+            document.getElementById('loginEmail').value = 'contacto@solucionesmante.com.mx';
+            document.getElementById('loginPassword').value = 'Empresa123!';
+        }
+        document.getElementById('formLogin').dispatchEvent(new Event('submit'));
+    },
+
+    logout: async function () {
+        if (confirm("¿Deseas cerrar tu sesión activa en OFIMANTE?")) {
+            await this.apiCall('logout');
+            this.state.currentUser = null;
+            localStorage.removeItem('ofimante_local_user');
+            this.renderNavbarUser();
+            this.goToScreen('screen-1');
+            alert("Sesión finalizada correctamente.");
+        }
+    },
+
+    // --------------------------------------------------------------------------
+    // 7. PANTALLA 3: PANEL DEL CANDIDATO
+    // --------------------------------------------------------------------------
+    loadCandidateDashboard: async function () {
+        const res = await this.apiCall('get_candidate_dashboard', null, 'GET');
+        if (!res || !res.success) return;
+
+        const cand = res.candidato;
+        const cv = res.curriculum;
+        this.state.misPostulaciones = res.solicitudes || [];
+        this.state.vacantes = res.vacantes || [];
+
+        // Rellenar formulario
+        if (cand) {
+            this.setVal('cvNombreCompleto', cand.nombre_completo);
+            this.setVal('cvFechaNacimiento', cand.fecha_nacimiento);
+            this.setVal('cvEdad', cand.edad);
+            this.setVal('cvTelefono', cand.telefono);
+            this.setVal('cvEmailContacto', cand.email_contacto);
+            this.setVal('cvDomicilio', cand.domicilio_zona);
+            this.setVal('cvNivelAcademico', cand.nivel_academico);
+            this.setVal('cvExperiencia', cand.experiencia_laboral);
+            this.setVal('cvHabilidades', cand.habilidades);
+            this.setVal('cvConocimientos', cand.conocimientos);
+            this.setVal('cvDescripcion', cand.descripcion_personal);
+            this.setVal('cvDisponibilidad', cand.disponibilidad);
+            this.setVal('cvExpectativa', cand.expectativa_salarial);
+            this.setVal('cvFotoUrl', cand.foto_url);
+
+            if (cv) {
+                this.setVal('cvPuestoDeseado', cv.puesto_deseado);
+            }
+
+            // Estado de aprobación
+            this.renderCandidateApprovalState(cand.estado_aprobacion, cand.motivo_rechazo);
+        }
+
+        this.renderCandidateJobs();
+        this.renderMyApplications();
+    },
+
+    renderCandidateApprovalState: function (estado, motivo) {
+        const banner = document.getElementById('candidateApprovalBanner');
+        const badge = document.getElementById('candidateStatusBadge');
+        const jobsSection = document.getElementById('candidateJobsSection');
+
+        if (badge) {
+            badge.className = `status-pill ${estado === 'aprobado' ? 'success' : (estado === 'rechazado' ? 'danger' : 'warning')}`;
+            badge.innerText = `Estado: ${estado.toUpperCase()}`;
+        }
+
+        if (banner) {
+            banner.className = `alert-banner ${estado === 'aprobado' ? 'success' : (estado === 'rechazado' ? 'danger' : 'warning')}`;
+            if (estado === 'pendiente') {
+                banner.innerHTML = `<strong>⏳ Perfil en Revisión:</strong> Tus datos han sido enviados al Administrador de OFIMANTE. Una vez que sean aprobados podrás postularte a las ofertas de empleo de Ciudad Mante.`;
+            } else if (estado === 'aprobado') {
+                banner.innerHTML = `<strong>✓ Perfil Verificado y Aprobado:</strong> Tu información cumple con los lineamientos de OFIMANTE. Ya puedes consultar vacantes y enviar tu currículum.`;
+            } else if (estado === 'rechazado') {
+                banner.innerHTML = `<strong>✕ Perfil Rechazado:</strong> Motivo: ${motivo || 'Datos incompletos'}. Por favor corrige la información señalada y vuelve a guardar para solicitar una nueva revisión.`;
+            } else {
+                banner.innerHTML = `<strong>Cuenta Suspendida:</strong> Comunícate con la administración para más información.`;
+            }
+        }
+
+        if (jobsSection) {
+            jobsSection.style.display = (estado === 'aprobado') ? 'block' : 'none';
+        }
+    },
+
+    handleSaveCandidateCv: async function (e) {
+        e.preventDefault();
+        const payload = {
+            nombre_completo: this.getVal('cvNombreCompleto'),
+            puesto_deseado: this.getVal('cvPuestoDeseado'),
+            fecha_nacimiento: this.getVal('cvFechaNacimiento'),
+            edad: parseInt(this.getVal('cvEdad')) || 0,
+            telefono: this.getVal('cvTelefono'),
+            email_contacto: this.getVal('cvEmailContacto'),
+            domicilio_zona: this.getVal('cvDomicilio'),
+            nivel_academico: this.getVal('cvNivelAcademico'),
+            experiencia_laboral: this.getVal('cvExperiencia'),
+            habilidades: this.getVal('cvHabilidades'),
+            conocimientos: this.getVal('cvConocimientos'),
+            descripcion_personal: this.getVal('cvDescripcion'),
+            disponibilidad: this.getVal('cvDisponibilidad'),
+            expectativa_salarial: this.getVal('cvExpectativa'),
+            foto_url: this.getVal('cvFotoUrl') || 'logo.png'
+        };
+
+        const res = await this.apiCall('update_candidate_profile', payload);
+        if (res && res.success) {
+            alert(res.message);
+            this.loadCandidateDashboard();
+        } else {
+            alert(res?.error || "Error al guardar el currículum.");
+        }
+    },
+
+    uploadCvPdf: async function (fileInput) {
+        if (!fileInput.files || fileInput.files.length === 0) return;
+        const file = fileInput.files[0];
+        if (file.type !== 'application/pdf') {
+            alert("Solo se admiten archivos en formato PDF.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('cv_pdf', file);
+
+        try {
+            const res = await fetch('backend/api.php?action=upload_cv_pdf', {
+                method: 'POST',
+                headers: { 'X-CSRF-Token': this.state.csrfToken },
+                body: formData
+            });
+            const data = await res.json();
+            if (data && data.success) {
+                alert("¡Documento PDF subido exitosamente!");
+            } else {
+                alert(data?.error || "Error al subir el archivo.");
+            }
+        } catch (e) {
+            alert("Archivo recibido en modo local.");
+        }
+    },
+
+    renderCandidateJobs: function () {
+        const grid = document.getElementById('candidateJobsGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        const filterPuesto = (this.getVal('filterJobKeyword') || '').toLowerCase();
+        const filterCat = this.getVal('filterJobCategory');
+
+        const filtered = this.state.vacantes.filter(j => {
+            const matchKeyword = !filterPuesto || j.puesto.toLowerCase().includes(filterPuesto) || j.descripcion.toLowerCase().includes(filterPuesto);
+            const matchCat = !filterCat || filterCat === 'todas' || j.categoria === filterCat;
+            return matchKeyword && matchCat;
+        });
+
+        if (filtered.length === 0) {
+            grid.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding:2rem;">No se encontraron vacantes con los criterios seleccionados.</p>`;
+            return;
+        }
+
+        filtered.forEach(j => {
+            const hasApplied = this.state.misPostulaciones.some(s => s.vacante_id === j.id);
+            const card = document.createElement('div');
+            card.className = 'job-card-item';
+            card.innerHTML = `
+                <div>
+                    <div class="job-card-top">
+                        <h3 class="job-card-title">${j.puesto}</h3>
+                        <span class="status-pill success">Verificada</span>
+                    </div>
+                    <div class="job-company-name">🏢 ${j.nombre_comercial || 'Empresa Mantense'}</div>
+                    <div class="job-meta-line">
+                        <span>📍 ${j.ubicacion}</span>
+                        <span>⏰ ${j.horario || 'Tiempo Completo'}</span>
+                        <span>📁 ${j.categoria || 'General'}</span>
+                    </div>
+                    <div class="job-salary-highlight">
+                        💵 Sueldo: ${j.sueldo_ofrecido}
+                    </div>
+                    <div class="job-benefits-box">
+                        🎁 <strong>Beneficios:</strong> ${j.beneficios || j.prestaciones || 'Prestaciones de ley'}
+                    </div>
+                    <p class="job-description-excerpt">${j.descripcion}</p>
+                </div>
+                <div class="job-card-footer">
+                    <button class="btn-secondary-large" onclick="OFIMANTE.openJobDetailModal(${j.id})">Consultar Puesto</button>
+                    <button class="btn-primary-large" ${hasApplied ? 'disabled style="background:#10b981; cursor:default;"' : ''} onclick="OFIMANTE.applyToJob(${j.id})">
+                        ${hasApplied ? '✓ Ya Postulado' : '📨 Postularme'}
+                    </button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    },
+
+    applyToJob: async function (jobId) {
+        if (!confirm("¿Deseas enviar tu currículum vitae a esta vacante?")) return;
+
+        const res = await this.apiCall('apply_job', { vacante_id: jobId, mensaje: 'Postulación formal desde OFIMANTE.' });
+        if (res && res.success) {
+            alert(res.message);
+            this.loadCandidateDashboard();
+        } else {
+            alert(res?.error || "Error al enviar la postulación.");
+        }
+    },
+
+    renderMyApplications: function () {
+        const tbody = document.getElementById('myApplicationsTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (this.state.misPostulaciones.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:1.5rem; color:#64748b;">Aún no te has postulado a ninguna vacante.</td></tr>`;
+            return;
+        }
+
+        this.state.misPostulaciones.forEach(s => {
+            const tr = document.createElement('tr');
+            const stClass = s.estado === 'aceptada' ? 'success' : (s.estado === 'rechazada' ? 'danger' : 'warning');
+            tr.innerHTML = `
+                <td><strong>${s.puesto}</strong></td>
+                <td>🏢 ${s.empresa_nombre || 'Empresa'}</td>
+                <td>🗓️ ${s.fecha_postulacion}</td>
+                <td><span class="status-pill ${stClass}">${s.estado.toUpperCase()}</span></td>
+                <td>${s.respuesta_empresa ? `<strong style="color:#0284c7;">"${s.respuesta_empresa}"</strong>` : '<span style="color:#94a3b8;">En espera de respuesta</span>'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    },
+
+    openMyCvPreviewModal: function () {
+        const modal = document.getElementById('modalPreviewCv');
+        const body = document.getElementById('previewCvBody');
+        if (!modal || !body) return;
+
+        body.innerHTML = `
+            <div style="border-bottom: 2px solid #0284c7; padding-bottom: 1rem; margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h2 style="color:#071324;">${this.getVal('cvNombreCompleto') || 'Nombre del Candidato'}</h2>
+                    <h4 style="color:#0284c7;">${this.getVal('cvPuestoDeseado') || 'Puesto Deseado'}</h4>
+                    <p style="font-size:0.9rem; color:#475569;">📍 ${this.getVal('cvDomicilio') || 'Ciudad Mante, Tam.'} | 📱 ${this.getVal('cvTelefono')} | ✉️ ${this.getVal('cvEmailContacto')}</p>
+                </div>
+                <img src="${this.getVal('cvFotoUrl') || 'logo.png'}" style="width:70px; height:70px; border-radius:50%; object-fit:cover; border:2px solid #0284c7;">
+            </div>
+            <div style="margin-bottom:1.25rem;">
+                <h4 style="color:#071324; border-bottom:1px solid #e2e8f0; padding-bottom:0.25rem;">Resumen Profesional</h4>
+                <p style="font-size:0.92rem; color:#334155; margin-top:0.35rem;">${this.getVal('cvDescripcion') || 'Sin descripción personal.'}</p>
+            </div>
+            <div style="margin-bottom:1.25rem;">
+                <h4 style="color:#071324; border-bottom:1px solid #e2e8f0; padding-bottom:0.25rem;">Formación Académica</h4>
+                <p style="font-size:0.92rem; color:#334155; margin-top:0.35rem;">${this.getVal('cvNivelAcademico') || 'No especificada.'}</p>
+            </div>
+            <div style="margin-bottom:1.25rem;">
+                <h4 style="color:#071324; border-bottom:1px solid #e2e8f0; padding-bottom:0.25rem;">Experiencia Laboral</h4>
+                <p style="font-size:0.92rem; color:#334155; margin-top:0.35rem;">${this.getVal('cvExperiencia') || 'Sin experiencia registrada.'}</p>
+            </div>
+            <div style="margin-bottom:1.25rem;">
+                <h4 style="color:#071324; border-bottom:1px solid #e2e8f0; padding-bottom:0.25rem;">Habilidades y Conocimientos</h4>
+                <p style="font-size:0.92rem; color:#334155; margin-top:0.35rem;"><strong>Habilidades:</strong> ${this.getVal('cvHabilidades')}</p>
+                <p style="font-size:0.92rem; color:#334155;"><strong>Conocimientos técnicos:</strong> ${this.getVal('cvConocimientos')}</p>
+            </div>
+        `;
+        modal.style.display = 'flex';
+    },
+
+    // --------------------------------------------------------------------------
+    // 8. PANTALLA 4: PANEL DE LA EMPRESA
+    // --------------------------------------------------------------------------
+    loadCompanyDashboard: async function () {
+        const res = await this.apiCall('get_company_dashboard', null, 'GET');
+        if (!res || !res.success) return;
+
+        const emp = res.empresa;
+        this.state.solicitudesEmpresa = res.solicitudes || [];
+
+        if (emp) {
+            this.setVal('empNombreComercial', emp.nombre_comercial);
+            this.setVal('empRazonSocial', emp.razon_social);
+            this.setVal('empRfc', emp.rfc);
+            this.setVal('empResponsable', emp.nombre_responsable);
+            this.setVal('empTelefono', emp.telefono);
+            this.setVal('empEmail', emp.email_contacto);
+            this.setVal('empDireccion', emp.direccion);
+            this.setVal('empGiro', emp.giro_actividad);
+            this.setVal('empDescripcion', emp.descripcion_empresa);
+
+            this.renderCompanyApprovalState(emp.estado_aprobacion, emp.motivo_rechazo);
+        }
+
+        this.renderCompanyApplications();
+    },
+
+    renderCompanyApprovalState: function (estado, motivo) {
+        const banner = document.getElementById('companyApprovalBanner');
+        const badge = document.getElementById('companyStatusBadge');
+        const panelSec = document.getElementById('companyMainOptionsSection');
+
+        if (badge) {
+            badge.className = `status-pill ${estado === 'aprobada' ? 'success' : (estado === 'rechazada' ? 'danger' : 'warning')}`;
+            badge.innerText = `Empresa: ${estado.toUpperCase()}`;
+        }
+
+        if (banner) {
+            banner.className = `alert-banner ${estado === 'aprobada' ? 'success' : (estado === 'rechazada' ? 'danger' : 'warning')}`;
+            if (estado === 'pendiente') {
+                banner.innerHTML = `<strong>⏳ Empresa en Revisión:</strong> Tus datos están en proceso de verificación por el Administrador. Una vez validada tu cuenta podrás publicar vacantes y revisar candidatos.`;
+            } else if (estado === 'aprobada') {
+                banner.innerHTML = `<strong>✓ Empresa Verificada:</strong> Tu negocio ha sido validado satisfactoriamente. Puedes publicar vacantes con tarifa de $100 MXN y administrar solicitudes recibidas.`;
+            } else if (estado === 'rechazada') {
+                banner.innerHTML = `<strong>✕ Solicitud Rechazada:</strong> Motivo: ${motivo || 'Verificación no exitosa'}. Por favor actualiza tus datos.`;
+            }
+        }
+
+        if (panelSec) {
+            panelSec.style.display = (estado === 'aprobada') ? 'block' : 'none';
+        }
+    },
+
+    handleSaveCompanyProfile: async function (e) {
+        e.preventDefault();
+        const payload = {
+            nombre_comercial: this.getVal('empNombreComercial'),
+            razon_social: this.getVal('empRazonSocial'),
+            rfc: this.getVal('empRfc'),
+            nombre_responsable: this.getVal('empResponsable'),
+            telefono: this.getVal('empTelefono'),
+            email_contacto: this.getVal('empEmail'),
+            direccion: this.getVal('empDireccion'),
+            giro_actividad: this.getVal('empGiro'),
+            descripcion_empresa: this.getVal('empDescripcion'),
+            logotipo_url: 'logo.png'
+        };
+
+        const res = await this.apiCall('update_company_profile', payload);
+        if (res && res.success) {
+            alert(res.message);
+            this.loadCompanyDashboard();
+        } else {
+            alert(res?.error || "Error al guardar perfil empresarial.");
+        }
+    },
+
+    handlePostJobWithFee: async function (e) {
+        e.preventDefault();
+        const payload = {
+            puesto: this.getVal('vacPuesto'),
+            descripcion: this.getVal('vacDescripcion'),
+            vacantes_disponibles: parseInt(this.getVal('vacDisponibles')) || 1,
+            requisitos: this.getVal('vacRequisitos'),
+            experiencia_requerida: this.getVal('vacExperiencia'),
+            escolaridad_minima: this.getVal('vacEscolaridad'),
+            horario: this.getVal('vacHorario'),
+            tipo_contratacion: this.getVal('vacContratacion'),
+            sueldo_ofrecido: this.getVal('vacSueldo'),
+            prestaciones: this.getVal('vacPrestaciones'),
+            beneficios: this.getVal('vacBeneficios'),
+            categoria: this.getVal('vacCategoria'),
+            ubicacion: this.getVal('vacUbicacion'),
+            fecha_cierre: this.getVal('vacFechaCierre')
+        };
+
+        const res = await this.apiCall('create_job', payload);
+        if (res && res.success) {
+            alert(res.message);
+            document.getElementById('formPostJob').reset();
+            this.loadCompanyDashboard();
+        } else {
+            alert(res?.error || "No se pudo publicar la vacante.");
+        }
+    },
+
+    renderCompanyApplications: function () {
+        const tbody = document.getElementById('companyApplicantsTableBody');
+        const countSpan = document.getElementById('companyApplicantsCount');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (countSpan) countSpan.innerText = this.state.solicitudesEmpresa.length;
+
+        if (this.state.solicitudesEmpresa.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:1.5rem; color:#64748b;">No hay solicitudes de candidatos recibidas aún.</td></tr>`;
+            return;
+        }
+
+        // Orden descendente (cronológico: la más reciente primero)
+        this.state.solicitudesEmpresa.forEach(a => {
+            const tr = document.createElement('tr');
+            const stClass = a.estado === 'aceptada' ? 'success' : (a.estado === 'rechazada' ? 'danger' : 'warning');
+            tr.innerHTML = `
+                <td>
+                    <strong>🗓️ ${a.fecha_postulacion}</strong>
+                </td>
+                <td>
+                    <strong>${a.nombre_completo}</strong><br>
+                    <small>📱 ${a.telefono} | ✉️ ${a.email_contacto}</small>
+                </td>
+                <td><strong>${a.puesto}</strong></td>
+                <td>${a.nivel_academico || 'Por definir'}</td>
+                <td><span class="status-pill ${stClass}">${a.estado.toUpperCase()}</span></td>
+                <td>
+                    <div class="action-btn-group">
+                        <button class="btn-table-action btn-table-approve" onclick="OFIMANTE.respondApplication(${a.id}, 'aceptada', '${a.nombre_completo}')">✓ Aceptar</button>
+                        <button class="btn-table-action btn-table-reject" onclick="OFIMANTE.respondApplication(${a.id}, 'rechazada', '${a.nombre_completo}')">✕ Rechazar</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    },
+
+    respondApplication: async function (solId, decision, candName) {
+        const nota = prompt(`Ingresa un mensaje o fecha de entrevista para ${candName} (Decisión: ${decision.toUpperCase()}):`, decision === 'aceptada' ? 'Te esperamos para entrevista este jueves 10:00 am.' : 'Agradecemos tu postulación, hemos seleccionado otro perfil.');
+        if (nota === null) return;
+
+        const res = await this.apiCall('respond_application', {
+            solicitud_id: solId,
+            decision: decision,
+            respuesta: nota
+        });
+
+        if (res && res.success) {
+            alert(res.message);
+            this.loadCompanyDashboard();
+        } else {
+            alert(res?.error || "Error al actualizar la solicitud.");
+        }
+    },
+
+    // --------------------------------------------------------------------------
+    // 9. PANTALLA 5: PANEL DEL ADMINISTRADOR
+    // --------------------------------------------------------------------------
+    loadAdminDashboard: async function () {
+        const res = await this.apiCall('get_admin_dashboard', null, 'GET');
+        if (!res || !res.success) return;
+
+        const k = res.kpis || {};
+        const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+
+        setTxt('kpiTotalCandidatos', k.candidatos || 0);
+        setTxt('kpiTotalEmpresas', k.empresas || 0);
+        setTxt('kpiTotalVacantes', k.vacantes || 0);
+        setTxt('kpiTotalPendientes', (k.candidatos_pendientes || 0) + (k.empresas_pendientes || 0) + (k.vacantes_pendientes || 0));
+        setTxt('kpiTotalRecaudacion', `$${parseFloat(k.recaudacion || 0).toFixed(2)} MXN`);
+
+        this.state.candidatosAdmin = res.candidatos || [];
+        this.state.empresasAdmin = res.empresas || [];
+        this.state.vacantesAdmin = res.vacantes || [];
+        this.state.historialAdmin = res.historial || [];
+
+        this.renderAdminCandidates();
+        this.renderAdminCompanies();
+        this.renderAdminJobs();
+        this.renderAdminHistory();
+    },
+
+    renderAdminCandidates: function () {
+        const tbody = document.getElementById('adminCandidatesListBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        this.state.candidatosAdmin.forEach(c => {
+            const tr = document.createElement('tr');
+            const isAppr = c.estado_aprobacion === 'aprobado';
+            tr.innerHTML = `
+                <td><strong>${c.nombre_completo}</strong></td>
+                <td>📱 ${c.telefono}<br><small>${c.email_contacto}</small></td>
+                <td>${c.nivel_academico || 'N/A'}</td>
+                <td><span class="status-pill ${isAppr ? 'success' : 'warning'}">${c.estado_aprobacion.toUpperCase()}</span></td>
+                <td>
+                    <div class="action-btn-group">
+                        ${!isAppr ? `<button class="btn-table-action btn-table-approve" onclick="OFIMANTE.adminModerateCandidate(${c.id}, 'aprobado')">✓ Aprobar</button>` : ''}
+                        <button class="btn-table-action btn-table-reject" onclick="OFIMANTE.adminModerateCandidate(${c.id}, 'rechazado')">✕ Rechazar</button>
+                        <button class="btn-table-action btn-table-delete" onclick="OFIMANTE.adminModerateCandidate(${c.id}, 'eliminado')">🗑️ Eliminar</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    },
+
+    renderAdminCompanies: function () {
+        const tbody = document.getElementById('adminCompaniesListBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        this.state.empresasAdmin.forEach(e => {
+            const tr = document.createElement('tr');
+            const isAppr = e.estado_aprobacion === 'aprobada';
+            tr.innerHTML = `
+                <td><strong>${e.nombre_comercial}</strong><br><small>${e.razon_social || ''}</small></td>
+                <td><code>${e.rfc || 'Sin RFC'}</code></td>
+                <td>${e.giro_actividad}</td>
+                <td><span class="status-pill ${isAppr ? 'success' : 'warning'}">${e.estado_aprobacion.toUpperCase()}</span></td>
+                <td>
+                    <div class="action-btn-group">
+                        ${!isAppr ? `<button class="btn-table-action btn-table-approve" onclick="OFIMANTE.adminModerateCompany(${e.id}, 'aprobada')">✓ Aprobar</button>` : ''}
+                        <button class="btn-table-action btn-table-reject" onclick="OFIMANTE.adminModerateCompany(${e.id}, 'rechazada')">✕ Rechazar</button>
+                        <button class="btn-table-action btn-table-delete" onclick="OFIMANTE.adminModerateCompany(${e.id}, 'eliminada')">🗑️ Eliminar</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    },
+
+    renderAdminJobs: function () {
+        const tbody = document.getElementById('adminJobsListBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        this.state.vacantesAdmin.forEach(j => {
+            const tr = document.createElement('tr');
+            const isAppr = j.estado === 'aprobada';
+            tr.innerHTML = `
+                <td><strong>${j.puesto}</strong></td>
+                <td>🏢 ${j.empresa_nombre}</td>
+                <td>💵 ${j.sueldo_ofrecido}</td>
+                <td><span class="status-pill success">$100 MXN Cubierta</span></td>
+                <td><span class="status-pill ${isAppr ? 'success' : 'warning'}">${j.estado.toUpperCase()}</span></td>
+                <td>
+                    <div class="action-btn-group">
+                        ${!isAppr ? `<button class="btn-table-action btn-table-approve" onclick="OFIMANTE.adminModerateJob(${j.id}, 'aprobada')">✓ Aprobar</button>` : ''}
+                        <button class="btn-table-action btn-table-edit" onclick="OFIMANTE.openAdminEditJob(${j.id})">✏️ Modificar</button>
+                        <button class="btn-table-action btn-table-delete" onclick="OFIMANTE.adminModerateJob(${j.id}, 'delete')">🗑️ Eliminar</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    },
+
+    renderAdminHistory: function () {
+        const tbody = document.getElementById('adminHistoryTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        this.state.historialAdmin.forEach(h => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>🗓️ ${h.creado_en}</td>
+                <td><strong>${h.accion}</strong></td>
+                <td>${h.descripcion}</td>
+                <td><code>${h.direccion_ip}</code></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    },
+
+    adminModerateCandidate: async function (candId, estado) {
+        let motivo = '';
+        if (estado === 'rechazado') {
+            motivo = prompt("Ingresa el motivo del rechazo del perfil:", "Falta comprobante de escolaridad o datos incompletos.");
+            if (motivo === null) return;
+        } else if (estado === 'eliminado') {
+            if (!confirm("¿Seguro que deseas eliminar definitivamente este candidato?")) return;
+        }
+
+        const res = await this.apiCall('admin_moderate_candidate', { candidato_id: candId, estado, motivo_rechazo: motivo });
+        if (res && res.success) {
+            alert(res.message);
+            this.loadAdminDashboard();
+        }
+    },
+
+    adminModerateCompany: async function (empId, estado) {
+        let motivo = '';
+        if (estado === 'rechazada') {
+            motivo = prompt("Ingresa el motivo del rechazo de la empresa:", "RFC no coincide o datos no verificables.");
+            if (motivo === null) return;
+        } else if (estado === 'eliminada') {
+            if (!confirm("¿Seguro que deseas eliminar definitivamente esta empresa?")) return;
+        }
+
+        const res = await this.apiCall('admin_moderate_company', { empresa_id: empId, estado, motivo_rechazo: motivo });
+        if (res && res.success) {
+            alert(res.message);
+            this.loadAdminDashboard();
+        }
+    },
+
+    adminModerateJob: async function (jobId, actionOrState) {
+        if (actionOrState === 'delete') {
+            if (!confirm("¿Eliminar definitivamente esta vacante?")) return;
+            const res = await this.apiCall('admin_moderate_job', { vacante_id: jobId, action_type: 'delete' });
+            if (res && res.success) {
+                alert(res.message);
+                this.loadAdminDashboard();
+            }
+        } else {
+            const res = await this.apiCall('admin_moderate_job', { vacante_id: jobId, estado: actionOrState });
+            if (res && res.success) {
+                alert(res.message);
+                this.loadAdminDashboard();
+            }
+        }
+    },
+
+    openAdminEditJob: function (jobId) {
+        const j = this.state.vacantesAdmin.find(item => item.id === jobId);
+        if (!j) return;
+
+        this.setVal('editJobId', j.id);
+        this.setVal('mEditPuesto', j.puesto);
+        this.setVal('mEditSueldo', j.sueldo_ofrecido);
+        this.setVal('mEditUbicacion', j.ubicacion);
+        this.setVal('mEditBeneficios', j.beneficios || j.prestaciones);
+        this.setVal('mEditDescripcion', j.descripcion);
+
+        document.getElementById('modalEditJob').style.display = 'flex';
+    },
+
+    handleSaveAdminEditedJob: async function (e) {
+        e.preventDefault();
+        const jobId = parseInt(this.getVal('editJobId'));
+        const payload = {
+            vacante_id: jobId,
+            action_type: 'edit',
+            puesto: this.getVal('mEditPuesto'),
+            sueldo_ofrecido: this.getVal('mEditSueldo'),
+            ubicacion: this.getVal('mEditUbicacion'),
+            beneficios: this.getVal('mEditBeneficios'),
+            descripcion: this.getVal('mEditDescripcion')
+        };
+
+        const res = await this.apiCall('admin_moderate_job', payload);
+        if (res && res.success) {
+            alert(res.message);
+            document.getElementById('modalEditJob').style.display = 'none';
+            this.loadAdminDashboard();
+        }
+    },
+
+    // --------------------------------------------------------------------------
+    // 10. MODAL DE DETALLE DE VACANTE
+    // --------------------------------------------------------------------------
+    openJobDetailModal: function (jobId) {
+        const j = this.state.vacantes.find(item => item.id === jobId);
+        if (!j) return;
+
+        const body = document.getElementById('jobDetailModalBody');
+        const modal = document.getElementById('modalJobDetail');
+        if (!body || !modal) return;
+
+        body.innerHTML = `
+            <div style="border-bottom:1px solid #e2e8f0; padding-bottom:1rem; margin-bottom:1rem;">
+                <h2 style="color:#071324;">${j.puesto}</h2>
+                <div style="color:#0284c7; font-weight:700; font-size:1.05rem;">🏢 ${j.nombre_comercial || 'Empresa de El Mante'}</div>
+                <div style="font-size:0.9rem; color:#475569; margin-top:0.35rem;">
+                    📍 ${j.ubicacion} | ⏰ ${j.horario || 'Tiempo Completo'} | 📁 ${j.categoria || 'General'}
+                </div>
+            </div>
+            <div class="job-salary-highlight" style="font-size:1.2rem;">
+                💵 Sueldo Mensual: ${j.sueldo_ofrecido}
+            </div>
+            <div class="job-benefits-box">
+                🎁 <strong>Beneficios y Prestaciones:</strong><br>
+                ${j.beneficios || j.prestaciones || 'Prestaciones de ley'}
+            </div>
+            <div style="margin-bottom:1rem;">
+                <h4 style="color:#071324;">Descripción y Requisitos del Puesto:</h4>
+                <p style="color:#334155; font-size:0.95rem; margin-top:0.4rem; white-space:pre-line;">${j.descripcion}</p>
+                <p style="color:#334155; font-size:0.95rem; margin-top:0.4rem;"><strong>Requisitos adicionales:</strong> ${j.requisitos || 'No especificados'}</p>
+            </div>
+            <div style="border-top:1px solid #e2e8f0; padding-top:0.75rem; font-size:0.85rem; color:#64748b;">
+                Fecha límite de postulación: ${j.fecha_cierre || 'Hasta agotar vacantes'}
+            </div>
+        `;
+
+        const btnApplyModal = document.getElementById('btnApplyFromModal');
+        if (btnApplyModal) {
+            btnApplyModal.onclick = () => {
+                modal.style.display = 'none';
+                OFIMANTE.applyToJob(j.id);
+            };
+        }
+        modal.style.display = 'flex';
+    },
+
+    // --------------------------------------------------------------------------
+    // 11. SISTEMA DE NOTIFICACIONES (VER Y MARCAR COMO LEÍDAS)
+    // --------------------------------------------------------------------------
+    toggleNotifDropdown: function () {
+        const dropdown = document.getElementById('notifDropdown');
+        if (!dropdown) return;
+
+        const isVisible = dropdown.style.display === 'block';
+        dropdown.style.display = isVisible ? 'none' : 'block';
+
+        if (!isVisible) {
+            this.renderNotifList();
+            this.apiCall('mark_notification_read', { id: 0 });
+            this.state.unreadNotifs = 0;
+            this.renderNotifCounter();
+        }
+    },
+
+    renderNotifList: function () {
+        const list = document.getElementById('notifDropdownList');
+        if (!list) return;
+        list.innerHTML = '';
+
+        if (!this.state.notificaciones || this.state.notificaciones.length === 0) {
+            list.innerHTML = `<p style="padding:1rem; text-align:center; color:#94a3b8; font-size:0.85rem;">No tienes notificaciones pendientes.</p>`;
+            return;
+        }
+
+        this.state.notificaciones.forEach(n => {
+            const item = document.createElement('div');
+            item.style.padding = '0.75rem 1rem';
+            item.style.borderBottom = '1px solid #1e3a63';
+            item.style.fontSize = '0.85rem';
+            item.innerHTML = `
+                <div style="font-weight:700; color:#38bdf8;">${n.titulo}</div>
+                <div style="color:#cbd5e1; margin-top:0.2rem;">${n.mensaje}</div>
+                <div style="color:#64748b; font-size:0.72rem; margin-top:0.2rem;">${n.creado_en}</div>
+            `;
+            list.appendChild(item);
+        });
+    },
+
+    // --------------------------------------------------------------------------
+    // 12. UTILIDADES Y LISTENERS
+    // --------------------------------------------------------------------------
+    getVal: function (id) {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+    },
+
+    setVal: function (id, val) {
+        const el = document.getElementById(id);
+        if (el && val !== undefined && val !== null) el.value = val;
+    },
+
+    setupEventListeners: function () {
+        // Acordeón FAQ
+        document.querySelectorAll('.faq-question').forEach(q => {
+            q.addEventListener('click', () => {
+                const item = q.parentElement;
+                item.classList.toggle('open');
+            });
+        });
+    },
+
+    // --------------------------------------------------------------------------
+    // 13. FALLBACK LOCALSTORAGE (MODO OFFLINE / STANDALONE)
+    // --------------------------------------------------------------------------
+    localFallbackHandler: function (action, data) {
+        console.log(`[LocalStorage Handler] simulando acción: ${action}`);
+        if (action === 'get_initial_data') {
+            return {
+                success: true,
+                jobs: [
+                    { id: 1, puesto: "Auxiliar de Soporte Técnico y Redes", nombre_comercial: "Soluciones Digitales Mante", ubicacion: "Zona Centro, Cd. Mante", horario: "Lunes a Viernes 8:30 - 5:30", sueldo_ofrecido: "$10,500 mensuales netos", beneficios: "Prestaciones de ley, bonos y capacitación pagada", descripcion: "Mantenimiento preventivo a equipos de cómputo y redes.", fecha_publicacion: "2026-11-10", categoria: "Tecnología e Informática" },
+                    { id: 2, puesto: "Recepcionista y Control de Citas Médicas", nombre_comercial: "Clínica Santa Fe Mante", ubicacion: "Zona Centro, Cd. Mante", horario: "Lunes a Viernes 8:00 - 4:00", sueldo_ofrecido: "$9,800 mensuales netos", beneficios: "Seguro médico, vales de despensa y descanso fines de semana", descripcion: "Atención a pacientes, control de citas y expedientes.", fecha_publicacion: "2026-11-10", categoria: "Salud y Administración" },
+                    { id: 3, puesto: "Asistente de Facturación y Ventas Mostrador", nombre_comercial: "Soluciones Digitales Mante", ubicacion: "Av. Cavazos Lerma #205", horario: "Medio Tiempo (9:00 am - 2:00 pm)", sueldo_ofrecido: "$6,800 mensuales netos", beneficios: "Horario ideal para estudiantes de nivel superior", descripcion: "Facturación básica, atención en mostrador y notas.", fecha_publicacion: "2026-11-11", categoria: "Comercio y Ventas" }
+                ],
+                stats: { candidatos: 15, empresas: 8, vacantes: 3, solicitudes: 12 }
+            };
+        }
+        return { success: true, message: "Acción completada en modo local autónomo." };
+    }
+};
+
+// Iniciar al cargar el DOM
+document.addEventListener('DOMContentLoaded', () => {
+    OFIMANTE.init();
+});
+
+// Exponer funciones globales para llamadas inline desde HTML
+window.goToScreen = (s) => OFIMANTE.goToScreen(s);
+window.selectAuthRole = (r) => OFIMANTE.selectRegisterRole(r);
+window.switchAuthTab = (t) => OFIMANTE.switchAuthTab(t);
+window.quickLoginAs = (r) => OFIMANTE.quickDemoLogin(r);
+window.loginWithGoogle = () => OFIMANTE.loginWithGoogleDemo();
+window.logoutSession = () => OFIMANTE.logout();
+

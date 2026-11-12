@@ -11,11 +11,11 @@ require_once __DIR__ . '/database.php';
 class GoogleAuth {
 
     /**
-     * Genera la URL oficial de redirección hacia el flujo de consentimiento de Google OAuth 2.0.
+     * Retorna la URL de redirección oficial de Google OAuth 2.0.
      */
     public static function getAuthUrl(string $role = 'candidato'): string {
         $state = bin2hex(random_bytes(16)) . ':' . urlencode($role);
-        $_SESSION['oauth_state'] = $state;
+        $_SESSION['google_oauth_state'] = $state;
 
         $params = [
             'client_id'     => GOOGLE_CLIENT_ID,
@@ -31,14 +31,17 @@ class GoogleAuth {
     }
 
     /**
-     * Procesa el código de autorización devuelto por Google o valida un ID Token emitido.
+     * Procesa la respuesta de Google tras la autorización.
      */
     public static function handleCallback(string $code, string $receivedState): array {
-        if (empty($_SESSION['oauth_state']) || !hash_equals($_SESSION['oauth_state'], $receivedState)) {
+        if (empty($_SESSION['google_oauth_state']) || !hash_equals($_SESSION['google_oauth_state'], $receivedState)) {
             return ['success' => false, 'error' => 'Validación de estado CSRF inválida en Google OAuth.'];
         }
 
-        // Intercambiar código por tokens mediante POST a Google
+        $parts = explode(':', $receivedState);
+        $role = $parts[1] ?? 'candidato';
+
+        // Intercambiar código por Token
         $postData = [
             'code'          => $code,
             'client_id'     => GOOGLE_CLIENT_ID,
@@ -60,26 +63,27 @@ class GoogleAuth {
         }
 
         $tokenData = json_decode($response, true);
-        $accessToken = $tokenData['access_token'] ?? '';
+        $idToken = $tokenData['id_token'] ?? '';
+        if (!$idToken) {
+            return ['success' => false, 'error' => 'Google no emitió un id_token válido.'];
+        }
 
-        // Obtener perfil del usuario desde Google API
-        $userInfoCh = curl_init('https://www.googleapis.com/oauth2/v3/userinfo');
-        curl_setopt($userInfoCh, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($userInfoCh, CURLOPT_HTTPHEADER, ["Authorization: Bearer {$accessToken}"]);
-        $userResponse = curl_exec($userInfoCh);
-        curl_close($userInfoCh);
+        // Consultar info del perfil
+        $userInfoUrl = 'https://oauth2.googleapis.com/tokeninfo?id_token=' . urlencode($idToken);
+        $userInfoRaw = @file_get_contents($userInfoUrl);
+        $googleUser = json_decode($userInfoRaw, true) ?: [];
 
-        $userData = json_decode($userResponse, true);
-        if (empty($userData['email'])) {
-            return ['success' => false, 'error' => 'No se pudo obtener el correo del perfil de Google.'];
+        if (empty($googleUser['email'])) {
+            return ['success' => false, 'error' => 'No se pudo obtener el correo de la cuenta de Google.'];
         }
 
         return [
             'success'   => true,
-            'google_id' => $userData['sub'] ?? '',
-            'email'     => $userData['email'],
-            'nombre'    => $userData['name'] ?? $userData['email'],
-            'foto'      => $userData['picture'] ?? 'logo.png'
+            'google_id' => $googleUser['sub'] ?? '',
+            'email'     => $googleUser['email'],
+            'nombre'    => $googleUser['name'] ?? explode('@', $googleUser['email'])[0],
+            'foto'      => $googleUser['picture'] ?? 'logo.png',
+            'rol'       => $role
         ];
     }
 }
