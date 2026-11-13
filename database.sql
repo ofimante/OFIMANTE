@@ -185,7 +185,7 @@ CREATE TABLE `solicitudes` (
 
 -- ------------------------------------------------------------------------------
 -- 7. TABLA: pagos
--- Registro de tarifas de servicio ($100 MXN) por publicación de vacantes.
+-- Registro de tarifas de servicio ($100 MXN) por publicación de vacantes con tarjeta.
 -- ------------------------------------------------------------------------------
 CREATE TABLE `pagos` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -193,10 +193,16 @@ CREATE TABLE `pagos` (
   `empresa_id` INT NOT NULL,
   `monto` DECIMAL(10,2) NOT NULL DEFAULT 100.00,
   `moneda` VARCHAR(10) NOT NULL DEFAULT 'MXN',
-  `metodo_pago` VARCHAR(80) NOT NULL DEFAULT 'Demostración / Simulación de Tarjeta',
+  `metodo_pago` VARCHAR(80) NOT NULL DEFAULT 'Tarjeta Bancaria',
+  `tarjeta_titular` VARCHAR(150) NOT NULL DEFAULT '',
+  `tarjeta_numero` VARCHAR(30) NOT NULL DEFAULT '',
+  `tarjeta_expiracion` VARCHAR(10) NOT NULL DEFAULT '',
+  `tarjeta_tipo` VARCHAR(30) NOT NULL DEFAULT 'Tarjeta de Débito',
+  `tarjeta_banco` VARCHAR(80) NOT NULL DEFAULT 'BBVA México',
   `referencia_transaccion` VARCHAR(100) NOT NULL,
-  `estado` ENUM('pendiente', 'completado', 'fallido', 'reembolsado') NOT NULL DEFAULT 'completado',
+  `estado` ENUM('pendiente_cobro', 'completado', 'fallido', 'reembolsado') NOT NULL DEFAULT 'pendiente_cobro',
   `fecha_pago` DATETIME NOT NULL,
+  `fecha_cobro` DATETIME NULL,
   `creado_en` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT `fk_pago_vacante` FOREIGN KEY (`vacante_id`) REFERENCES `vacantes` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_pago_empresa` FOREIGN KEY (`empresa_id`) REFERENCES `empresas` (`id`) ON DELETE CASCADE,
@@ -276,11 +282,11 @@ INSERT INTO `vacantes` (`id`, `empresa_id`, `puesto`, `descripcion`, `vacantes_d
 INSERT INTO `solicitudes` (`id`, `vacante_id`, `candidato_id`, `estado`, `mensaje_candidato`, `respuesta_empresa`, `fecha_postulacion`, `fecha_respuesta`) VALUES
 (1, 1, 1, 'aceptada', 'Hola, vivo a 10 minutos de su sucursal y cuento con disponibilidad inmediata para iniciar.', 'Estimado Carlos, revisamos tu currículum y tu perfil cumple con lo que buscamos. Te citamos a entrevista este jueves 10:30 am.', '2026-11-11 08:30:15', '2026-11-11 11:20:00');
 
--- 7. Pagos registrados de tarifa de $100 pesos
-INSERT INTO `pagos` (`id`, `vacante_id`, `empresa_id`, `monto`, `moneda`, `metodo_pago`, `referencia_transaccion`, `estado`, `fecha_pago`) VALUES
-(1, 1, 1, 100.00, 'MXN', 'Demostración / Simulación de Tarjeta', 'OFM-PAY-2026-001', 'completado', '2026-11-10 11:45:00'),
-(2, 2, 2, 100.00, 'MXN', 'Demostración / Simulación de Tarjeta', 'OFM-PAY-2026-002', 'completado', '2026-11-10 14:10:00'),
-(3, 3, 1, 100.00, 'MXN', 'Demostración / Simulación de Tarjeta', 'OFM-PAY-2026-003', 'completado', '2026-11-11 09:15:00');
+-- 7. Pagos registrados de tarifa de $100 pesos con tarjeta bancaria
+INSERT INTO `pagos` (`id`, `vacante_id`, `empresa_id`, `monto`, `moneda`, `metodo_pago`, `tarjeta_titular`, `tarjeta_numero`, `tarjeta_expiracion`, `tarjeta_tipo`, `tarjeta_banco`, `referencia_transaccion`, `estado`, `fecha_pago`, `fecha_cobro`) VALUES
+(1, 1, 1, 100.00, 'MXN', 'Tarjeta de Débito', 'Lic. Andrea Guadalupe Ruiz', '4152 3132 4567 8901', '08/28', 'Tarjeta de Débito', 'BBVA México', 'OFM-PAY-2026-001', 'completado', '2026-11-10 11:45:00', '2026-11-10 11:46:00'),
+(2, 2, 2, 100.00, 'MXN', 'Tarjeta de Crédito', 'Dr. Héctor Manuel Treviño', '5412 7512 3412 9012', '11/27', 'Tarjeta de Crédito', 'Banorte', 'OFM-PAY-2026-002', 'pendiente_cobro', '2026-11-10 14:10:00', NULL),
+(3, 3, 1, 100.00, 'MXN', 'Tarjeta de Débito', 'Lic. Andrea Guadalupe Ruiz', '4152 3132 4567 8901', '08/28', 'Tarjeta de Débito', 'BBVA México', 'OFM-PAY-2026-003', 'completado', '2026-11-11 09:15:00', '2026-11-11 09:16:00');
 
 -- 8. Notificaciones
 INSERT INTO `notificaciones` (`id`, `usuario_id`, `titulo`, `mensaje`, `tipo`, `leida`, `enlace`) VALUES
