@@ -42,7 +42,7 @@
             <div class="user-auth-area">
                 <!-- Botón de Notificaciones -->
                 <button id="btnNotifNav" class="btn-notif-nav" style="display: none;" onclick="OFIMANTE.toggleNotifDropdown()" title="Notificaciones">
-                    🔔
+                    Avisos
                     <span id="notifBadgeCount" class="notif-badge-count" style="display: none;">0</span>
                 </button>
 
@@ -64,7 +64,7 @@
                         <span id="headerUserName" class="user-name">Usuario</span>
                         <span id="headerUserRole" class="user-role-badge">Candidato</span>
                     </div>
-                    <button class="btn-logout" onclick="OFIMANTE.logout()" title="Cerrar Sesión">✕</button>
+                    <button class="btn-logout" onclick="OFIMANTE.logout()" title="Cerrar Sesión">&times;</button>
                 </div>
 
                 <!-- Botón Ingresar -->
@@ -105,10 +105,10 @@
 
                     <div class="hero-action-buttons">
                         <button class="btn-primary-huge" onclick="OFIMANTE.goToScreen('screen-2'); OFIMANTE.switchAuthTab('register'); OFIMANTE.selectRegisterRole('candidato');">
-                            🔍 Buscar Empleo
+                            Buscar Empleo
                         </button>
                         <button class="btn-action-outline" onclick="OFIMANTE.goToScreen('screen-2'); OFIMANTE.switchAuthTab('register'); OFIMANTE.selectRegisterRole('empresa');">
-                            🏢 Registrar una Empresa
+                            Registrar una Empresa
                         </button>
                     </div>
 
@@ -179,33 +179,33 @@
             <div class="benefits-container">
                 <div class="benefit-column-card">
                     <div class="benefit-header">
-                        <div class="benefit-icon-box cand">🎓</div>
+                        <div class="benefit-icon-box cand"></div>
                         <div>
                             <h3>Para Candidatos</h3>
                             <p style="font-size:0.85rem; color:#64748b;">Acceso gratuito a oportunidades laborales formales</p>
                         </div>
                     </div>
                     <ul class="benefit-list">
-                        <li><span class="check-icon">✓</span> Elaboración de Currículum Vitae digital interactivo con foto y opción de adjuntar PDF.</li>
-                        <li><span class="check-icon">✓</span> Ofertas de empleo verificadas y con sueldos y prestaciones claramente especificados.</li>
-                        <li><span class="check-icon">✓</span> Postulación en 1 clic y seguimiento en tiempo real del estado de tus solicitudes.</li>
-                        <li><span class="check-icon">✓</span> Notificaciones directas cuando una empresa acepte tu CV o te cite a entrevista.</li>
+                        <li><span class="check-icon">•</span> Elaboración de Currículum Vitae digital interactivo con foto y opción de adjuntar PDF.</li>
+                        <li><span class="check-icon">•</span> Ofertas de empleo verificadas y con sueldos y prestaciones claramente especificados.</li>
+                        <li><span class="check-icon">•</span> Postulación en 1 clic y seguimiento en tiempo real del estado de tus solicitudes.</li>
+                        <li><span class="check-icon">•</span> Notificaciones directas cuando una empresa acepte tu CV o te cite a entrevista.</li>
                     </ul>
                 </div>
 
                 <div class="benefit-column-card">
                     <div class="benefit-header">
-                        <div class="benefit-icon-box emp">🏢</div>
+                        <div class="benefit-icon-box emp"></div>
                         <div>
                             <h3>Para Empresas y Locales</h3>
                             <p style="font-size:0.85rem; color:#64748b;">Encuentra al personal idóneo para tu establecimiento</p>
                         </div>
                     </div>
                     <ul class="benefit-list">
-                        <li><span class="check-icon">✓</span> Difusión focalizada en Ciudad Mante y comunidades aledañas con tarifa accesible ($100 MXN).</li>
-                        <li><span class="check-icon">✓</span> Acceso a candidatos con perfiles completos, formación académica y experiencia comprobada.</li>
-                        <li><span class="check-icon">✓</span> Bandeja cronológica de aspirantes clasificada de la solicitud más reciente a la más antigua.</li>
-                        <li><span class="check-icon">✓</span> Contacto telefónico y por correo directo para agendar entrevistas rápidamente.</li>
+                        <li><span class="check-icon">•</span> Difusión focalizada en Ciudad Mante y comunidades aledañas con tarifa accesible ($100 MXN).</li>
+                        <li><span class="check-icon">•</span> Acceso a candidatos con perfiles completos, formación académica y experiencia comprobada.</li>
+                        <li><span class="check-icon">•</span> Bandeja cronológica de aspirantes clasificada de la solicitud más reciente a la más antigua.</li>
+                        <li><span class="check-icon">•</span> Contacto telefónico y por correo directo para agendar entrevistas rápidamente.</li>
                     </ul>
                 </div>
             </div>
@@ -291,12 +291,12 @@
                         <label class="block-label" style="font-weight:700; font-size:0.88rem; color:#071324;">Selecciona tu Tipo de Perfil: *</label>
                         <div class="role-selector-cards">
                             <div class="role-opt-card active" id="roleOptCandidate" onclick="OFIMANTE.selectRegisterRole('candidato')">
-                                <span class="role-opt-icon">🎓</span>
+                                <span class="role-opt-badge">[Candidato]</span>
                                 <strong>Candidato</strong>
                                 <small>Busco empleo</small>
                             </div>
                             <div class="role-opt-card" id="roleOptCompany" onclick="OFIMANTE.selectRegisterRole('empresa')">
-                                <span class="role-opt-icon">🏢</span>
+                                <span class="role-opt-badge">[Empresa]</span>
                                 <strong>Empresa / Negocio</strong>
                                 <small>Ofrezco empleo</small>
                             </div>
@@ -363,9 +363,9 @@
                     <div class="demo-quick-box">
                         <span class="demo-title">Accesos Rápidos de Prueba (Autocompletar):</span>
                         <div class="demo-pills">
-                            <button type="button" class="demo-btn" onclick="OFIMANTE.quickDemoLogin('candidato')">🎓 Candidato</button>
-                            <button type="button" class="demo-btn" onclick="OFIMANTE.quickDemoLogin('empresa')">🏢 Empresa</button>
-                            <button type="button" class="demo-btn admin" onclick="OFIMANTE.quickDemoLogin('admin')">🛡️ Administrador</button>
+                            <button type="button" class="demo-btn" onclick="OFIMANTE.quickDemoLogin('candidato')"> Candidato</button>
+                            <button type="button" class="demo-btn" onclick="OFIMANTE.quickDemoLogin('empresa')"> Empresa</button>
+                            <button type="button" class="demo-btn admin" onclick="OFIMANTE.quickDemoLogin('admin')"> Administrador</button>
                         </div>
                     </div>
                 </div>
@@ -378,7 +378,7 @@
         <section id="screen-3" class="screen-view">
             <div class="view-header">
                 <div>
-                    <h2>🎓 Panel del Candidato</h2>
+                    <h2> Panel del Candidato</h2>
                     <p class="view-subtitle">Registra tu Currículum Vitae, adjunta tu PDF y postúlate a las vacantes en Ciudad Mante.</p>
                 </div>
                 <div class="header-status-badge">
@@ -395,11 +395,11 @@
             <div class="card-box">
                 <div class="card-box-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
                     <div>
-                        <h3>📄 Mi Perfil y Currículum Vitae</h3>
+                        <h3> Mi Perfil y Currículum Vitae</h3>
                         <p>Completa con veracidad todos tus datos personales, formación y experiencia.</p>
                     </div>
                     <button type="button" class="btn-secondary-large" onclick="OFIMANTE.openMyCvPreviewModal()">
-                        👁️ Ver Presentación de Mi CV
+                        Ver Presentación de Mi CV
                     </button>
                 </div>
 
@@ -474,14 +474,14 @@
 
                     <!-- Adjuntar archivo PDF de Currículum -->
                     <div style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:var(--radius-md); padding:1.25rem; margin-top:1.5rem;">
-                        <label style="font-weight:700; color:#071324; display:block; margin-bottom:0.4rem;">📎 Adjuntar Currículum en PDF (Opcional):</label>
+                        <label style="font-weight:700; color:#071324; display:block; margin-bottom:0.4rem;">Adjuntar Currículum en PDF (Opcional):</label>
                         <input type="file" id="cvPdfFile" accept=".pdf" onchange="OFIMANTE.uploadCvPdf(this)">
                         <small style="color:#64748b; display:block; margin-top:0.35rem;">Formato admitido: PDF (Máximo 5MB). Las empresas podrán descargarlo al postularte.</small>
                     </div>
 
                     <div class="mt-4" style="display: flex; gap: 1rem; flex-wrap: wrap;">
                         <button type="submit" class="btn-primary-large">
-                            💾 Guardar Perfil y Solicitar Aprobación
+                            Guardar Perfil y Solicitar Aprobación
                         </button>
                     </div>
                 </form>
@@ -491,7 +491,7 @@
             <div id="candidateJobsSection" style="display: none;">
                 <div class="view-header">
                     <div>
-                        <h3>💼 Vacantes Disponibles en El Mante</h3>
+                        <h3>Vacantes Disponibles en El Mante</h3>
                         <p class="view-subtitle">Filtra y postúlate a las ofertas laborales validadas por la administración.</p>
                     </div>
                 </div>
@@ -517,7 +517,7 @@
             <!-- Sección: Mis Postulaciones Realizadas -->
             <div class="card-box mt-4">
                 <div class="card-box-header">
-                    <h3>📋 Mis Postulaciones Realizadas</h3>
+                    <h3>Mis Postulaciones Realizadas</h3>
                     <p>Historial y seguimiento del estado de tus solicitudes enviadas a empresas de El Mante.</p>
                 </div>
                 <div class="table-responsive">
@@ -545,7 +545,7 @@
         <section id="screen-4" class="screen-view">
             <div class="view-header">
                 <div>
-                    <h2>🏢 Panel de la Empresa / Negocio Local</h2>
+                    <h2>Panel de la Empresa / Negocio Local</h2>
                     <p class="view-subtitle">Registra los datos de tu comercio, publica vacantes con tarifa de $100 MXN y gestiona candidatos.</p>
                 </div>
                 <div class="header-status-badge">
@@ -561,7 +561,7 @@
             <!-- Paso 1: Formulario de Perfil Empresarial -->
             <div class="card-box">
                 <div class="card-box-header">
-                    <h3>📋 Información Oficial de la Empresa</h3>
+                    <h3>Información Oficial de la Empresa</h3>
                     <p>Registra la información de tu establecimiento o comercio en Ciudad Mante.</p>
                 </div>
 
@@ -613,7 +613,7 @@
 
                     <div class="mt-4">
                         <button type="submit" class="btn-primary-large">
-                            🏢 Guardar Información Empresarial
+                            Guardar Información Empresarial
                         </button>
                     </div>
                 </form>
@@ -625,7 +625,7 @@
                 <!-- Formulario de Publicación de Vacante con Tarifa de $100 MXN -->
                 <div class="card-box">
                     <div class="card-box-header">
-                        <h3>➕ Publicar Nueva Vacante de Empleo</h3>
+                        <h3>Publicar Nueva Vacante de Empleo</h3>
                         <p>Crea una oferta de trabajo detallando con exactitud los requisitos, el sueldo y los beneficios.</p>
                     </div>
 
@@ -707,18 +707,68 @@
                             </div>
                         </div>
 
-                        <!-- Confirmación de Pago Demostrativo -->
-                        <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:var(--radius-sm); padding:1rem; margin-top:1.5rem;">
-                            <label style="display:flex; align-items:center; gap:0.5rem; font-weight:600; font-size:0.92rem; color:#166534; cursor:pointer;">
-                                <input type="checkbox" id="chkConfirmPay" checked required>
-                                Confirmo la aceptación del pago de la <strong>tarifa de servicio de $100.00 MXN</strong> (Simulación de Demostración) para publicar esta vacante.
-                            </label>
+                        <!-- Formulario de Registro de Tarjeta Bancaria (Debito o Credito) para Tarifa de $100 MXN -->
+                        <div class="card-box mt-4" style="background:#0b1e36; border:1.5px solid #1e3a63; border-radius:8px; padding:1.5rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+                                <h4 style="color:#ffffff; margin:0; font-size:1.05rem;">Registro de Tarjeta de Débito o Crédito</h4>
+                                <span class="fee-badge" style="font-size:0.85rem; padding:0.25rem 0.6rem;">Tarifa Obligatoria: $100.00 MXN</span>
+                            </div>
+                            <p style="font-size:0.88rem; color:#94a3b8; margin-bottom:1.25rem;">
+                                Ingresa los datos bancarios para procesar la tarifa de servicio de publicación. Los datos quedarán registrados y serán verificados en el panel de administración para efectuar el cobro.
+                            </p>
+
+                            <div class="form-grid-2">
+                                <div class="form-field">
+                                    <label for="cardTipo">Tipo de Tarjeta: *</label>
+                                    <select id="cardTipo" required>
+                                        <option value="Tarjeta de Débito">Tarjeta de Débito</option>
+                                        <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                                    </select>
+                                </div>
+                                <div class="form-field">
+                                    <label for="cardBanco">Banco Emisor: *</label>
+                                    <select id="cardBanco" required>
+                                        <option value="BBVA México">BBVA México</option>
+                                        <option value="Banorte">Banorte</option>
+                                        <option value="Santander">Santander</option>
+                                        <option value="Citibanamex">Citibanamex</option>
+                                        <option value="HSBC">HSBC</option>
+                                        <option value="Scotiabank">Scotiabank</option>
+                                        <option value="Banco Azteca">Banco Azteca</option>
+                                        <option value="Otro Banco">Otro Banco / Institución</option>
+                                    </select>
+                                </div>
+                                <div class="form-field span-full">
+                                    <label for="cardTitular">Nombre del Titular de la Tarjeta: *</label>
+                                    <input type="text" id="cardTitular" placeholder="Nombre idéntico al plástico o cuenta bancaria" required>
+                                </div>
+                                <div class="form-field">
+                                    <label for="cardNumero">Número de Tarjeta (16 dígitos): *</label>
+                                    <input type="text" id="cardNumero" placeholder="4152 3132 4567 8901" maxlength="19" required oninput="OFIMANTE.formatCardNumberInput(this)">
+                                </div>
+                                <div class="form-field">
+                                    <label for="cardExpiracion">Vencimiento (MM/AA): *</label>
+                                    <input type="text" id="cardExpiracion" placeholder="MM/AA (Ej. 12/28)" maxlength="5" required oninput="OFIMANTE.formatCardExpiryInput(this)">
+                                </div>
+                                <div class="form-field">
+                                    <label for="cardCvv">Código de Seguridad (CVV / CVC): *</label>
+                                    <input type="password" id="cardCvv" placeholder="3 o 4 dígitos" maxlength="4" required>
+                                </div>
+                            </div>
+
+                            <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:6px; padding:0.85rem; margin-top:1rem;">
+                                <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; color:#a7f3d0; cursor:pointer;">
+                                    <input type="checkbox" id="chkConfirmPay" checked required>
+                                    Autorizo el cobro de la tarifa única de <strong>$100.00 MXN</strong> a la tarjeta registrada para la publicación, validación y difusión de esta vacante en Ciudad Mante.
+                                </label>
+                            </div>
                         </div>
 
                         <div class="mt-4">
                             <button type="submit" class="btn-primary-large">
-                                💳 Pagar $100 y Enviar Vacante a Revisión
+                                Registrar Vacante y Procesar Tarifa de $100 MXN
                             </button>
+                        </div>
                         </div>
                     </form>
                 </div>
@@ -726,7 +776,7 @@
                 <!-- Bandeja Cronológica de Solicitudes Recibidas (De más reciente a más antigua) -->
                 <div class="card-box mt-4">
                     <div class="card-box-header">
-                        <h3>📋 Solicitudes de Candidatos Recibidas (<span id="companyApplicantsCount">0</span>)</h3>
+                        <h3>Solicitudes de Candidatos Recibidas (<span id="companyApplicantsCount">0</span>)</h3>
                         <p>Clasificadas de forma estrictamente cronológica por <strong>fecha y hora</strong> de envío.</p>
                     </div>
                     <div class="table-responsive">
@@ -738,7 +788,8 @@
                                     <th>Puesto Solicitado</th>
                                     <th>Escolaridad</th>
                                     <th>Estado</th>
-                                    <th>Acciones (Aceptar / Rechazar)</th>
+                                    <th>Currículum</th>
+                                    <th>Decisión</th>
                                 </tr>
                             </thead>
                             <tbody id="companyApplicantsTableBody">
@@ -757,46 +808,46 @@
         <section id="screen-5" class="screen-view">
             <div class="view-header">
                 <div>
-                    <h2>🛡️ Panel de Control del Administrador</h2>
+                    <h2>Panel de Control del Administrador</h2>
                     <p class="view-subtitle">Supervisión integral de candidatos, empresas, vacantes, ingresos y auditoría del sistema.</p>
                 </div>
                 <div class="header-status-badge">
-                    <span class="status-pill success">🛡️ Super Administrador Activo</span>
+                    <span class="status-pill success">Administrador Activo</span>
                 </div>
             </div>
 
             <!-- Dashboard de KPIs y Estadísticas -->
             <div class="kpi-grid">
                 <div class="kpi-card">
-                    <div class="kpi-icon">🎓</div>
+                    <div class="kpi-icon" style="font-size:0.9rem; font-weight:800; background:rgba(2,132,199,0.15); color:var(--blue-vivid);">CAN</div>
                     <div>
                         <div class="kpi-value" id="kpiTotalCandidatos">0</div>
                         <div class="kpi-label">Candidatos Registrados</div>
                     </div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-icon" style="background:rgba(16,185,129,0.15); color:var(--mint-success);">🏢</div>
+                    <div class="kpi-icon" style="font-size:0.9rem; font-weight:800; background:rgba(16,185,129,0.15); color:var(--mint-success);">EMP</div>
                     <div>
                         <div class="kpi-value" id="kpiTotalEmpresas">0</div>
                         <div class="kpi-label">Empresas Registradas</div>
                     </div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-icon" style="background:rgba(2,132,199,0.15); color:var(--blue-vivid);">💼</div>
+                    <div class="kpi-icon" style="font-size:0.9rem; font-weight:800; background:rgba(6,182,212,0.15); color:var(--cyan-primary);">VAC</div>
                     <div>
                         <div class="kpi-value" id="kpiTotalVacantes">0</div>
                         <div class="kpi-label">Vacantes Totales</div>
                     </div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-icon" style="background:rgba(245,158,11,0.15); color:var(--amber-warning);">⏳</div>
+                    <div class="kpi-icon" style="font-size:0.9rem; font-weight:800; background:rgba(245,158,11,0.15); color:var(--amber-warning);">REV</div>
                     <div>
                         <div class="kpi-value" id="kpiTotalPendientes">0</div>
                         <div class="kpi-label">Revisiones Pendientes</div>
                     </div>
                 </div>
                 <div class="kpi-card" style="border: 2px solid var(--cyan-primary);">
-                    <div class="kpi-icon" style="background:rgba(6,182,212,0.2); color:var(--cyan-primary);">💵</div>
+                    <div class="kpi-icon" style="font-size:0.9rem; font-weight:800; background:rgba(16,185,129,0.2); color:var(--mint-success);">MXN</div>
                     <div>
                         <div class="kpi-value" id="kpiTotalRecaudacion">$0.00 MXN</div>
                         <div class="kpi-label">Recaudación por Tarifas ($100 MXN)</div>
@@ -807,7 +858,7 @@
             <!-- Sección 1: Moderación de Candidatos -->
             <div class="card-box mt-4">
                 <div class="card-box-header">
-                    <h3>🎓 1. Moderación y Aprobación de Candidatos</h3>
+                    <h3>1. Moderación y Aprobación de Candidatos</h3>
                     <p>Revisa la información curricular para autorizar o rechazar con motivo a los aspirantes.</p>
                 </div>
                 <div class="table-responsive">
@@ -818,6 +869,7 @@
                                 <th>Contacto</th>
                                 <th>Escolaridad</th>
                                 <th>Estado de Datos</th>
+                                <th>Currículum</th>
                                 <th>Acciones de Moderación</th>
                             </tr>
                         </thead>
@@ -831,7 +883,7 @@
             <!-- Sección 2: Moderación de Empresas -->
             <div class="card-box mt-4">
                 <div class="card-box-header">
-                    <h3>🏢 2. Moderación y Aprobación de Empresas</h3>
+                    <h3>2. Moderación y Aprobación de Empresas</h3>
                     <p>Verifica los datos comerciales y fiscales de los establecimientos de Ciudad Mante.</p>
                 </div>
                 <div class="table-responsive">
@@ -855,7 +907,7 @@
             <!-- Sección 3: Moderación de Vacantes y Verificación de Pago -->
             <div class="card-box mt-4">
                 <div class="card-box-header">
-                    <h3>💼 3. Moderación de Vacantes y Supervisión de Pago</h3>
+                    <h3>3. Moderación de Vacantes y Supervisión de Pago</h3>
                     <p>Valida las publicaciones con tarifa de $100 MXN cubierta, edita detalles o elimina ofertas.</p>
                 </div>
                 <div class="table-responsive">
@@ -877,10 +929,39 @@
                 </div>
             </div>
 
-            <!-- Sección 4: Historial de Actividad y Auditoría -->
+            <!-- Sección 4: Control de Cobros y Pagos con Tarjeta ($100 MXN) -->
             <div class="card-box mt-4">
                 <div class="card-box-header">
-                    <h3>📜 4. Historial de Actividad y Auditoría del Sistema</h3>
+                    <h3>4. Control de Cobros y Pagos con Tarjeta ($100.00 MXN)</h3>
+                    <p>Datos bancarios registrados por las empresas para realizar el cobro de la tarifa de publicación de vacantes.</p>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Folio / Ref</th>
+                                <th>Empresa</th>
+                                <th>Vacante</th>
+                                <th>Titular de Tarjeta</th>
+                                <th>Tipo y Banco</th>
+                                <th>Número de Tarjeta</th>
+                                <th>Vencimiento</th>
+                                <th>Monto</th>
+                                <th>Estado de Cobro</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminPaymentsListBody">
+                            <!-- Se inyecta con JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sección 5: Historial de Actividad y Auditoría -->
+            <div class="card-box mt-4">
+                <div class="card-box-header">
+                    <h3>5. Historial de Actividad y Auditoría del Sistema</h3>
                     <p>Registro de movimientos y acciones administrativas importantes.</p>
                 </div>
                 <div class="table-responsive">
@@ -910,7 +991,7 @@
     <!-- 1. Modal: Consulta de Detalles de Vacante -->
     <div id="modalJobDetail" class="modal-overlay" style="display: none;">
         <div class="modal-card">
-            <button class="modal-close-btn" onclick="document.getElementById('modalJobDetail').style.display='none'">✕</button>
+            <button class="modal-close-btn" onclick="document.getElementById('modalJobDetail').style.display='none'">&times;</button>
             <div id="jobDetailModalBody">
                 <!-- Se llena con JS -->
             </div>
@@ -923,14 +1004,14 @@
 
     <!-- 2. Modal: Presentación Visual del CV (Vista Previa e Impresión) -->
     <div id="modalPreviewCv" class="modal-overlay" style="display: none;">
-        <div class="modal-card" style="max-width: 750px;">
-            <button class="modal-close-btn" onclick="document.getElementById('modalPreviewCv').style.display='none'">✕</button>
+        <div class="modal-card" style="max-width: 820px; max-height: 90vh; overflow-y: auto;">
+            <button class="modal-close-btn" onclick="document.getElementById('modalPreviewCv').style.display='none'">&times;</button>
             <div id="previewCvBody">
                 <!-- Se llena con JS -->
             </div>
-            <div class="mt-4" style="display:flex; justify-content:space-between;">
+            <div id="previewCvActions" class="mt-4" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.75rem; border-top:1px solid #e2e8f0; padding-top:1.25rem;">
                 <button type="button" class="btn-secondary-large" onclick="document.getElementById('modalPreviewCv').style.display='none'">Cerrar</button>
-                <button type="button" class="btn-primary-large" onclick="window.print()">🖨️ Imprimir / Guardar en PDF</button>
+                <button type="button" class="btn-primary-large" onclick="window.print()">Imprimir / Guardar en PDF</button>
             </div>
         </div>
     </div>
@@ -938,8 +1019,8 @@
     <!-- 3. Modal: Edición de Vacante para Administrador -->
     <div id="modalEditJob" class="modal-overlay" style="display: none;">
         <div class="modal-card">
-            <button class="modal-close-btn" onclick="document.getElementById('modalEditJob').style.display='none'">✕</button>
-            <h3>✏️ Modificar Vacante (Administrador)</h3>
+            <button class="modal-close-btn" onclick="document.getElementById('modalEditJob').style.display='none'">&times;</button>
+            <h3>Modificar Vacante (Administrador)</h3>
             <p style="font-size:0.88rem; color:#64748b; margin-bottom:1.5rem;">Ajusta los detalles de la oferta antes o después de publicarla.</p>
 
             <form id="formAdminEditJob" onsubmit="OFIMANTE.handleSaveAdminEditedJob(event)">
@@ -967,7 +1048,7 @@
                     </div>
                 </div>
                 <div class="mt-4" style="display:flex; gap:1rem;">
-                    <button type="submit" class="btn-primary-large">💾 Guardar Modificaciones</button>
+                    <button type="submit" class="btn-primary-large">Guardar Modificaciones</button>
                     <button type="button" class="btn-secondary-large" onclick="document.getElementById('modalEditJob').style.display='none'">Cancelar</button>
                 </div>
             </form>
@@ -977,8 +1058,8 @@
     <!-- 4. Modal: Recuperación de Contraseña -->
     <div id="modalRecoverPass" class="modal-overlay" style="display: none;">
         <div class="modal-card" style="max-width: 480px;">
-            <button class="modal-close-btn" onclick="document.getElementById('modalRecoverPass').style.display='none'">✕</button>
-            <h3>🔑 Recuperar Contraseña</h3>
+            <button class="modal-close-btn" onclick="document.getElementById('modalRecoverPass').style.display='none'">&times;</button>
+            <h3>Recuperar Contraseña</h3>
             <p style="font-size:0.9rem; color:#64748b; margin-top:0.3rem;">Ingresa el correo electrónico asociado a tu cuenta para recibir las instrucciones de restablecimiento.</p>
             <form onsubmit="event.preventDefault(); alert('Si el correo existe en nuestro sistema, hemos generado un enlace para restablecer la contraseña.'); document.getElementById('modalRecoverPass').style.display='none';" class="mt-3">
                 <div class="form-field">
@@ -1007,7 +1088,7 @@
                     Conectando personas que buscan empleo con empresas y negocios locales.
                 </p>
                 <p style="font-size: 0.85rem; color: #38bdf8; margin-top: 0.85rem;">
-                    📍 Ciudad Mante, Tamaulipas, México • CP 89800
+                    Ubicación: Ciudad Mante, Tamaulipas, México • CP 89800
                 </p>
             </div>
 
@@ -1024,8 +1105,8 @@
 
             <div class="footer-contact">
                 <h4 style="color: #ffffff; margin-bottom: 1rem; font-size: 1.1rem;">Atención &amp; Soporte</h4>
-                <p style="font-size: 0.92rem; margin-bottom: 0.5rem;">✉️ contacto@ofimante.com</p>
-                <p style="font-size: 0.92rem; margin-bottom: 0.5rem;">📱 Tel: 831-232-5500</p>
+                <p style="font-size: 0.92rem; margin-bottom: 0.5rem;">Correo: contacto@ofimante.com</p>
+                <p style="font-size: 0.92rem; margin-bottom: 0.5rem;">Teléfono: 831-232-5500</p>
                 <p style="font-size: 0.92rem; color: #94a3b8;">Horario: Lunes a Viernes 8:00 am - 5:00 pm</p>
             </div>
         </div>
