@@ -602,7 +602,7 @@ switch ($action) {
                     $vacantes = $stmtVac->fetchAll();
 
                     // Solicitudes recibidas ordenadas de más reciente a más antigua
-                    $stmtSol = $pdo->prepare("SELECT s.*, v.puesto, c.nombre_completo, c.foto_url, c.telefono, c.email_contacto, c.domicilio_zona, c.nivel_academico, c.experiencia_laboral, c.archivo_cv_pdf FROM `solicitudes` s JOIN `vacantes` v ON s.vacante_id = v.id JOIN `candidatos` c ON s.candidato_id = c.id WHERE v.empresa_id = ? ORDER BY s.fecha_postulacion DESC");
+                    $stmtSol = $pdo->prepare("SELECT s.*, v.puesto, c.nombre_completo, c.foto_url, c.telefono, c.email_contacto, c.domicilio_zona, c.nivel_academico, c.experiencia_laboral, c.habilidades, c.conocimientos, c.descripcion_personal, c.disponibilidad, c.expectativa_salarial, c.fecha_nacimiento, c.edad, c.archivo_cv_pdf FROM `solicitudes` s JOIN `vacantes` v ON s.vacante_id = v.id JOIN `candidatos` c ON s.candidato_id = c.id WHERE v.empresa_id = ? ORDER BY s.fecha_postulacion DESC");
                     $stmtSol->execute([(int)$empresa['id']]);
                     $solicitudes = $stmtSol->fetchAll();
                 }
@@ -651,9 +651,16 @@ switch ($action) {
                     'foto_url' => 'logo.png',
                     'telefono' => '831-145-8921',
                     'email_contacto' => 'carlos.garza@alumnos.uat.edu.mx',
-                    'domicilio_zona' => 'Zona Centro, Cd. Mante',
-                    'nivel_academico' => 'Ingeniería en Tecnologías de la Información',
-                    'experiencia_laboral' => '1 año en soporte preventivo y redes.',
+                    'domicilio_zona' => 'Calle Juárez #402 Ote., Zona Centro, Cd. Mante',
+                    'nivel_academico' => 'Ingeniería en Tecnologías de la Información (UAMM UAT)',
+                    'experiencia_laboral' => '1 año en soporte preventivo, ensamblaje de PC y mantenimiento a locales de El Mante.',
+                    'habilidades' => 'Atención a clientes, Office 365, diagnóstico de hardware, cableado y redes.',
+                    'conocimientos' => 'HTML5, CSS3, JavaScript básico, MySQL y Windows 11.',
+                    'descripcion_personal' => 'Joven profesional enfocado en optimizar el servicio tecnológico de las empresas en Ciudad Mante.',
+                    'disponibilidad' => 'Inmediata - Tiempo Completo',
+                    'expectativa_salarial' => '$9,000 - $11,000 mensuales',
+                    'fecha_nacimiento' => '2001-05-18',
+                    'edad' => 23,
                     'archivo_cv_pdf' => 'cv_carlos_garza.pdf',
                     'estado' => 'aceptada',
                     'respuesta_empresa' => 'Perfil preseleccionado para entrevista presencial.',
@@ -710,7 +717,7 @@ switch ($action) {
         }
         break;
 
-    // 14. PUBLICAR VACANTE (CON TARIFA DEMO DE $100 MXN)
+    // 14. PUBLICAR VACANTE (CON REGISTRO DE TARJETA Y TARIFA DE $100 MXN)
     case 'create_job':
         $user = Auth::user();
         if (!$user) {
@@ -732,8 +739,20 @@ switch ($action) {
         $ubicacion = trim($body['ubicacion'] ?? 'Zona Centro, Cd. Mante');
         $fechaCierre = $body['fecha_cierre'] ?? date('Y-m-d', strtotime('+30 days'));
 
+        // Datos de la tarjeta bancaria obligatorios
+        $cardTitular = trim($body['tarjeta_titular'] ?? '');
+        $cardNumero = trim($body['tarjeta_numero'] ?? '');
+        $cardExpiracion = trim($body['tarjeta_expiracion'] ?? '');
+        $cardCvv = trim($body['tarjeta_cvv'] ?? '');
+        $cardTipo = trim($body['tarjeta_tipo'] ?? 'Tarjeta de Débito');
+        $cardBanco = trim($body['tarjeta_banco'] ?? 'BBVA México');
+
         if (empty($puesto) || empty($sueldo) || empty($requisitos)) {
             sendJson(400, ['success' => false, 'error' => 'Por favor completa el puesto, requisitos y sueldo ofrecido.']);
+        }
+
+        if (empty($cardTitular) || empty($cardNumero) || empty($cardExpiracion) || empty($cardCvv)) {
+            sendJson(400, ['success' => false, 'error' => 'Por favor registra los datos completos de la tarjeta de débito o crédito para proceder con la tarifa de $100.00 MXN.']);
         }
 
         if ($isMySQL) {
@@ -755,30 +774,45 @@ switch ($action) {
                 preg_match('/[\d,]+(\.\d+)?/', $sueldo, $matches);
                 $sueldoNum = isset($matches[0]) ? (float)str_replace(',', '', $matches[0]) : 0.00;
 
-                // Insertar vacante con tarifa pagada = 1 (demo) y estado = 'pendiente' (revisión admin)
-                $stmtVac = $pdo->prepare("INSERT INTO `vacantes` (`empresa_id`, `puesto`, `descripcion`, `vacantes_disponibles`, `requisitos`, `experiencia_requerida`, `escolaridad_minima`, `horario`, `tipo_contratacion`, `sueldo_ofrecido`, `sueldo_numerico`, `prestaciones`, `beneficios`, `categoria`, `ubicacion`, `fecha_publicacion`, `fecha_cierre`, `tarifa_monto`, `tarifa_pagada`, `estado`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE(), ?, 100.00, 1, 'pendiente')");
+                // Insertar vacante con tarifa registrada y estado pendiente de revisión
+                $stmtVac = $pdo->prepare("INSERT INTO `vacantes` (`empresa_id`, `puesto`, `descripcion`, `vacantes_disponibles`, `requisitos`, `experiencia_requerida`, `escolaridad_minima`, `horario`, `tipo_contratacion`, `sueldo_ofrecido`, `sueldo_numerico`, `prestaciones`, `beneficios`, `categoria`, `ubicacion`, `fecha_publicacion`, `fecha_cierre`, `tarifa_monto`, `tarifa_pagada`, `estado`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE(), ?, 100.00, 0, 'pendiente')");
                 $stmtVac->execute([$empresa['id'], $puesto, $descripcion, $vacantesNum, $requisitos, $experiencia, $escolaridad, $horario, $contratacion, $sueldo, $sueldoNum, $prestaciones, $beneficios, $categoria, $ubicacion, $fechaCierre]);
                 $vacanteId = (int)$pdo->lastInsertId();
 
-                // Registrar pago de tarifa de servicio de $100 MXN en tabla `pagos`
+                // Registrar pago con los datos de tarjeta de débito o crédito en tabla `pagos`
                 $ref = 'OFM-PAY-' . date('Ymd') . '-' . str_pad($vacanteId, 4, '0', STR_PAD_LEFT);
-                $stmtPago = $pdo->prepare("INSERT INTO `pagos` (`vacante_id`, `empresa_id`, `monto`, `moneda`, `metodo_pago`, `referencia_transaccion`, `estado`, `fecha_pago`) VALUES (?, ?, 100.00, 'MXN', 'Demostración / Simulación de Tarjeta', ?, 'completado', NOW())");
-                $stmtPago->execute([$vacanteId, $empresa['id'], $ref]);
+                $stmtPago = $pdo->prepare("INSERT INTO `pagos` (`vacante_id`, `empresa_id`, `monto`, `moneda`, `metodo_pago`, `tarjeta_titular`, `tarjeta_numero`, `tarjeta_expiracion`, `tarjeta_tipo`, `tarjeta_banco`, `referencia_transaccion`, `estado`, `fecha_pago`) VALUES (?, ?, 100.00, 'MXN', ?, ?, ?, ?, ?, ?, ?, 'pendiente_cobro', NOW())");
+                $stmtPago->execute([$vacanteId, $empresa['id'], $cardTipo, $cardTitular, $cardNumero, $cardExpiracion, $cardTipo, $cardBanco, $ref]);
 
                 // Notificar al admin y registrar historial
-                $pdo->query("INSERT INTO `notificaciones` (`usuario_id`, `titulo`, `mensaje`, `tipo`, `enlace`) SELECT `id`, 'Nueva Vacante con Pago de $100', 'La empresa " . addslashes($empresa['nombre_comercial']) . " publicó " . addslashes($puesto) . " con tarifa pagada.', 'pago', '#vacantes' FROM `usuarios` WHERE `rol` = 'admin'");
-                Auth::logActivity((int)$user['id'], 'PUBLICACION_VACANTE', "Publicación de vacante '$puesto' con tarifa de $100 MXN cubierta.");
+                $pdo->query("INSERT INTO `notificaciones` (`usuario_id`, `titulo`, `mensaje`, `tipo`, `enlace`) SELECT `id`, 'Nueva Vacante con Tarjeta Registrada', 'La empresa " . addslashes($empresa['nombre_comercial']) . " registró la vacante " . addslashes($puesto) . " con tarjeta bancaria para cobro de $100 MXN.', 'pago', '#pagos' FROM `usuarios` WHERE `rol` = 'admin'");
+                Auth::logActivity((int)$user['id'], 'REGISTRO_VACANTE_TARJETA', "Publicación de vacante '$puesto' con datos de tarjeta bancaria registrados para cobro de $100 MXN.");
 
                 sendJson(201, [
                     'success'   => true,
-                    'message'   => '¡Vacante registrada exitosamente! Se procesó la tarifa de servicio de $100 MXN (Demostración). El Administrador validará la publicación.',
+                    'message'   => 'Vacante registrada exitosamente. Los datos de la tarjeta bancaria fueron registrados para proceder con el cobro en el panel administrativo.',
                     'referencia'=> $ref
                 ]);
             } catch (Exception $e) {
                 sendJson(500, ['success' => false, 'error' => $e->getMessage()]);
             }
         } else {
-            sendJson(200, ['success' => true, 'message' => 'Vacante registrada con tarifa demo de $100 en modo local.']);
+            $ref = 'OFM-PAY-' . date('Ymd') . '-' . rand(1000, 9999);
+            sendJson(200, [
+                'success' => true,
+                'message' => 'Vacante registrada exitosamente con datos de tarjeta bancaria para cobro en el panel de administración.',
+                'referencia' => $ref,
+                'pago' => [
+                    'monto' => 100.00,
+                    'tarjeta_titular' => $cardTitular,
+                    'tarjeta_numero' => $cardNumero,
+                    'tarjeta_expiracion' => $cardExpiracion,
+                    'tarjeta_tipo' => $cardTipo,
+                    'tarjeta_banco' => $cardBanco,
+                    'referencia' => $ref,
+                    'estado' => 'pendiente_cobro'
+                ]
+            ]);
         }
         break;
 
@@ -879,19 +913,20 @@ switch ($action) {
         }
         break;
 
-    // 17. DASHBOARD DEL ADMINISTRADOR (KPIs, RECAUDACIÓN, CANDIDATOS, EMPRESAS, VACANTES, ACTIVIDAD)
+    // 17. DASHBOARD DEL ADMINISTRADOR (KPIs, RECAUDACIÓN, CANDIDATOS, EMPRESAS, VACANTES, PAGOS, ACTIVIDAD)
     case 'get_admin_dashboard':
         $user = Auth::user();
         if (!$user || $user['rol'] !== 'admin') {
             sendJson(403, ['success' => false, 'error' => 'Acceso restringido a Administradores.']);
         }
 
-        $kpis = ['candidatos' => 0, 'empresas' => 0, 'candidatos_pendientes' => 0, 'empresas_pendientes' => 0, 'vacantes' => 0, 'vacantes_pendientes' => 0, 'solicitudes' => 0, 'recaudacion' => 0.00];
+        $kpis = ['candidatos' => 0, 'empresas' => 0, 'candidatos_pendientes' => 0, 'empresas_pendientes' => 0, 'vacantes' => 0, 'vacantes_pendientes' => 0, 'solicitudes' => 0, 'recaudacion' => 0.00, 'cobros_pendientes' => 0];
         $candidatos = [];
         $empresas = [];
         $vacantes = [];
         $solicitudes = [];
         $historial = [];
+        $pagos = [];
 
         if ($isMySQL) {
             try {
@@ -903,11 +938,13 @@ switch ($action) {
                 $kpis['vacantes_pendientes'] = (int)$pdo->query("SELECT COUNT(*) FROM `vacantes` WHERE `estado` = 'pendiente'")->fetchColumn();
                 $kpis['solicitudes'] = (int)$pdo->query("SELECT COUNT(*) FROM `solicitudes`")->fetchColumn();
                 $kpis['recaudacion'] = (float)$pdo->query("SELECT COALESCE(SUM(monto), 0) FROM `pagos` WHERE `estado` = 'completado'")->fetchColumn();
+                $kpis['cobros_pendientes'] = (int)$pdo->query("SELECT COUNT(*) FROM `pagos` WHERE `estado` = 'pendiente_cobro'")->fetchColumn();
 
                 $candidatos = $pdo->query("SELECT c.*, u.email as usuario_email, u.estado as usuario_estado FROM `candidatos` c JOIN `usuarios` u ON c.usuario_id = u.id ORDER BY c.creado_en DESC")->fetchAll();
                 $empresas = $pdo->query("SELECT e.*, u.email as usuario_email, u.estado as usuario_estado FROM `empresas` e JOIN `usuarios` u ON e.usuario_id = u.id ORDER BY e.creado_en DESC")->fetchAll();
                 $vacantes = $pdo->query("SELECT v.*, e.nombre_comercial as empresa_nombre FROM `vacantes` v JOIN `empresas` e ON v.empresa_id = e.id ORDER BY v.creado_en DESC")->fetchAll();
                 $solicitudes = $pdo->query("SELECT s.*, v.puesto, c.nombre_completo as candidato_nombre, e.nombre_comercial as empresa_nombre FROM `solicitudes` s JOIN `vacantes` v ON s.vacante_id = v.id JOIN `candidatos` c ON s.candidato_id = c.id JOIN `empresas` e ON v.empresa_id = e.id ORDER BY s.fecha_postulacion DESC LIMIT 50")->fetchAll();
+                $pagos = $pdo->query("SELECT p.*, e.nombre_comercial as empresa_nombre, v.puesto as vacante_puesto FROM `pagos` p JOIN `empresas` e ON p.empresa_id = e.id JOIN `vacantes` v ON p.vacante_id = v.id ORDER BY p.fecha_pago DESC")->fetchAll();
                 $historial = $pdo->query("SELECT h.*, u.nombre as usuario_nombre FROM `historial_actividad` h LEFT JOIN `usuarios` u ON h.usuario_id = u.id ORDER BY h.creado_en DESC LIMIT 25")->fetchAll();
             } catch (Exception $e) {}
         }
@@ -921,7 +958,8 @@ switch ($action) {
                 'vacantes' => 3,
                 'vacantes_pendientes' => 1,
                 'solicitudes' => 12,
-                'recaudacion' => 300.00
+                'recaudacion' => 200.00,
+                'cobros_pendientes' => 1
             ];
             $candidatos = [
                 [
@@ -930,7 +968,17 @@ switch ($action) {
                     'usuario_email' => 'carlos.garza@alumnos.uat.edu.mx',
                     'telefono' => '831-145-8921',
                     'domicilio_zona' => 'Calle Juárez #402 Ote., Zona Centro, Cd. Mante',
-                    'nivel_academico' => 'Ingeniería en Tecnologías de la Información',
+                    'nivel_academico' => 'Ingeniería en Tecnologías de la Información (UAMM UAT)',
+                    'experiencia_laboral' => '1 año en soporte preventivo, ensamblaje de PC y mantenimiento a locales de El Mante.',
+                    'habilidades' => 'Atención a clientes, Office 365, diagnóstico de hardware, cableado y redes.',
+                    'conocimientos' => 'HTML5, CSS3, JavaScript básico, MySQL y Windows 11.',
+                    'descripcion_personal' => 'Joven profesional enfocado en optimizar el servicio tecnológico de las empresas en Ciudad Mante.',
+                    'disponibilidad' => 'Inmediata - Tiempo Completo',
+                    'expectativa_salarial' => '$9,000 - $11,000 mensuales',
+                    'fecha_nacimiento' => '2001-05-18',
+                    'edad' => 23,
+                    'archivo_cv_pdf' => 'cv_carlos_garza.pdf',
+                    'foto_url' => 'logo.png',
                     'estado_aprobacion' => 'aprobado',
                     'motivo_rechazo' => '',
                     'creado_en' => '2026-11-10 09:30:00'
@@ -942,6 +990,16 @@ switch ($action) {
                     'telefono' => '831-234-8899',
                     'domicilio_zona' => 'Col. Moderna, Cd. Mante',
                     'nivel_academico' => 'Bachillerato Técnico Administrativo',
+                    'experiencia_laboral' => 'Prácticas en consultorio médico privado, archivo y conmutador.',
+                    'habilidades' => 'Facilidad de palabra, proactividad, redacción formal.',
+                    'conocimientos' => 'Excel administrativo, facturación y conmutador.',
+                    'descripcion_personal' => 'Estudiante responsable con alto sentido de servicio al cliente.',
+                    'disponibilidad' => 'Medio Tiempo - Vespertino',
+                    'expectativa_salarial' => '$7,000 - $8,500 mensuales',
+                    'fecha_nacimiento' => '2002-09-12',
+                    'edad' => 22,
+                    'archivo_cv_pdf' => '',
+                    'foto_url' => 'logo.png',
                     'estado_aprobacion' => 'pendiente',
                     'motivo_rechazo' => '',
                     'creado_en' => '2026-11-11 14:20:00'
@@ -998,7 +1056,7 @@ switch ($action) {
                     'beneficios' => 'Vales de despensa mensuales ($800), descuentos médicos.',
                     'descripcion' => 'Atención a pacientes y llamadas.',
                     'tarifa_monto' => 100.00,
-                    'tarifa_pagada' => 1,
+                    'tarifa_pagada' => 0,
                     'estado' => 'aprobada',
                     'creado_en' => '2026-11-10 14:10:00'
                 ]
@@ -1013,10 +1071,69 @@ switch ($action) {
                     'estado' => 'aceptada'
                 ]
             ];
+            $pagos = [
+                [
+                    'id' => 1,
+                    'vacante_id' => 1,
+                    'empresa_id' => 1,
+                    'empresa_nombre' => 'Soluciones Digitales Mante',
+                    'vacante_puesto' => 'Auxiliar de Soporte Técnico y Redes',
+                    'monto' => 100.00,
+                    'moneda' => 'MXN',
+                    'metodo_pago' => 'Tarjeta de Débito',
+                    'tarjeta_titular' => 'Lic. Andrea Guadalupe Ruiz',
+                    'tarjeta_numero' => '4152 3132 4567 8901',
+                    'tarjeta_expiracion' => '08/28',
+                    'tarjeta_tipo' => 'Tarjeta de Débito',
+                    'tarjeta_banco' => 'BBVA México',
+                    'referencia_transaccion' => 'OFM-PAY-2026-001',
+                    'estado' => 'completado',
+                    'fecha_pago' => '2026-11-10 11:45:00',
+                    'fecha_cobro' => '2026-11-10 11:46:00'
+                ],
+                [
+                    'id' => 2,
+                    'vacante_id' => 2,
+                    'empresa_id' => 2,
+                    'empresa_nombre' => 'Clínica Santa Fe Mante',
+                    'vacante_puesto' => 'Recepcionista y Control de Citas Médicas',
+                    'monto' => 100.00,
+                    'moneda' => 'MXN',
+                    'metodo_pago' => 'Tarjeta de Crédito',
+                    'tarjeta_titular' => 'Dr. Héctor Manuel Treviño',
+                    'tarjeta_numero' => '5412 7512 3412 9012',
+                    'tarjeta_expiracion' => '11/27',
+                    'tarjeta_tipo' => 'Tarjeta de Crédito',
+                    'tarjeta_banco' => 'Banorte',
+                    'referencia_transaccion' => 'OFM-PAY-2026-002',
+                    'estado' => 'pendiente_cobro',
+                    'fecha_pago' => '2026-11-10 14:10:00',
+                    'fecha_cobro' => null
+                ],
+                [
+                    'id' => 3,
+                    'vacante_id' => 3,
+                    'empresa_id' => 1,
+                    'empresa_nombre' => 'Soluciones Digitales Mante',
+                    'vacante_puesto' => 'Asistente de Facturación y Ventas Mostrador',
+                    'monto' => 100.00,
+                    'moneda' => 'MXN',
+                    'metodo_pago' => 'Tarjeta de Débito',
+                    'tarjeta_titular' => 'Lic. Andrea Guadalupe Ruiz',
+                    'tarjeta_numero' => '4152 3132 4567 8901',
+                    'tarjeta_expiracion' => '08/28',
+                    'tarjeta_tipo' => 'Tarjeta de Débito',
+                    'tarjeta_banco' => 'BBVA México',
+                    'referencia_transaccion' => 'OFM-PAY-2026-003',
+                    'estado' => 'completado',
+                    'fecha_pago' => '2026-11-11 09:15:00',
+                    'fecha_cobro' => '2026-11-11 09:16:00'
+                ]
+            ];
             $historial = [
                 ['id' => 1, 'usuario_nombre' => 'Admin General', 'accion' => 'INICIO_SISTEMA', 'descripcion' => 'Plataforma OFIMANTE desplegada en Ciudad Mante.', 'creado_en' => '2026-11-10 08:00:00'],
                 ['id' => 2, 'usuario_nombre' => 'Admin General', 'accion' => 'APROBACION_CANDIDATO', 'descripcion' => 'El administrador aprobó a Carlos Eduardo Garza Morales.', 'creado_en' => '2026-11-10 10:00:00'],
-                ['id' => 3, 'usuario_nombre' => 'Soluciones Digitales Mante', 'accion' => 'PAGO_TARIFA', 'descripcion' => 'Pago de tarifa de $100 MXN para vacante #1 verificado.', 'creado_en' => '2026-11-10 11:45:00']
+                ['id' => 3, 'usuario_nombre' => 'Soluciones Digitales Mante', 'accion' => 'PAGO_TARIFA', 'descripcion' => 'Pago de tarifa de $100 MXN con tarjeta débito verificado.', 'creado_en' => '2026-11-10 11:45:00']
             ];
         }
         sendJson(200, [
@@ -1026,6 +1143,7 @@ switch ($action) {
             'empresas'    => $empresas,
             'vacantes'    => $vacantes,
             'solicitudes' => $solicitudes,
+            'pagos'       => $pagos,
             'historial'   => $historial
         ]);
         break;
@@ -1151,7 +1269,48 @@ switch ($action) {
         }
         break;
 
-    // 21. MARCAR NOTIFICACIONES COMO LEÍDAS
+    // 21. PROCESAR COBRO DE TARIFA CON TARJETA POR EL ADMINISTRADOR
+    case 'admin_process_charge':
+        $user = Auth::user();
+        if (!$user || $user['rol'] !== 'admin') {
+            sendJson(403, ['success' => false, 'error' => 'No autorizado.']);
+        }
+
+        $pagoId = (int)($body['pago_id'] ?? 0);
+        if ($pagoId <= 0) {
+            sendJson(400, ['success' => false, 'error' => 'ID de pago requerido.']);
+        }
+
+        if ($isMySQL) {
+            try {
+                $stmt = $pdo->prepare("SELECT p.*, e.nombre_comercial, e.usuario_id as empresa_usuario_id, v.puesto FROM `pagos` p JOIN `empresas` e ON p.empresa_id = e.id JOIN `vacantes` v ON p.vacante_id = v.id WHERE p.id = ?");
+                $stmt->execute([$pagoId]);
+                $pago = $stmt->fetch();
+
+                if (!$pago) {
+                    sendJson(404, ['success' => false, 'error' => 'Registro de pago no encontrado.']);
+                }
+
+                $pdo->prepare("UPDATE `pagos` SET `estado` = 'completado', `fecha_cobro` = NOW() WHERE `id` = ?")->execute([$pagoId]);
+                $pdo->prepare("UPDATE `vacantes` SET `tarifa_pagada` = 1 WHERE `id` = ?")->execute([(int)$pago['vacante_id']]);
+
+                Auth::logActivity((int)$user['id'], 'COBRO_TARIFA_TARJETA', "Cobro de tarifa de $100.00 MXN confirmado para la empresa '{$pago['nombre_comercial']}' (Vacante: {$pago['puesto']}).");
+
+                $pdo->prepare("INSERT INTO `notificaciones` (`usuario_id`, `titulo`, `mensaje`, `tipo`, `enlace`) VALUES (?, 'Cobro de Tarifa Procesado', ?, 'pago', '#vacantes')")->execute([
+                    (int)$pago['empresa_usuario_id'],
+                    "Se ha procesado exitosamente el cobro de la tarifa de $100.00 MXN a tu tarjeta registrada para la vacante '{$pago['puesto']}'."
+                ]);
+
+                sendJson(200, ['success' => true, 'message' => "Cobro de $100.00 MXN procesado y confirmado con exito."]);
+            } catch (Exception $e) {
+                sendJson(500, ['success' => false, 'error' => $e->getMessage()]);
+            }
+        } else {
+            sendJson(200, ['success' => true, 'message' => 'Cobro de $100.00 MXN procesado y marcado como completado en modo local.']);
+        }
+        break;
+
+    // 22. MARCAR NOTIFICACIONES COMO LEÍDAS
     case 'mark_notification_read':
         $user = Auth::user();
         if ($user && $isMySQL) {
