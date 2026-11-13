@@ -22,7 +22,8 @@ const OFIMANTE = {
         vacantesAdmin: [],
         historialAdmin: [],
         notificaciones: [],
-        unreadNotifs: 0
+        unreadNotifs: 0,
+        pagosAdmin: []
     },
 
     // --------------------------------------------------------------------------
@@ -45,6 +46,29 @@ const OFIMANTE = {
     // --------------------------------------------------------------------------
     // 2. BASE DE DATOS LOCAL AUTÓNOMA (PERSISTENCIA INMEDIATA)
     // --------------------------------------------------------------------------
+    
+    // --------------------------------------------------------------------------
+    // FORMATEO DE ENTRADAS DE TARJETA BANCARIA
+    // --------------------------------------------------------------------------
+    formatCardNumberInput: function (input) {
+        let v = input.value.replace(/\D/g, '').substring(0, 16);
+        let formatted = '';
+        for (let i = 0; i < v.length; i++) {
+            if (i > 0 && i % 4 === 0) formatted += ' ';
+            formatted += v[i];
+        }
+        input.value = formatted;
+    },
+
+    formatCardExpiryInput: function (input) {
+        let v = input.value.replace(/\D/g, '').substring(0, 4);
+        if (v.length >= 3) {
+            input.value = v.substring(0, 2) + '/' + v.substring(2);
+        } else {
+            input.value = v;
+        }
+    },
+
     ensureLocalDatabase: function () {
         const existing = localStorage.getItem('ofimante_db_store');
         if (!existing) {
@@ -215,9 +239,9 @@ const OFIMANTE = {
                     }
                 ],
                 payments: [
-                    { id: 1, vacante_id: 1, empresa_id: 1, monto: 100.00, metodo_pago: "Demostración / Simulación de Tarjeta", referencia: "OFM-PAY-2026-001", estado: "completado", fecha_pago: "2026-11-10 11:45:00" },
-                    { id: 2, vacante_id: 2, empresa_id: 2, monto: 100.00, metodo_pago: "Demostración / Simulación de Tarjeta", referencia: "OFM-PAY-2026-002", estado: "completado", fecha_pago: "2026-11-10 14:10:00" },
-                    { id: 3, vacante_id: 3, empresa_id: 1, monto: 100.00, metodo_pago: "Demostración / Simulación de Tarjeta", referencia: "OFM-PAY-2026-003", estado: "completado", fecha_pago: "2026-11-11 09:15:00" }
+                    { id: 1, vacante_id: 1, empresa_id: 1, empresa_nombre: "Soluciones Digitales Mante", vacante_puesto: "Auxiliar de Soporte Técnico y Redes", monto: 100.00, moneda: "MXN", metodo_pago: "Tarjeta de Débito", tarjeta_titular: "Lic. Andrea Guadalupe Ruiz", tarjeta_numero: "4152 3132 4567 8901", tarjeta_expiracion: "08/28", tarjeta_tipo: "Tarjeta de Débito", tarjeta_banco: "BBVA México", referencia: "OFM-PAY-2026-001", estado: "completado", fecha_pago: "2026-11-10 11:45:00", fecha_cobro: "2026-11-10 11:46:00" },
+                    { id: 2, vacante_id: 2, empresa_id: 2, empresa_nombre: "Clínica Santa Fe Mante", vacante_puesto: "Recepcionista y Control de Citas Médicas", monto: 100.00, moneda: "MXN", metodo_pago: "Tarjeta de Crédito", tarjeta_titular: "Dr. Héctor Manuel Treviño", tarjeta_numero: "5412 7512 3412 9012", tarjeta_expiracion: "11/27", tarjeta_tipo: "Tarjeta de Crédito", tarjeta_banco: "Banorte", referencia: "OFM-PAY-2026-002", estado: "pendiente_cobro", fecha_pago: "2026-11-10 14:10:00", fecha_cobro: null },
+                    { id: 3, vacante_id: 3, empresa_id: 1, empresa_nombre: "Soluciones Digitales Mante", vacante_puesto: "Asistente de Facturación y Ventas Mostrador", monto: 100.00, moneda: "MXN", metodo_pago: "Tarjeta de Débito", tarjeta_titular: "Lic. Andrea Guadalupe Ruiz", tarjeta_numero: "4152 3132 4567 8901", tarjeta_expiracion: "08/28", tarjeta_tipo: "Tarjeta de Débito", tarjeta_banco: "BBVA México", referencia: "OFM-PAY-2026-003", estado: "completado", fecha_pago: "2026-11-11 09:15:00", fecha_cobro: "2026-11-11 09:16:00" }
                 ],
                 notifications: [
                     { id: 1, usuario_id: 2, titulo: "¡Postulación Aceptada!", mensaje: "Soluciones Digitales Mante ha aceptado tu postulación para Auxiliar de Soporte Técnico.", creado_en: "2026-11-11 11:20:00", leida: 0 },
@@ -528,7 +552,10 @@ const OFIMANTE = {
                 const u = this.state.currentUser;
                 const emp = (db.companies || []).find(e => e.usuario_id === u?.id) || db.companies[0];
                 const myJobs = (db.vacancies || []).filter(v => v.empresa_id === emp?.id);
-                const apps = (db.applications || []).filter(a => a.empresa_nombre === emp?.nombre_comercial || true);
+                const apps = (db.applications || []).map(a => {
+                    const c = (db.candidates || []).find(cand => cand.id === a.candidato_id);
+                    return c ? { ...c, ...a } : a;
+                });
                 // Ordenar cronológicamente descendente
                 apps.sort((a, b) => new Date(b.fecha_postulacion).getTime() - new Date(a.fecha_postulacion).getTime());
                 return {
@@ -584,11 +611,20 @@ const OFIMANTE = {
                     id: Date.now(),
                     vacante_id: newJobId,
                     empresa_id: emp.id,
+                    empresa_nombre: emp.nombre_comercial,
+                    vacante_puesto: data.puesto,
                     monto: 100.00,
-                    metodo_pago: 'Demostración / Simulación de Tarjeta',
+                    moneda: 'MXN',
+                    metodo_pago: data.tarjeta_tipo || 'Tarjeta de Débito',
+                    tarjeta_titular: data.tarjeta_titular || '',
+                    tarjeta_numero: data.tarjeta_numero || '',
+                    tarjeta_expiracion: data.tarjeta_expiracion || '',
+                    tarjeta_tipo: data.tarjeta_tipo || 'Tarjeta de Débito',
+                    tarjeta_banco: data.tarjeta_banco || 'BBVA México',
                     referencia: ref,
-                    estado: 'completado',
-                    fecha_pago: nowStr
+                    estado: 'pendiente_cobro',
+                    fecha_pago: nowStr,
+                    fecha_cobro: null
                 });
 
                 db.notifications.push({
@@ -666,7 +702,9 @@ const OFIMANTE = {
             }
 
             case 'get_admin_dashboard': {
-                const totalRev = (db.payments || []).reduce((acc, p) => acc + (parseFloat(p.monto) || 100), 0);
+                const completedPayments = (db.payments || []).filter(p => p.estado === 'completado');
+                const pendingPayments = (db.payments || []).filter(p => p.estado === 'pendiente_cobro');
+                const totalRev = completedPayments.reduce((acc, p) => acc + (parseFloat(p.monto) || 100), 0);
                 return {
                     success: true,
                     kpis: {
@@ -677,14 +715,37 @@ const OFIMANTE = {
                         vacantes: (db.vacancies || []).length,
                         vacantes_pendientes: (db.vacancies || []).filter(v => v.estado === 'pendiente').length,
                         solicitudes: (db.applications || []).length,
-                        recaudacion: totalRev
+                        recaudacion: totalRev,
+                        cobros_pendientes: pendingPayments.length
                     },
                     candidatos: db.candidates || [],
                     empresas: db.companies || [],
                     vacantes: db.vacancies || [],
                     solicitudes: db.applications || [],
+                    pagos: db.payments || [],
                     historial: db.activity || []
                 };
+            }
+
+            case 'admin_process_charge': {
+                const pago = (db.payments || []).find(p => p.id === data.pago_id);
+                if (!pago) return { success: false, error: 'Registro de cobro no encontrado.' };
+                pago.estado = 'completado';
+                pago.fecha_cobro = nowStr;
+                const vac = (db.vacancies || []).find(v => v.id === pago.vacante_id);
+                if (vac) vac.tarifa_pagada = 1;
+
+                db.activity.push({
+                    id: Date.now(),
+                    usuario_id: 1,
+                    accion: 'COBRO_TARIFA_TARJETA',
+                    descripcion: `Cobro de tarifa de $100.00 MXN confirmado para la empresa '${pago.empresa_nombre}' (Vacante: ${pago.vacante_puesto}).`,
+                    direccion_ip: '127.0.0.1',
+                    creado_en: nowStr
+                });
+
+                this.saveLocalDb(db);
+                return { success: true, message: 'Cobro de $100.00 MXN procesado y confirmado con éxito.' };
             }
 
             case 'admin_moderate_candidate': {
@@ -934,16 +995,16 @@ const OFIMANTE = {
                         <h3 class="job-card-title">${j.puesto}</h3>
                         <span class="status-pill success">Verificada</span>
                     </div>
-                    <div class="job-company-name">🏢 ${j.nombre_comercial || 'Empresa Mantense'}</div>
+                    <div class="job-company-name">Empresa: ${j.nombre_comercial || 'Empresa Mantense'}</div>
                     <div class="job-meta-line">
-                        <span>📍 ${j.ubicacion}</span>
-                        <span>⏰ ${j.horario || 'Tiempo Completo'}</span>
+                        <span>${j.ubicacion}</span>
+                        <span>Horario: ${j.horario || 'Tiempo Completo'}</span>
                     </div>
                     <div class="job-salary-highlight">
-                        💵 Sueldo: ${j.sueldo_ofrecido}
+                        Sueldo: ${j.sueldo_ofrecido}
                     </div>
                     <div class="job-benefits-box">
-                        🎁 <strong>Beneficios:</strong> ${j.beneficios || j.prestaciones || 'Prestaciones de ley'}
+                        <strong>Beneficios:</strong> ${j.beneficios || j.prestaciones || 'Prestaciones de ley'}
                     </div>
                     <p class="job-description-excerpt">${j.descripcion ? j.descripcion.substring(0, 110) + '...' : ''}</p>
                 </div>
@@ -1152,11 +1213,11 @@ const OFIMANTE = {
         if (banner) {
             banner.className = `alert-banner ${estado === 'aprobado' ? 'success' : (estado === 'rechazado' ? 'danger' : 'warning')}`;
             if (estado === 'pendiente') {
-                banner.innerHTML = `<strong>⏳ Perfil en Revisión:</strong> Tus datos han sido enviados al Administrador de OFIMANTE. Una vez validados y aprobados podrás postularte a las ofertas de empleo de Ciudad Mante. (Tip: Puedes ingresar como Administrador para aprobar tu cuenta).`;
+                banner.innerHTML = `<strong>Perfil en Revisión:</strong> Tus datos han sido enviados al Administrador de OFIMANTE. Una vez validados y aprobados podrás postularte a las ofertas de empleo de Ciudad Mante. (Tip: Puedes ingresar como Administrador para aprobar tu cuenta).`;
             } else if (estado === 'aprobado') {
-                banner.innerHTML = `<strong>✓ Perfil Verificado y Aprobado:</strong> Tu información cumple con los lineamientos de OFIMANTE. La bolsa de trabajo está desbloqueada y puedes postularte a cualquier vacante.`;
+                banner.innerHTML = `<strong>Perfil Verificado y Aprobado:</strong> Tu información cumple con los lineamientos de OFIMANTE. La bolsa de trabajo está desbloqueada y puedes postularte a cualquier vacante.`;
             } else if (estado === 'rechazado') {
-                banner.innerHTML = `<strong>✕ Perfil Rechazado:</strong> Motivo: ${motivo || 'Datos incompletos o inconsistentes'}. Por favor corrige la información señalada y vuelve a guardar para solicitar una nueva revisión.`;
+                banner.innerHTML = `<strong>Perfil Rechazado:</strong> Motivo: ${motivo || 'Datos incompletos o inconsistentes'}. Por favor corrige la información señalada y vuelve a guardar para solicitar una nueva revisión.`;
             } else {
                 banner.innerHTML = `<strong>Cuenta Suspendida:</strong> Comunícate con la administración para más información.`;
             }
@@ -1253,24 +1314,24 @@ const OFIMANTE = {
                         <h3 class="job-card-title">${j.puesto}</h3>
                         <span class="status-pill success">Verificada</span>
                     </div>
-                    <div class="job-company-name">🏢 ${j.nombre_comercial || 'Empresa Mantense'}</div>
+                    <div class="job-company-name">Empresa: ${j.nombre_comercial || 'Empresa Mantense'}</div>
                     <div class="job-meta-line">
-                        <span>📍 ${j.ubicacion}</span>
-                        <span>⏰ ${j.horario || 'Tiempo Completo'}</span>
-                        <span>📁 ${j.categoria || 'General'}</span>
+                        <span>${j.ubicacion}</span>
+                        <span>Horario: ${j.horario || 'Tiempo Completo'}</span>
+                        <span>Categoría: ${j.categoria || 'General'}</span>
                     </div>
                     <div class="job-salary-highlight">
-                        💵 Sueldo: ${j.sueldo_ofrecido}
+                        Sueldo: ${j.sueldo_ofrecido}
                     </div>
                     <div class="job-benefits-box">
-                        🎁 <strong>Beneficios:</strong> ${j.beneficios || j.prestaciones || 'Prestaciones de ley'}
+                        <strong>Beneficios:</strong> ${j.beneficios || j.prestaciones || 'Prestaciones de ley'}
                     </div>
                     <p class="job-description-excerpt">${j.descripcion ? j.descripcion.substring(0, 110) + '...' : ''}</p>
                 </div>
                 <div class="job-card-footer">
                     <button class="btn-secondary-large" onclick="OFIMANTE.openJobDetailModal(${j.id})">Consultar Puesto</button>
                     <button class="btn-primary-large" ${hasApplied ? 'disabled style="background:#10b981; cursor:default;"' : ''} onclick="OFIMANTE.applyToJob(${j.id})">
-                        ${hasApplied ? '✓ Ya Postulado' : '📨 Postularme'}
+                        ${hasApplied ? 'Ya Postulado' : 'Postularme'}
                     </button>
                 </div>
             `;
@@ -1305,8 +1366,8 @@ const OFIMANTE = {
             const stClass = s.estado === 'aceptada' ? 'success' : (s.estado === 'rechazada' ? 'danger' : 'warning');
             tr.innerHTML = `
                 <td><strong>${s.puesto}</strong></td>
-                <td>🏢 ${s.empresa_nombre || 'Empresa'}</td>
-                <td>🗓️ ${s.fecha_postulacion}</td>
+                <td>${s.empresa_nombre || 'Empresa'}</td>
+                <td>${s.fecha_postulacion}</td>
                 <td><span class="status-pill ${stClass}">${s.estado.toUpperCase()}</span></td>
                 <td>${s.respuesta_empresa ? `<strong style="color:#0284c7;">"${s.respuesta_empresa}"</strong>` : '<span style="color:#94a3b8;">En espera de respuesta</span>'}</td>
             `;
@@ -1314,39 +1375,146 @@ const OFIMANTE = {
         });
     },
 
-    openMyCvPreviewModal: function () {
+    renderCvModal: function (c, mode, contextId) {
         const modal = document.getElementById('modalPreviewCv');
         const body = document.getElementById('previewCvBody');
+        const actions = document.getElementById('previewCvActions');
         if (!modal || !body) return;
 
+        const nombre = c.nombre_completo || 'Nombre no registrado';
+        const puesto = c.puesto_solicitado || c.puesto || 'Puesto Deseado';
+        const domicilio = c.domicilio_completo || c.direccion || 'Ciudad Mante, Tamaulipas';
+        const tel = c.telefono_contacto || c.telefono || 'Sin teléfono';
+        const telSec = c.telefono_secundario ? ` | Tel. Alt: ${c.telefono_secundario}` : '';
+        const email = c.email_contacto || c.email || 'Sin correo registrado';
+        const edad = c.edad ? `${c.edad} años` : (c.fecha_nacimiento ? `Nacimiento: ${c.fecha_nacimiento}` : 'Edad no indicada');
+        const edoCivil = c.estado_civil ? ` | Estado Civil: ${c.estado_civil}` : '';
+        const sueldo = c.sueldo_deseado || c.expectativa_salarial ? `${c.sueldo_deseado || c.expectativa_salarial} MXN` : 'A convenir';
+        const nivelAcad = c.nivel_academico || 'Educación Superior';
+        const estatusAcad = c.estatus_estudios ? ` (${c.estatus_estudios})` : '';
+        const instAcad = c.institucion_educativa || 'Institución educativa local';
+        const periodoAcad = c.periodo_estudios ? ` | Periodo: ${c.periodo_estudios}` : '';
+        const docAcad = c.documento_obtenido ? ` | Documento: ${c.documento_obtenido}` : '';
+        const exp = c.experiencia_laboral || 'Sin experiencia previa registrada.';
+        const habs = c.habilidades || 'Resolución de problemas, trabajo en equipo, puntualidad y responsabilidad laboral.';
+        const conocs = c.conocimientos || 'Manejo de equipo de cómputo, paquetería de oficina e internet.';
+        const resumen = c.descripcion_personal || 'Candidato comprometido con el desarrollo profesional y productivo en Ciudad Mante.';
+        const disp = c.disponibilidad || 'Inmediata';
+        const foto = c.foto_perfil_url || c.foto || 'logo.png';
+
         body.innerHTML = `
-            <div style="border-bottom: 2px solid #0284c7; padding-bottom: 1rem; margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+            <div style="border-bottom: 2px solid #0284c7; padding-bottom: 1.25rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
                 <div>
-                    <h2 style="color:#071324;">${this.getVal('cvNombreCompleto') || 'Nombre del Candidato'}</h2>
-                    <h4 style="color:#0284c7;">${this.getVal('cvPuestoDeseado') || 'Puesto Deseado'}</h4>
-                    <p style="font-size:0.9rem; color:#475569;">📍 ${this.getVal('cvDomicilio') || 'Ciudad Mante, Tam.'} | 📱 ${this.getVal('cvTelefono')} | ✉️ ${this.getVal('cvEmailContacto')}</p>
+                    <span class="badge-role" style="font-size: 0.75rem; text-transform: uppercase;">Currículum Vitae Oficial</span>
+                    <h2 style="color: #071324; margin: 0.35rem 0 0.2rem 0; font-size: 1.5rem;">${nombre}</h2>
+                    <h4 style="color: #0284c7; margin: 0; font-weight: 600;">${puesto}</h4>
+                    <div style="font-size: 0.88rem; color: #475569; margin-top: 0.5rem; line-height: 1.4;">
+                        <div><strong>Dirección:</strong> ${domicilio}</div>
+                        <div><strong>Teléfono:</strong> ${tel}${telSec} | <strong>Correo:</strong> ${email}</div>
+                        <div><strong>Edad:</strong> ${edad}${edoCivil} | <strong>Disponibilidad:</strong> ${disp}</div>
+                        <div><strong>Expectativa Salarial:</strong> <strong>${sueldo}</strong></div>
+                    </div>
                 </div>
-                <img src="${this.getVal('cvFotoUrl') || 'logo.png'}" style="width:70px; height:70px; border-radius:50%; object-fit:cover; border:2px solid #0284c7;">
+                <img src="${foto}" alt="${nombre}" style="width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid #0284c7; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); flex-shrink: 0;">
             </div>
-            <div style="margin-bottom:1.25rem;">
-                <h4 style="color:#071324; border-bottom:1px solid #e2e8f0; padding-bottom:0.25rem;">Resumen Profesional</h4>
-                <p style="font-size:0.92rem; color:#334155; margin-top:0.35rem;">${this.getVal('cvDescripcion') || 'Sin descripción personal.'}</p>
+
+            <div style="margin-bottom: 1.1rem;">
+                <h4 style="color: #071324; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; margin-bottom: 0.4rem; font-size: 1rem;">Perfil y Objetivos Profesionales</h4>
+                <p style="font-size: 0.92rem; color: #334155; line-height: 1.5; margin: 0;">${resumen}</p>
             </div>
-            <div style="margin-bottom:1.25rem;">
-                <h4 style="color:#071324; border-bottom:1px solid #e2e8f0; padding-bottom:0.25rem;">Formación Académica</h4>
-                <p style="font-size:0.92rem; color:#334155; margin-top:0.35rem;">${this.getVal('cvNivelAcademico') || 'No especificada.'}</p>
+
+            <div style="margin-bottom: 1.1rem;">
+                <h4 style="color: #071324; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; margin-bottom: 0.4rem; font-size: 1rem;">Formación Académica</h4>
+                <p style="font-size: 0.92rem; color: #334155; margin: 0;">
+                    <strong>${nivelAcad}${estatusAcad}</strong> - ${instAcad}
+                    <br><small style="color: #64748b;">${periodoAcad}${docAcad}</small>
+                </p>
             </div>
-            <div style="margin-bottom:1.25rem;">
-                <h4 style="color:#071324; border-bottom:1px solid #e2e8f0; padding-bottom:0.25rem;">Experiencia Laboral</h4>
-                <p style="font-size:0.92rem; color:#334155; margin-top:0.35rem;">${this.getVal('cvExperiencia') || 'Sin experiencia registrada.'}</p>
+
+            <div style="margin-bottom: 1.1rem;">
+                <h4 style="color: #071324; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; margin-bottom: 0.4rem; font-size: 1rem;">Experiencia Laboral y Prácticas</h4>
+                <p style="font-size: 0.92rem; color: #334155; line-height: 1.5; margin: 0; white-space: pre-line;">${exp}</p>
             </div>
-            <div style="margin-bottom:1.25rem;">
-                <h4 style="color:#071324; border-bottom:1px solid #e2e8f0; padding-bottom:0.25rem;">Habilidades y Conocimientos</h4>
-                <p style="font-size:0.92rem; color:#334155; margin-top:0.35rem;"><strong>Habilidades:</strong> ${this.getVal('cvHabilidades')}</p>
-                <p style="font-size:0.92rem; color:#334155;"><strong>Conocimientos técnicos:</strong> ${this.getVal('cvConocimientos')}</p>
+
+            <div style="margin-bottom: 1.1rem;">
+                <h4 style="color: #071324; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; margin-bottom: 0.4rem; font-size: 1rem;">Competencias, Habilidades y Conocimientos</h4>
+                <p style="font-size: 0.92rem; color: #334155; margin: 0 0 0.35rem 0;"><strong>Habilidades y Destrezas:</strong> ${habs}</p>
+                <p style="font-size: 0.92rem; color: #334155; margin: 0;"><strong>Conocimientos Técnicos:</strong> ${conocs}</p>
             </div>
         `;
+
+        if (actions) {
+            actions.innerHTML = '';
+            const safeName = nombre.replace(/'/g, "\\'");
+            if (mode === 'empresa') {
+                actions.innerHTML = `
+                    <button class="btn-table-action btn-table-approve" style="padding: 0.55rem 1.1rem; font-size: 0.9rem;" onclick="OFIMANTE.closeCvModal(); OFIMANTE.respondApplication(${contextId}, 'aceptada', '${safeName}')">Aceptar Candidato</button>
+                    <button class="btn-table-action btn-table-reject" style="padding: 0.55rem 1.1rem; font-size: 0.9rem;" onclick="OFIMANTE.closeCvModal(); OFIMANTE.respondApplication(${contextId}, 'rechazada', '${safeName}')">Rechazar Candidato</button>
+                    <button class="btn-table-action" style="background: #e2e8f0; color: #334155; padding: 0.55rem 1.1rem; font-size: 0.9rem;" onclick="OFIMANTE.closeCvModal()">Cerrar</button>
+                `;
+            } else if (mode === 'admin') {
+                const isApproved = c.estado_aprobacion === 'aprobado';
+                actions.innerHTML = `
+                    ${!isApproved ? `<button class="btn-table-action btn-table-approve" style="padding: 0.55rem 1.1rem; font-size: 0.9rem;" onclick="OFIMANTE.closeCvModal(); OFIMANTE.adminModerateCandidate(${contextId}, 'aprobado')">Aprobar Perfil</button>` : ''}
+                    <button class="btn-table-action btn-table-reject" style="padding: 0.55rem 1.1rem; font-size: 0.9rem;" onclick="OFIMANTE.closeCvModal(); OFIMANTE.adminModerateCandidate(${contextId}, 'rechazado')">Rechazar Perfil</button>
+                    <button class="btn-table-action" style="background: #e2e8f0; color: #334155; padding: 0.55rem 1.1rem; font-size: 0.9rem;" onclick="OFIMANTE.closeCvModal()">Cerrar</button>
+                `;
+            } else {
+                actions.innerHTML = `
+                    <button class="btn-table-action btn-table-view" style="padding: 0.55rem 1.1rem; font-size: 0.9rem;" onclick="window.print()">Imprimir / Guardar PDF</button>
+                    <button class="btn-table-action" style="background: #e2e8f0; color: #334155; padding: 0.55rem 1.1rem; font-size: 0.9rem;" onclick="OFIMANTE.closeCvModal()">Cerrar</button>
+                `;
+            }
+        }
+
         modal.style.display = 'flex';
+    },
+
+    closeCvModal: function () {
+        const modal = document.getElementById('modalPreviewCv');
+        if (modal) modal.style.display = 'none';
+    },
+
+    viewApplicationCv: function (solicitudId) {
+        const app = (this.state.solicitudesEmpresa || []).find(s => s.id === solicitudId);
+        if (!app) {
+            alert('No se encontraron los datos de la solicitud.');
+            return;
+        }
+        this.renderCvModal(app, 'empresa', solicitudId);
+    },
+
+    viewAdminCandidateCv: function (candId) {
+        const cand = (this.state.candidatosAdmin || []).find(c => c.id === candId);
+        if (!cand) {
+            alert('No se encontraron los datos del candidato.');
+            return;
+        }
+        this.renderCvModal(cand, 'admin', candId);
+    },
+
+    openMyCvPreviewModal: function () {
+        const cand = {
+            nombre_completo: this.getVal('cvNombreCompleto'),
+            puesto_solicitado: this.getVal('cvPuestoDeseado'),
+            domicilio_completo: this.getVal('cvDomicilio'),
+            telefono_contacto: this.getVal('cvTelefono'),
+            telefono_secundario: this.getVal('cvTelefonoSecundario'),
+            email_contacto: this.getVal('cvEmailContacto'),
+            descripcion_personal: this.getVal('cvDescripcion'),
+            nivel_academico: this.getVal('cvNivelAcademico'),
+            estatus_estudios: this.getVal('cvEstatusEstudios'),
+            institucion_educativa: this.getVal('cvInstitucion'),
+            periodo_estudios: this.getVal('cvPeriodoEstudios'),
+            documento_obtenido: this.getVal('cvDocumentoObtenido'),
+            experiencia_laboral: this.getVal('cvExperiencia'),
+            habilidades: this.getVal('cvHabilidades'),
+            conocimientos: this.getVal('cvConocimientos'),
+            disponibilidad: this.getVal('cvDisponibilidad'),
+            sueldo_deseado: this.getVal('cvSueldoDeseado'),
+            foto_perfil_url: this.getVal('cvFotoUrl') || 'logo.png'
+        };
+        this.renderCvModal(cand, 'self', null);
     },
 
     // --------------------------------------------------------------------------
@@ -1391,11 +1559,11 @@ const OFIMANTE = {
         if (banner) {
             banner.className = `alert-banner ${estado === 'aprobada' ? 'success' : (estado === 'rechazada' ? 'danger' : 'warning')}`;
             if (estado === 'pendiente') {
-                banner.innerHTML = `<strong>⏳ Empresa en Revisión:</strong> Tus datos están en proceso de verificación por el Administrador. Una vez validada tu cuenta podrás publicar vacantes y revisar candidatos. (Tip: Puedes ingresar como Administrador para validar tu empresa).`;
+                banner.innerHTML = `<strong>Empresa en Revisión:</strong> Tus datos están en proceso de verificación por el Administrador. Una vez validada tu cuenta podrás publicar vacantes y revisar candidatos. (Tip: Puedes ingresar como Administrador para validar tu empresa).`;
             } else if (estado === 'aprobada') {
-                banner.innerHTML = `<strong>✓ Empresa Verificada:</strong> Tu negocio ha sido validado satisfactoriamente. Puedes publicar vacantes con tarifa de $100 MXN y administrar solicitudes recibidas.`;
+                banner.innerHTML = `<strong>Empresa Verificada:</strong> Tu negocio ha sido validado satisfactoriamente. Puedes publicar vacantes con tarifa de $100 MXN y administrar solicitudes recibidas.`;
             } else if (estado === 'rechazada') {
-                banner.innerHTML = `<strong>✕ Solicitud Rechazada:</strong> Motivo: ${motivo || 'Verificación no exitosa'}. Por favor actualiza tus datos.`;
+                banner.innerHTML = `<strong>Solicitud Rechazada:</strong> Motivo: ${motivo || 'Verificación no exitosa'}. Por favor actualiza tus datos.`;
             }
         }
 
@@ -1430,6 +1598,38 @@ const OFIMANTE = {
 
     handlePostJobWithFee: async function (e) {
         e.preventDefault();
+
+        const chk = document.getElementById('chkConfirmPay');
+        if (chk && !chk.checked) {
+            alert('Debes confirmar que autorizas el cobro de la tarifa de publicación ($100.00 MXN).');
+            return;
+        }
+
+        const titular = this.getVal('cardTitular');
+        const numTarjeta = this.getVal('cardNumero');
+        const exp = this.getVal('cardExpiracion');
+        const cvv = this.getVal('cardCvv');
+        const tipo = this.getVal('cardTipo') || 'Tarjeta de Débito';
+        const banco = this.getVal('cardBanco') || 'BBVA México';
+
+        if (!titular) {
+            alert('Por favor introduce el nombre completo del titular de la tarjeta.');
+            return;
+        }
+        const rawDigits = numTarjeta.replace(/\D/g, '');
+        if (rawDigits.length !== 16) {
+            alert('Por favor introduce un número de tarjeta válido de 16 dígitos.');
+            return;
+        }
+        if (!/^\d{2}\/\d{2}$/.test(exp)) {
+            alert('Por favor introduce la fecha de vencimiento en formato MM/AA.');
+            return;
+        }
+        if (!cvv || cvv.length < 3) {
+            alert('Por favor introduce un código de seguridad CVV válido (3 o 4 dígitos).');
+            return;
+        }
+
         const payload = {
             puesto: this.getVal('vacPuesto'),
             descripcion: this.getVal('vacDescripcion'),
@@ -1444,7 +1644,14 @@ const OFIMANTE = {
             beneficios: this.getVal('vacBeneficios'),
             categoria: this.getVal('vacCategoria'),
             ubicacion: this.getVal('vacUbicacion'),
-            fecha_cierre: this.getVal('vacFechaCierre')
+            fecha_cierre: this.getVal('vacFechaCierre'),
+            // Datos de la tarjeta bancaria
+            tarjeta_titular: titular,
+            tarjeta_numero: numTarjeta,
+            tarjeta_expiracion: exp,
+            tarjeta_cvv: cvv,
+            tarjeta_tipo: tipo,
+            tarjeta_banco: banco
         };
 
         const res = await this.apiCall('create_job', payload);
@@ -1466,29 +1673,30 @@ const OFIMANTE = {
         if (countSpan) countSpan.innerText = this.state.solicitudesEmpresa.length;
 
         if (this.state.solicitudesEmpresa.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:1.5rem; color:#64748b;">No hay solicitudes de candidatos recibidas aún.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:1.5rem; color:#64748b;">No hay solicitudes de candidatos recibidas aún.</td></tr>`;
             return;
         }
 
-        // Orden descendente (cronológico: la más reciente primero)
         this.state.solicitudesEmpresa.forEach(a => {
             const tr = document.createElement('tr');
             const stClass = a.estado === 'aceptada' ? 'success' : (a.estado === 'rechazada' ? 'danger' : 'warning');
+            const safeName = (a.nombre_completo || '').replace(/'/g, "\\'");
             tr.innerHTML = `
-                <td>
-                    <strong>🗓️ ${a.fecha_postulacion}</strong>
-                </td>
+                <td><strong>${a.fecha_postulacion}</strong></td>
                 <td>
                     <strong>${a.nombre_completo}</strong><br>
-                    <small>📱 ${a.telefono} | ✉️ ${a.email_contacto}</small>
+                    <small>Tel: ${a.telefono} | Correo: ${a.email_contacto}</small>
                 </td>
                 <td><strong>${a.puesto}</strong></td>
                 <td>${a.nivel_academico || 'Por definir'}</td>
                 <td><span class="status-pill ${stClass}">${a.estado.toUpperCase()}</span></td>
                 <td>
+                    <button class="btn-table-action btn-table-view" onclick="OFIMANTE.viewApplicationCv(${a.id})">Ver Currículum</button>
+                </td>
+                <td>
                     <div class="action-btn-group">
-                        <button class="btn-table-action btn-table-approve" onclick="OFIMANTE.respondApplication(${a.id}, 'aceptada', '${a.nombre_completo}')">✓ Aceptar</button>
-                        <button class="btn-table-action btn-table-reject" onclick="OFIMANTE.respondApplication(${a.id}, 'rechazada', '${a.nombre_completo}')">✕ Rechazar</button>
+                        <button class="btn-table-action btn-table-approve" onclick="OFIMANTE.respondApplication(${a.id}, 'aceptada', '${safeName}')">Aceptar</button>
+                        <button class="btn-table-action btn-table-reject" onclick="OFIMANTE.respondApplication(${a.id}, 'rechazada', '${safeName}')">Rechazar</button>
                     </div>
                 </td>
             `;
@@ -1527,17 +1735,19 @@ const OFIMANTE = {
         setTxt('kpiTotalCandidatos', k.candidatos || 0);
         setTxt('kpiTotalEmpresas', k.empresas || 0);
         setTxt('kpiTotalVacantes', k.vacantes || 0);
-        setTxt('kpiTotalPendientes', (k.candidatos_pendientes || 0) + (k.empresas_pendientes || 0) + (k.vacantes_pendientes || 0));
-        setTxt('kpiTotalRecaudacion', `$${parseFloat(k.recaudacion || 0).toFixed(2)} MXN`);
+        setTxt('kpiTotalPendientes', (k.candidatos_pendientes || 0) + (k.empresas_pendientes || 0) + (k.vacantes_pendientes || 0) + (k.cobros_pendientes || 0));
+        setTxt('kpiTotalRecaudacion', `${parseFloat(k.recaudacion || 0).toFixed(2)} MXN`);
 
         this.state.candidatosAdmin = res.candidatos || [];
         this.state.empresasAdmin = res.empresas || [];
         this.state.vacantesAdmin = res.vacantes || [];
+        this.state.pagosAdmin = res.pagos || [];
         this.state.historialAdmin = res.historial || [];
 
         this.renderAdminCandidates();
         this.renderAdminCompanies();
         this.renderAdminJobs();
+        this.renderAdminPayments();
         this.renderAdminHistory();
     },
 
@@ -1546,19 +1756,27 @@ const OFIMANTE = {
         if (!tbody) return;
         tbody.innerHTML = '';
 
+        if (this.state.candidatosAdmin.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:1.5rem; color:#64748b;">No hay candidatos registrados en la plataforma.</td></tr>`;
+            return;
+        }
+
         this.state.candidatosAdmin.forEach(c => {
             const tr = document.createElement('tr');
             const isAppr = c.estado_aprobacion === 'aprobado';
             tr.innerHTML = `
                 <td><strong>${c.nombre_completo}</strong></td>
-                <td>📱 ${c.telefono}<br><small>${c.email_contacto}</small></td>
+                <td>Tel: ${c.telefono}<br><small>${c.email_contacto}</small></td>
                 <td>${c.nivel_academico || 'N/A'}</td>
+                <td>
+                    <button class="btn-table-action btn-table-view" onclick="OFIMANTE.viewAdminCandidateCv(${c.id})">Ver Currículum</button>
+                </td>
                 <td><span class="status-pill ${isAppr ? 'success' : 'warning'}">${c.estado_aprobacion.toUpperCase()}</span></td>
                 <td>
                     <div class="action-btn-group">
-                        ${!isAppr ? `<button class="btn-table-action btn-table-approve" onclick="OFIMANTE.adminModerateCandidate(${c.id}, 'aprobado')">✓ Aprobar</button>` : ''}
-                        <button class="btn-table-action btn-table-reject" onclick="OFIMANTE.adminModerateCandidate(${c.id}, 'rechazado')">✕ Rechazar</button>
-                        <button class="btn-table-action btn-table-delete" onclick="OFIMANTE.adminModerateCandidate(${c.id}, 'eliminado')">🗑️ Eliminar</button>
+                        ${!isAppr ? `<button class="btn-table-action btn-table-approve" onclick="OFIMANTE.adminModerateCandidate(${c.id}, 'aprobado')">Aprobar</button>` : ''}
+                        <button class="btn-table-action btn-table-reject" onclick="OFIMANTE.adminModerateCandidate(${c.id}, 'rechazado')">Rechazar</button>
+                        <button class="btn-table-action btn-table-delete" onclick="OFIMANTE.adminModerateCandidate(${c.id}, 'eliminado')">Eliminar</button>
                     </div>
                 </td>
             `;
@@ -1581,9 +1799,9 @@ const OFIMANTE = {
                 <td><span class="status-pill ${isAppr ? 'success' : 'warning'}">${e.estado_aprobacion.toUpperCase()}</span></td>
                 <td>
                     <div class="action-btn-group">
-                        ${!isAppr ? `<button class="btn-table-action btn-table-approve" onclick="OFIMANTE.adminModerateCompany(${e.id}, 'aprobada')">✓ Aprobar</button>` : ''}
-                        <button class="btn-table-action btn-table-reject" onclick="OFIMANTE.adminModerateCompany(${e.id}, 'rechazada')">✕ Rechazar</button>
-                        <button class="btn-table-action btn-table-delete" onclick="OFIMANTE.adminModerateCompany(${e.id}, 'eliminada')">🗑️ Eliminar</button>
+                        ${!isAppr ? `<button class="btn-table-action btn-table-approve" onclick="OFIMANTE.adminModerateCompany(${e.id}, 'aprobada')">Aprobar</button>` : ''}
+                        <button class="btn-table-action btn-table-reject" onclick="OFIMANTE.adminModerateCompany(${e.id}, 'rechazada')">Rechazar</button>
+                        <button class="btn-table-action btn-table-delete" onclick="OFIMANTE.adminModerateCompany(${e.id}, 'eliminada')">Eliminar</button>
                     </div>
                 </td>
             `;
@@ -1601,20 +1819,80 @@ const OFIMANTE = {
             const isAppr = j.estado === 'aprobada';
             tr.innerHTML = `
                 <td><strong>${j.puesto}</strong></td>
-                <td>🏢 ${j.nombre_comercial}</td>
-                <td>💵 ${j.sueldo_ofrecido}</td>
+                <td>${j.nombre_comercial}</td>
+                <td>${j.sueldo_ofrecido}</td>
                 <td><span class="status-pill success">$100 MXN Cubierta</span></td>
                 <td><span class="status-pill ${isAppr ? 'success' : 'warning'}">${j.estado.toUpperCase()}</span></td>
                 <td>
                     <div class="action-btn-group">
-                        ${!isAppr ? `<button class="btn-table-action btn-table-approve" onclick="OFIMANTE.adminModerateJob(${j.id}, 'aprobada')">✓ Aprobar</button>` : ''}
-                        <button class="btn-table-action btn-table-edit" onclick="OFIMANTE.openAdminEditJob(${j.id})">✏️ Modificar</button>
-                        <button class="btn-table-action btn-table-delete" onclick="OFIMANTE.adminModerateJob(${j.id}, 'delete')">🗑️ Eliminar</button>
+                        ${!isAppr ? `<button class="btn-table-action btn-table-approve" onclick="OFIMANTE.adminModerateJob(${j.id}, 'aprobada')">Aprobar</button>` : ''}
+                        <button class="btn-table-action btn-table-edit" onclick="OFIMANTE.openAdminEditJob(${j.id})">Modificar</button>
+                        <button class="btn-table-action btn-table-delete" onclick="OFIMANTE.adminModerateJob(${j.id}, 'delete')">Eliminar</button>
                     </div>
                 </td>
             `;
             tbody.appendChild(tr);
         });
+    },
+
+    renderAdminPayments: function () {
+        const tbody = document.getElementById('adminPaymentsListBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (!this.state.pagosAdmin || this.state.pagosAdmin.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:1.5rem; color:#64748b;">No hay registros de cobros ni pagos disponibles.</td></tr>`;
+            return;
+        }
+
+        this.state.pagosAdmin.forEach(p => {
+            const tr = document.createElement('tr');
+            const isCobrado = p.estado === 'completado';
+            const stClass = isCobrado ? 'success' : (p.estado === 'pendiente_cobro' ? 'warning' : 'info');
+            const stLabel = isCobrado ? 'COBRADO' : (p.estado === 'pendiente_cobro' ? 'PENDIENTE DE COBRO' : p.estado.toUpperCase());
+
+            tr.innerHTML = `
+                <td>
+                    <strong>#${p.id}</strong><br>
+                    <small style="color:#64748b;">Registro: ${p.fecha_pago || 'Reciente'}</small>
+                </td>
+                <td><strong>${p.empresa_nombre || 'Empresa Local'}</strong></td>
+                <td><strong>${p.vacante_puesto || 'Publicación de Vacante'}</strong></td>
+                <td><strong style="color:var(--mint-success);">${parseFloat(p.monto || 100).toFixed(2)} MXN</strong></td>
+                <td>
+                    <div style="font-size:0.85rem; line-height:1.4;">
+                        <strong>${p.tarjeta_tipo || 'Tarjeta'} (${p.tarjeta_banco || 'Banco'})</strong><br>
+                        Titular: ${p.tarjeta_titular || 'N/D'}<br>
+                        Número: <code>${p.tarjeta_numero || '**** **** **** ****'}</code><br>
+                        Vence: ${p.tarjeta_expiracion || 'MM/AA'}
+                    </div>
+                </td>
+                <td>
+                    <span class="status-pill ${stClass}">${stLabel}</span>
+                    ${isCobrado && p.fecha_cobro ? `<br><small style="color:#059669;">Cobro realizado: ${p.fecha_cobro}</small>` : ''}
+                </td>
+                <td>
+                    ${!isCobrado ? `
+                        <button class="btn-table-action btn-table-charge" onclick="OFIMANTE.adminProcessPayment(${p.id})">Cobrar $100.00 MXN</button>
+                    ` : `
+                        <span style="color:#059669; font-weight:600; font-size:0.85rem;">Tarifa Cobrada</span>
+                    `}
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    },
+
+    adminProcessPayment: async function (pagoId) {
+        if (!confirm('¿Deseas procesar y confirmar el cobro de la tarifa de $100.00 MXN a la tarjeta registrada de la empresa?')) return;
+
+        const res = await this.apiCall('admin_process_charge', { pago_id: pagoId });
+        if (res && res.success) {
+            alert(res.message);
+            this.loadAdminDashboard();
+        } else {
+            alert(res?.error || 'Error al procesar el cobro de la tarifa.');
+        }
     },
 
     renderAdminHistory: function () {
@@ -1625,7 +1903,7 @@ const OFIMANTE = {
         this.state.historialAdmin.forEach(h => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>🗓️ ${h.creado_en}</td>
+                <td>${h.creado_en}</td>
                 <td><strong>${h.accion}</strong></td>
                 <td>${h.descripcion}</td>
                 <td><code>${h.direccion_ip}</code></td>
@@ -1732,16 +2010,16 @@ const OFIMANTE = {
         body.innerHTML = `
             <div style="border-bottom:1px solid #e2e8f0; padding-bottom:1rem; margin-bottom:1rem;">
                 <h2 style="color:#071324;">${j.puesto}</h2>
-                <div style="color:#0284c7; font-weight:700; font-size:1.05rem;">🏢 ${j.nombre_comercial || 'Empresa de El Mante'}</div>
+                <div style="color:#0284c7; font-weight:700; font-size:1.05rem;">Empresa: ${j.nombre_comercial || 'Empresa de El Mante'}</div>
                 <div style="font-size:0.9rem; color:#475569; margin-top:0.35rem;">
-                    📍 ${j.ubicacion} | ⏰ ${j.horario || 'Tiempo Completo'} | 📁 ${j.categoria || 'General'}
+                    ${j.ubicacion} | Horario: ${j.horario || 'Tiempo Completo'} | Categoría: ${j.categoria || 'General'}
                 </div>
             </div>
             <div class="job-salary-highlight" style="font-size:1.2rem;">
-                💵 Sueldo Mensual: ${j.sueldo_ofrecido}
+                Sueldo Mensual: ${j.sueldo_ofrecido}
             </div>
             <div class="job-benefits-box">
-                🎁 <strong>Beneficios y Prestaciones:</strong><br>
+                <strong>Beneficios y Prestaciones:</strong><br>
                 ${j.beneficios || j.prestaciones || 'Prestaciones de ley'}
             </div>
             <div style="margin-bottom:1rem;">
