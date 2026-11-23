@@ -880,7 +880,7 @@ const OFIMANTE = {
         if (banner) {
             banner.style.background = this.state.backendOnline
                 ? "linear-gradient(90deg, #064e3b, #07172b)"
-                : "linear-gradient(90deg, #1e293b, #071324)";
+                : "linear-gradient(90deg, #1e293b, #0f2942)";
         }
     },
 
@@ -1406,7 +1406,7 @@ const OFIMANTE = {
             <div style="border-bottom: 2px solid #0284c7; padding-bottom: 1.25rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
                 <div>
                     <span class="badge-role" style="font-size: 0.75rem; text-transform: uppercase;">Currículum Vitae Oficial</span>
-                    <h2 style="color: #071324; margin: 0.35rem 0 0.2rem 0; font-size: 1.5rem;">${nombre}</h2>
+                    <h2 style="color: #0f2942; margin: 0.35rem 0 0.2rem 0; font-size: 1.5rem;">${nombre}</h2>
                     <h4 style="color: #0284c7; margin: 0; font-weight: 600;">${puesto}</h4>
                     <div style="font-size: 0.88rem; color: #475569; margin-top: 0.5rem; line-height: 1.4;">
                         <div><strong>Dirección:</strong> ${domicilio}</div>
@@ -1419,12 +1419,12 @@ const OFIMANTE = {
             </div>
 
             <div style="margin-bottom: 1.1rem;">
-                <h4 style="color: #071324; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; margin-bottom: 0.4rem; font-size: 1rem;">Perfil y Objetivos Profesionales</h4>
+                <h4 style="color: #0f2942; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; margin-bottom: 0.4rem; font-size: 1rem;">Perfil y Objetivos Profesionales</h4>
                 <p style="font-size: 0.92rem; color: #334155; line-height: 1.5; margin: 0;">${resumen}</p>
             </div>
 
             <div style="margin-bottom: 1.1rem;">
-                <h4 style="color: #071324; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; margin-bottom: 0.4rem; font-size: 1rem;">Formación Académica</h4>
+                <h4 style="color: #0f2942; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; margin-bottom: 0.4rem; font-size: 1rem;">Formación Académica</h4>
                 <p style="font-size: 0.92rem; color: #334155; margin: 0;">
                     <strong>${nivelAcad}${estatusAcad}</strong> - ${instAcad}
                     <br><small style="color: #64748b;">${periodoAcad}${docAcad}</small>
@@ -1432,12 +1432,12 @@ const OFIMANTE = {
             </div>
 
             <div style="margin-bottom: 1.1rem;">
-                <h4 style="color: #071324; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; margin-bottom: 0.4rem; font-size: 1rem;">Experiencia Laboral y Prácticas</h4>
+                <h4 style="color: #0f2942; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; margin-bottom: 0.4rem; font-size: 1rem;">Experiencia Laboral y Prácticas</h4>
                 <p style="font-size: 0.92rem; color: #334155; line-height: 1.5; margin: 0; white-space: pre-line;">${exp}</p>
             </div>
 
             <div style="margin-bottom: 1.1rem;">
-                <h4 style="color: #071324; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; margin-bottom: 0.4rem; font-size: 1rem;">Competencias, Habilidades y Conocimientos</h4>
+                <h4 style="color: #0f2942; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; margin-bottom: 0.4rem; font-size: 1rem;">Competencias, Habilidades y Conocimientos</h4>
                 <p style="font-size: 0.92rem; color: #334155; margin: 0 0 0.35rem 0;"><strong>Habilidades y Destrezas:</strong> ${habs}</p>
                 <p style="font-size: 0.92rem; color: #334155; margin: 0;"><strong>Conocimientos Técnicos:</strong> ${conocs}</p>
             </div>
@@ -2009,7 +2009,7 @@ const OFIMANTE = {
 
         body.innerHTML = `
             <div style="border-bottom:1px solid #e2e8f0; padding-bottom:1rem; margin-bottom:1rem;">
-                <h2 style="color:#071324;">${j.puesto}</h2>
+                <h2 style="color:#0f2942;">${j.puesto}</h2>
                 <div style="color:#0284c7; font-weight:700; font-size:1.05rem;">Empresa: ${j.nombre_comercial || 'Empresa de El Mante'}</div>
                 <div style="font-size:0.9rem; color:#475569; margin-top:0.35rem;">
                     ${j.ubicacion} | Horario: ${j.horario || 'Tiempo Completo'} | Categoría: ${j.categoria || 'General'}
@@ -2023,7 +2023,7 @@ const OFIMANTE = {
                 ${j.beneficios || j.prestaciones || 'Prestaciones de ley'}
             </div>
             <div style="margin-bottom:1rem;">
-                <h4 style="color:#071324;">Descripción y Requisitos del Puesto:</h4>
+                <h4 style="color:#0f2942;">Descripción y Requisitos del Puesto:</h4>
                 <p style="color:#334155; font-size:0.95rem; margin-top:0.4rem; white-space:pre-line;">${j.descripcion}</p>
                 <p style="color:#334155; font-size:0.95rem; margin-top:0.4rem;"><strong>Requisitos adicionales:</strong> ${j.requisitos || 'No especificados'}</p>
             </div>
@@ -2066,19 +2066,17 @@ const OFIMANTE = {
         list.innerHTML = '';
 
         if (!this.state.notificaciones || this.state.notificaciones.length === 0) {
-            list.innerHTML = `<p style="padding:1rem; text-align:center; color:#94a3b8; font-size:0.85rem;">No tienes notificaciones pendientes.</p>`;
+            list.innerHTML = `<p style="padding:1rem; text-align:center; color:#64748b; font-size:0.85rem;">No tienes notificaciones pendientes.</p>`;
             return;
         }
 
         this.state.notificaciones.forEach(n => {
             const item = document.createElement('div');
-            item.style.padding = '0.75rem 1rem';
-            item.style.borderBottom = '1px solid #1e3a63';
-            item.style.fontSize = '0.85rem';
+            item.className = 'notif-dropdown-item';
             item.innerHTML = `
-                <div style="font-weight:700; color:#38bdf8;">${n.titulo}</div>
-                <div style="color:#cbd5e1; margin-top:0.2rem;">${n.mensaje}</div>
-                <div style="color:#64748b; font-size:0.72rem; margin-top:0.2rem;">${n.creado_en}</div>
+                <div class="notif-dropdown-title">${n.titulo}</div>
+                <div class="notif-dropdown-msg">${n.mensaje}</div>
+                <div class="notif-dropdown-time">${n.creado_en}</div>
             `;
             list.appendChild(item);
         });
